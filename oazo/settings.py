@@ -74,6 +74,17 @@ DATABASES = {
         'OPTIONS': {
             'options': '-c search_path=public'
         },
+        'explorer': {
+            'NAME': DB_NAME,
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'USER': DB_USER,
+            'PASSWORD': DB_PWD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
+            'OPTIONS': {
+                'options': '-c search_path=public,explorer'
+            },
+        }
     }
 }
 
