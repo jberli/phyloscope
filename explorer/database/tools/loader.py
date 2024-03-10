@@ -1,7 +1,5 @@
 import geopandas as gpd
 import csv
-import pyproj
-import shapely
 
 def extract(rfile, wfile, column, value, delimiter='\t'):
     """
