@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import *
+from explorer.database.update import update_database
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -14,15 +14,17 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if options['nocheck']:
-            doit = True
-        else:
-            doit = prompt(
-'''You are about to add entries to the database.
-This operation might take some time, continue?
-''')
-        if (doit):
-            print('Updating database...')
-            update_database()
-        else:
-            print('Nothing was done')
+        update_database()
+
+#         if options['nocheck']:
+#             doit = True
+#         else:
+#             doit = prompt(
+# '''You are about to add entries to the database.
+# This operation might take some time, continue?
+# ''')
+#         if (doit):
+#             print('Updating database...')
+#             update_database()
+#         else:
+#             print('Nothing was done')

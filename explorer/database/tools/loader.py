@@ -20,68 +20,58 @@ def extract(rfile, wfile, column, value, delimiter='\t'):
         The delimiter of the csv files.
     """
     # Open the file to read and create the reader
-    with open('data/{0}.csv'.format(rfile), 'r') as r:
+    with open(rfile, 'r') as r:
         reader = csv.reader(r, delimiter=delimiter)
-        data = list(reader)
 
         # Open a new file to write as text and create the writer
-        with open('data/{0}.csv'.format(wfile), 'wt') as w:
+        with open(wfile, 'wt') as w:
             writer = csv.writer(w, delimiter=delimiter)
 
-            # Retrieve the index of the column
-            index = get_column_index(data, column)
-
             # Get the header row and write it
-            header = data[0]
+            header = next(reader)
+
+            if column in header:
+                index = header.index(column)
+            else:
+                raise Exception('No column named {0}.'.format(column))
+
             writer.writerow(header)
 
             # Loop through remaining rows
-            for i in range(1, len(data) - 1):
-                row = data[i]
+            for row in reader:
                 # Write the row if the index is the same as the wanted column
                 if row[index] == value:
                     writer.writerow(row)
 
-def get_column_index(data, column):
-    """
-    Return the index of the column from the data.
-    Parameters
-    ----------
-    data : list
-        List of data from a csv file reader.
-    column : str
-        The name of the column to get the index from.
-    """
-    # Get the header
-    header = data[0]
-    # Return the index of the column name if it is found
-    if column in header:
-        return header.index(column)
-    else:
-        raise Exception('No column named {0}.'.format(column))
+def display_present(column):
+    # Open the file to read and create the reader
+    with open('explorer/database/data/occurrence.txt', 'r') as r:
+        reader = csv.reader(r, delimiter='\t')
+        header = next(reader)
+        if column in header:
+                index = header.index(column)
+        else:
+            raise Exception('No column named {0}.'.format(column))
+        for row in reader:
+            v = row[index]
+            if v != '':
+                print(v)
 
-def get_observations(data, xcol, ycol):
-    """
-    Export observations from a data list.
-    """
-    xindex = get_column_index(data, xcol)
-    yindex = get_column_index(data, ycol)
-
-    observations = []
-    for i in range(1, len(data) - 1):
-        row = data[i]
-        x, y = row[xindex], row[yindex]
-        coords = project([x, y])
-        observations.append({'geometry': shapely.Point(coords)})
-    
-    return observations
-
-def project(coordinates, epsg1=4326, epsg2=3857):
-    """
-    Reproject coordinates from epsg1 to epsg2.
-    """
-    proj = pyproj.Transformer.from_crs(epsg1, epsg2, always_xy=True)
-    return proj.transform(coordinates[0], coordinates[1])
+def display_absent(column):
+    # Open the file to read and create the reader
+    with open('explorer/database/data/occurrence.txt', 'r') as r:
+        reader = csv.reader(r, delimiter='\t')
+        header = next(reader)
+        if column in header:
+                index = header.index(column)
+        else:
+            raise Exception('No column named {0}.'.format(column))
+        counter = 0
+        for row in reader:
+            v = row[index]
+            if v == '':
+                print(row)
+                counter += 1
 
 def write_geojson(data, filename, crs):
     gdf = gpd.GeoDataFrame(data, crs=crs)
