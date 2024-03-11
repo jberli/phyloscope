@@ -69,7 +69,6 @@ class Species(models.Model):
     name = models.CharField(db_column='name', max_length=1000, blank=True, null=True)
     generic = models.CharField(db_column='generic', max_length=500, blank=True, null=True)
     specific = models.CharField(db_column='specific', max_length=500, blank=True, null=True)
-    vernacular = models.CharField(db_column='vernacular', max_length=150, blank=True, null=True)
     rank = models.CharField(db_column='rank', max_length=30, blank=True, null=True)
     status = models.CharField(db_column='status', max_length=30, blank=True, null=True)
     genus = models.ForeignKey('Genus', models.DO_NOTHING, db_column='genus', blank=True, null=True)
@@ -86,15 +85,15 @@ class Species(models.Model):
         db_table = 'explorer\".\"species'
 
 class Observations(models.Model):
-    gbif = models.IntegerField(db_column='gbif', blank=True, null=True)
+    gbif = models.BigIntegerField(db_column='gbif', blank=True, null=True, unique=True)
     taxon = models.ForeignKey('Species', models.DO_NOTHING, db_column='taxon', blank=True, null=True)
     license = models.CharField(db_column='license', max_length=50, blank=True, null=True)
-    basis = models.CharField(db_column='basis', max_length=50, blank=True, null=True)
-    catalog = models.IntegerField(db_column='catalog', unique=True)
-    author = models.CharField(db_column='author', max_length=100, blank=True, null=True)
+    basis = models.CharField(db_column='basis', max_length=100, blank=True, null=True)
+    catalog = models.BigIntegerField(db_column='catalog', unique=True)
+    author = models.CharField(db_column='author', max_length=500, blank=True, null=True)
     sex = models.CharField(db_column='sex', max_length=50, blank=True, null=True)
     stage = models.CharField(db_column='stage', max_length=50, blank=True, null=True)
-    condition = models.CharField(db_column='condition', max_length=50, blank=True, null=True)
+    condition = models.CharField(db_column='condition', max_length=100, blank=True, null=True)
     status = models.CharField(db_column='status', max_length=50, blank=True, null=True)
     date = models.DateTimeField(db_column='date', blank=True, null=True)
     lat = models.FloatField(db_column='lat', blank=True, null=True)
@@ -105,3 +104,13 @@ class Observations(models.Model):
         managed = True
         ordering = ('gbif',)
         db_table = 'explorer\".\"observations'
+
+class Vernacular(models.Model):
+    taxon = models.ForeignKey('Species', models.DO_NOTHING, db_column='taxon', blank=True, null=True)
+    name = models.CharField(db_column='name', max_length=1000, blank=True, null=True)
+    language = models.CharField(db_column='language', max_length=2, blank=True, null=True)
+    country = models.CharField(db_column='country', max_length=2, blank=True, null=True)
+    class Meta:
+        managed = True
+        ordering = ('language', 'country', 'name',)
+        db_table = 'explorer\".\"vernacular'
