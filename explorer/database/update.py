@@ -13,6 +13,7 @@ def test():
 def update_vernacular():
     """
     Update vernacular name table using the GBIF backbone dataset.
+    Can take a long time as it's looking for duplicates on four columns before adding.
     """
     # Raise csl field size limit
     csv.field_size_limit(sys.maxsize)
@@ -25,10 +26,8 @@ def update_vernacular():
         reader = csv.reader(r, delimiter='\t')
         # Get the columns name
         colnames = next(reader)
-        index = colnames.index('taxonID')
 
         vernaculars = list(Vernacular.objects.order_by('taxon').values('taxon', 'name', 'language', 'country').distinct())
-        print(vernaculars)
 
         indexes = []
         for i, col in enumerate(colnames):
@@ -43,7 +42,6 @@ def update_vernacular():
         for s in species:
             taxons.append(s.taxon)
 
-        count = 0
         for row in reader:
             # Reconstruct the entry by removing unwanted columns
             values = []
@@ -65,26 +63,21 @@ def update_vernacular():
                     name, country = entry['vernacularName'], entry['countryCode']
                     add = True
                     for v in vernaculars:
-                        if v['taxon'] == taxon:
+                        t = Species.objects.get(taxon=taxon).pk
+                        if v['taxon'] == t:
                             if v['name'] == name:
                                 if v['language'] == language:
                                     if v['country'] == country:
-                                        print('yo')
                                         add = False
 
-                    # if add:
-                    #     Vernacular(
-                    #         name = name,
-                    #         taxon = Species.objects.get(taxon = taxon),
-                    #         language = language,
-                    #         country = country
-                    #     ).save()
-                    # else:
-                    print(taxon, name, language, country)
-
-                    if count > 50:
-                        break
-                    count += 1
+                    if add:
+                        print('adding taxon n°{0}: {1} in {2} {3}'.format(taxon, name, language, country))
+                        Vernacular(
+                            name = name,
+                            taxon = Species.objects.get(taxon = taxon),
+                            language = language,
+                            country = country
+                        ).save()
 
 def insert_missing_species():
     """
