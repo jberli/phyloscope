@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import insert_missing_species
+from explorer.database.update import update_establishment
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -23,6 +23,6 @@ This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            insert_missing_species()
+            update_establishment()
         else:
             print('Nothing was done')

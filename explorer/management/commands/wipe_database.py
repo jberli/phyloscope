@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import insert_data
+from explorer.database.update import wipe_database
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -18,11 +18,10 @@ class Command(BaseCommand):
             doit = True
         else:
             doit = prompt(
-'''You are about to add entries to the database.
-This operation might take some time, continue?
+'''You are about to remove all entries from the database. Continue?
 ''')
         if (doit):
-            print('Updating database...')
-            insert_data()
+            print('Cleaning database...')
+            wipe_database()
         else:
             print('Nothing was done')

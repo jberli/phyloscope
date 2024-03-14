@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis', # GeoDjango
     # Own applications
-    'explorer'
+    'explorer',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'oazo.wsgi.application'
-
 
 # Database
 DATABASES = {
