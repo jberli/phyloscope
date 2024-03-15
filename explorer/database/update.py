@@ -242,7 +242,7 @@ def add_missing_species():
     ]
 
     taxonomy = get_taxonomy()
-    r, reader, indexes = read_csv('explorer/database/data/species.csv', fields)
+    r, reader, indexes = read_csv('explorer/database/data/inaturalist/species.csv', fields)
 
     ttaxon = taxonomy['taxon']
 
