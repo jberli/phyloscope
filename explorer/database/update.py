@@ -87,11 +87,11 @@ def update_establishment(distribution):
     count = 0
 
     for row in reader:
+        progress(count, total, suffix='Progress')
         entry = read_entry(row, fields, indexes)
         if entry['countryCode'] == 'FR' and len(entry['establishmentMeans']) > 0:
             taxon = int(entry['taxonID']) if len(entry['taxonID']) > 0 else None
             if taxon is not None and taxon in taxons:
-                progress(count, total, suffix='Progress')
                 establishment = entry['establishmentMeans']
                 t = Species.objects.get(taxon=taxon)
                 t.establishment = establishment
