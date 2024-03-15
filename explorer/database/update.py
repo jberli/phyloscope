@@ -117,6 +117,7 @@ def insert_vernacular(vernacular):
     count = 0
 
     for row in reader:
+        progress(count, total, suffix='Progress')
         entry = read_entry(row, fields, indexes)
         language = entry['language']
 
@@ -142,10 +143,6 @@ def insert_vernacular(vernacular):
                         content = Species.objects.get(taxon=taxon)
 
                     if content is not None:
-                        progress(count, total,
-                            suffix='adding taxon n°{0}: {1} in {2} {3}'.format(taxon, name, language, country)
-                        )
-
                         Vernacular(
                             taxon=taxon,
                             name = name,
@@ -155,6 +152,7 @@ def insert_vernacular(vernacular):
                         ).save()
                 except IntegrityError:
                     pass
+        count += 1
 
 def insert_observations(observations):
     """
