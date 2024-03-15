@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import wipe_database
+from explorer.database.tools.database import wipe_database
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):

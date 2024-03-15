@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import update_vernacular
+from explorer.database.update import insert_pictures
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -23,6 +23,6 @@ This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            update_vernacular()
+            insert_pictures('explorer/database/data/inaturalist/multimedia.csv')
         else:
             print('Nothing was done')

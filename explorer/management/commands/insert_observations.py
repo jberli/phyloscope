@@ -23,6 +23,6 @@ This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            insert_observations()
+            insert_observations('explorer/database/data/inaturalist/occurrence.csv')
         else:
             print('Nothing was done')

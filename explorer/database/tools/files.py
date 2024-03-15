@@ -1,5 +1,6 @@
 import geopandas as gpd
 import csv
+import sys
 
 def extract(rfile, wfile, column, value, delimiter='\t'):
     """
@@ -79,3 +80,48 @@ def write_geojson(data, filename, crs):
         print(n)
 
     gdf.to_file('{0}.geojson'.format(filename), driver='GeoJSON')
+
+def read_csv(file, fields):
+    """
+    Read a csv file and return the opened file, the reader, and the indexes of the provided fields name.
+    """
+    r = open(file, 'r')
+    reader = csv.reader(r, delimiter='\t')
+    colnames = next(reader)
+    indexes = []
+    for i, col in enumerate(colnames):
+        if col in fields:
+            indexes.append(i)
+    if len(indexes) != len(fields):
+        raise Exception('The number of fields does not match the occurrence.txt file.')
+    return r, reader, indexes
+
+def read_entry(row, fields, indexes):
+    """
+    Construct the entry dictionnary.
+    """
+    # Reconstruct the entry by removing unwanted columns
+    values = []
+    j = 0
+    for i, value in enumerate(row):
+        if i in indexes:
+            values.append(value)
+            j += 1
+
+    # Make a dict from the entry and the fields
+    return dict(zip(fields, values))
+
+def get_row_number(file):
+    r = open(file, 'r')
+    reader = csv.reader(r, delimiter='\t')
+    row_count = sum(1 for row in reader)
+    r.close()
+    return row_count
+
+def progress(count, total, suffix=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+    sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', suffix))
+    sys.stdout.flush()

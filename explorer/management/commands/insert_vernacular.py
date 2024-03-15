@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import update_taxonomy
+from explorer.database.update import insert_vernacular
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -23,6 +23,6 @@ This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            update_taxonomy()
+            insert_vernacular('explorer/database/data/inaturalist/vernacular.csv')
         else:
             print('Nothing was done')

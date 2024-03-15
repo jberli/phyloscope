@@ -18,11 +18,11 @@ class Command(BaseCommand):
             doit = True
         else:
             doit = prompt(
-'''You are about to add entries to the database.
+'''You are about to add update the database.
 This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            update_establishment()
+            update_establishment('explorer/database/data/backbone/distribution.csv')
         else:
             print('Nothing was done')

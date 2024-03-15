@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
 class IUCN(models.Model):
@@ -12,10 +12,10 @@ class IUCN(models.Model):
         db_table = 'explorer\".\"iucn'
 
 class Vernacular(models.Model):
-    name = models.CharField(db_column='name', max_length=1000, blank=True, null=True)
-    language = models.CharField(db_column='language', max_length=2, blank=True, null=True)
+    taxon = models.IntegerField(db_column='taxon', blank=False, null=False, unique=False)
+    name = models.CharField(db_column='name', max_length=1000, blank=False, null=False)
+    language = models.CharField(db_column='language', max_length=2, blank=False, null=False)
     country = models.CharField(db_column='country', max_length=2, blank=True, null=True)
-
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -23,13 +23,14 @@ class Vernacular(models.Model):
         managed = True
         ordering = ('language', 'country', 'name',)
         db_table = 'explorer\".\"vernacular'
+        indexes = [ models.Index(fields=["content_type", "object_id"]), ]
+        constraints = [ models.UniqueConstraint(fields=['taxon', 'name', 'language', 'country'], name='vernacular_multiple_constraint') ]
 
 class Taxon(models.Model):
     taxon = models.IntegerField(db_column='taxon', blank=True, null=True, unique=True)
     key = models.IntegerField(db_column='key', blank=False, null=False, unique=False)
     name = models.CharField(db_column='name', max_length=50, blank=True, null=True)
-    fr = models.CharField(db_column='fr', max_length=1000, blank=True, null=True)
-    en = models.CharField(db_column='en', max_length=1000, blank=True, null=True)
+    vernacular = GenericRelation(Vernacular)
     geom = models.PolygonField(db_column='geom', srid=3857, null=True)
     class Meta:
         abstract = True
@@ -115,3 +116,11 @@ class Observations(models.Model):
         managed = True
         ordering = ('gbif',)
         db_table = 'explorer\".\"observations'
+
+class Pictures(models.Model):
+    observation = models.ForeignKey(Observations, models.DO_NOTHING, db_column='observation', blank=False, null=False)
+    author = models.CharField(db_column='author', max_length=500, blank=True, null=True)
+    link = models.CharField(db_column='link', max_length=500, blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'explorer\".\"pictures'
