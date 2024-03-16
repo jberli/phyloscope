@@ -1,0 +1,4 @@
+django
+django-compressor
+django-sass-processor
+pyproj
