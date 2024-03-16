@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+
+{% csrf_token %}
+
+<head>
+    {% load static %}
+    <link rel=icon href=favicon type=image/png>
+    <meta charset="utf-8"> {% include "./libs.html" %} {% include "./app.html" %}
+    <title>{{ fullname }}</title>
+</head>
+
+<body>
+    {% block body %}
+    <div id="menu-container" class="displayed lang-en">
+        <div id="menu-mask" class="menu-mask mask"></div>
+    </div>
+    <div id="container">
+        <div id="loading-container" class="start-up mask hidden"></div>
+    </div>
+    {% endblock %}
+</body>
+
+</html>

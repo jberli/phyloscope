@@ -1,7 +1,7 @@
 """
 Django Settings
 """
-
+import os
 from pathlib import Path
 from oazo.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD
 
@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sass_processor', # Sass processor
     'django.contrib.gis', # GeoDjango
     # Own applications
     'explorer',
@@ -114,9 +115,16 @@ USE_I18N = True
 
 USE_TZ = True
 
+# The list of finder backends that know how to find static files in various location
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'sass_processor.finders.CssFinder',
+]
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
