@@ -293,7 +293,7 @@ def insert_pictures(multimedia):
                     link=entry['identifier']
                 ).save()
         
-        progress(count, total, suffix="gbif: {0}".format(gbif))
+        progress(count, total, suffix="Progress")
         count += 1
 
     r.close()
