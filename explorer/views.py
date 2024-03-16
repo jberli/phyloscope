@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
-            'name': 'explorer',
-            'fullname': 'explorer',
+            'name': 'Oazo',
+            'fullname': 'Oazo',
             'version': 1.0,
         })
