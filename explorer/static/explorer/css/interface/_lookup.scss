@@ -1,6 +1,14 @@
+#lookup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #lookup {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    height: 2em;
     width: 400px;
+    background-color: $main-color-light;
+    border-radius: .5em;
+
+    cursor: text;
 }

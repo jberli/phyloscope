@@ -1,20 +1,9 @@
 @import '_colors.scss';
+@import 'interface/_header.scss';
 @import 'interface/_loader.scss';
 @import 'interface/_lookup.scss';
+@import 'interface/_map.scss';
 
 body {
     font-family: 'Cantarell';
-}
-
-#container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-}
-
-#map {
-    height: 100%;
-    width: 100%;
 }
