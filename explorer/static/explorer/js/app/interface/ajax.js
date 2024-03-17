@@ -6,16 +6,16 @@
 function ajax(data, url, method, callback) {
     fetch(url, {
         method: method,
-        body: data,
+        body: JSON.stringify(data),
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
     }).then((response) => {
-        return response.json()
+        return response.json();
     }).then((r) => {
-        callback(r)
+        callback(r);
     }).catch((e) => {
-        callback(e)
+        callback(e);
     })
 }

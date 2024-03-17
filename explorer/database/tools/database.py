@@ -6,6 +6,16 @@ from django.db.models import F
 
 from explorer.models import Kingdom, Phylum, Class, Order, Family, Genus, Species, IUCN
 
+TABLE_NAMES = {
+    'kingdom': { 'en': 'kingdom', 'fr': 'règne' },
+    'phylum': { 'en': 'phylum', 'fr': 'phylum' },
+    'class': { 'en': 'class', 'fr': 'classe' },
+    'order': { 'en': 'order', 'fr': 'ordre' },
+    'family': { 'en': 'family', 'fr': 'famille' },
+    'genus': { 'en': 'genus', 'fr': 'genre' },
+    'species': { 'en': 'species', 'fr': 'espèce' },
+}
+
 def wipe_database():
     """
     Remove all entry from every tables.

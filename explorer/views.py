@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 from explorer.models import Vernacular
+from explorer.database.tools.database import TABLE_NAMES
 
 # Create your views here.
 
@@ -17,18 +18,14 @@ def initialization(request):
 
 @csrf_exempt
 def lookup(request):
-    q = request.GET.get('term', '')
-    print(q)
-
-        # dates = Edges.objects.filter(date__istartswith=q).order_by('date').distinct('date')
-    #     results = []
-    #     for date in dates:
-    #         date_json = {}
-    #         # Jquery UI demande une clé 'value'
-    #         date_json['value'] = date.date
-    #         results.append(date_json)
-    #         data = json.dumps(results)
-    # else:
-    #     data = 'fail'
-
-    return JsonResponse({'alat': 123})
+    if request.method == 'POST':
+        value = json.load(request)['str']
+        vernaculars = Vernacular.objects.filter(language='fr', name__istartswith=value).order_by('name')
+        result = { 'values': [] }
+        for v in vernaculars:
+            r = { 'vernacular': v.name.lower(), 'scientific': v.content_object.name, 'type': TABLE_NAMES[v.content_type.name]['fr'] }
+            if r not in result['values']:
+                result['values'].append(r)
+                if len(result['values']) > 9:
+                    break
+    return JsonResponse(result)
