@@ -7,7 +7,7 @@ import requests
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError
 
-from explorer.models import Kingdom, Phylum, Class, Order, Family, Genus, Species, Observations, Vernacular, Pictures
+from explorer.models import Taxon, Kingdom, Phylum, Class, Order, Family, Genus, Species, Observations, Vernacular, Pictures
 from explorer.database.tools.files import read_csv, read_entry, get_row_number, progress
 from explorer.database.tools.geography import project
 from explorer.database.tools.database import (
@@ -70,6 +70,28 @@ def test():
                         if language == 'fr':
                             page_title = title.split(u' – ')[0]
                             print(page_title)
+
+def update_vernacular(vernacular):
+    """
+    Update french and english vernacular names inside the taxonomy specific tables.
+    """
+    def get_entries():
+        return [ Kingdom, Phylum, Class, Order, Family, Genus, Species ]
+
+    def update_table(model):
+        for e in model.objects.all():
+            taxon = e.taxon
+            for v in e.vernacular.all():
+                french = []
+                if v.language == 'fr':
+                    french.append(v.name)
+                if len(french) > 0:
+                    print(taxon, french)
+        
+    models = get_entries()
+
+    for model in models:
+        update_table(model)
 
 def update_establishment(distribution):
     """

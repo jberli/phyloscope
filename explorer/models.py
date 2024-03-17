@@ -30,6 +30,8 @@ class Taxon(models.Model):
     taxon = models.IntegerField(db_column='taxon', blank=True, null=True, unique=True)
     key = models.IntegerField(db_column='key', blank=False, null=False, unique=False)
     name = models.CharField(db_column='name', max_length=50, blank=True, null=True)
+    fr = models.CharField(db_column='fr', max_length=100, blank=True, null=True)
+    en = models.CharField(db_column='en', max_length=100, blank=True, null=True)
     vernacular = GenericRelation(Vernacular)
     geom = models.PolygonField(db_column='geom', srid=3857, null=True)
     class Meta:

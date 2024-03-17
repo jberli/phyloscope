@@ -3,14 +3,18 @@
  * Defines the initialization of the application.
  */
 
-window.addEventListener('load', function () {
-    let container = document.createElement('div');
-    container.setAttribute('id', 'container');
-    let mapdiv = document.createElement('div');
-    mapdiv.setAttribute('id', 'map');
-
+$(document).ready(function() {
+    let container = make_div(id='container')
+    let mapdiv = make_div(id='map')
     container.appendChild(mapdiv)
     document.body.appendChild(container);
 
     initialize_map(mapdiv);
+
+    let lookup = make_div(id='lookup')
+    container.appendChild(lookup);
+
+    ajax({ bonjour: '152' }, 'lookup/', 'POST', function(e) {
+        console.log(e)
+    })   
 })
