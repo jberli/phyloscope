@@ -1,24 +1,130 @@
-#lookup-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#module-lookup {
+    width: 500px;
 }
 
-#lookup {
-    height: 2em;
-    line-height: 2em;
-    width: 400px;
+.lookup-container {
+    position: relative;
+    z-index: 1;
+    top: calc(50px - 1.4em);
+
     background-color: $main-color-light;
     border-radius: .5em;
+    height: fit-content;
+    width: 100%;
+}
 
-    padding: 0 10px;
-    overflow: hidden;
+.lookup-input {
+    line-height: 2em;
+    padding: .4em 10px;
     cursor: text;
 
-    transition: transform .2s;
-
-    &:focus-visible, &:hover {
-        transform: scale(1.1);
+    &:focus-visible {
         outline: none;
     }
 }
+
+.lookup-result-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
+
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.lookup-taxonomy-level {
+    margin: 10px 10px 0 10px;
+    padding: 5px 10px;
+    border-top-left-radius: .5em;
+    border-top-right-radius: .5em;
+}
+
+.lookup-result-sorting {
+    flex-shrink: 0;
+    overflow: hidden;
+    margin: 0 10px;
+    border-bottom-left-radius: .5em;
+    border-bottom-right-radius: .5em;
+
+    &:first-child {
+        margin-top: 0;
+    }
+    &:last-child {
+        margin-bottom: 10px;
+    }
+}
+
+.lookup-result {
+    height: 3em;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    &.species { height: 6em; }
+}
+
+.lookup-image-container {
+    position: relative;
+    height: 6em;
+    width: 6em;
+    flex-shrink: 0;
+
+    &::before {
+        opacity: 0;
+    }
+
+    &.loading::before {
+        content: '';
+        
+    }
+}
+
+.lookup-image-mask {
+    position: absolute;
+    opacity: 1;
+    
+    height: inherit;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: opacity .2s;
+    &.loaded { opacity: 0; }
+}
+
+.lookup-image {
+    height: inherit;
+    width: inherit;
+    overflow: hidden;
+    object-fit: cover;
+}
+
+.loader-image {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 6px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: rotationcw 1.2s linear infinite;
+}
+
+.lookup-label {
+    margin-left: 10px;
+}
+
+.kingdom { background-color: $kingdom; }
+.phylum { background-color: $phylum; }
+.class { background-color: $class; }
+.order { background-color: $order; }
+.family { background-color: $family; }
+.genus { background-color: $genus; }
+.species { background-color: $species; }

@@ -44,13 +44,3 @@
         }
     }
 }
-
-@keyframes rotationccw {
-    0% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
-}
-
-@keyframes rotationcw {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}

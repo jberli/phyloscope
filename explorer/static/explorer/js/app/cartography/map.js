@@ -3,7 +3,7 @@
  * Defines OpenLayers's object and related functions.
  */
 
-function initialize_map(div) {
+function initializeMap(div) {
     // View definition
     view = new ol.View({
         center: [ 270980, 5930193 ],

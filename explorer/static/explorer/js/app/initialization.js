@@ -3,46 +3,100 @@
  * Defines the initialization of the application.
  */
 
-$(document).ready(function() {
-    let header = make_div(id='header');
+window.addEventListener('DOMContentLoaded', function() {
+    let header = makeDiv(id='header');
     document.body.appendChild(header);
 
-    let container = make_div(id='container')
-    let mapdiv = make_div(id='map')
-    container.appendChild(mapdiv)
+    let container = makeDiv(id='container');
+    let mapdiv = makeDiv(id='map');
+    container.appendChild(mapdiv);
     document.body.appendChild(container);
 
-    initialize_map(mapdiv);
+    initializeMap(mapdiv);
 
+    let modulelookup = makeDiv(id='module-lookup', c='header-module');
+    let lookupcontainer = makeDiv(id=null, c='lookup-container');
+    let results = makeDiv(id=null, c='lookup-result-container');
+    let lookup = makeInput(id=null, c='lookup-input');
 
-    let lookupcontainer = make_div(id='lookup-container');
-    let lookup = make_input(id='lookup');
+    lookup.addEventListener("focusin", focusIn);
 
-    lookup.addEventListener("focusin", focusin);
-
-    function focusin(event) {
+    function focusIn(event) {
         lookup.addEventListener("input", input);
-        lookup.addEventListener("focusout", focusout);
+        lookup.addEventListener("focusout", focusOut);
+        getVernacular(event);
     }
 
-    function focusout(event) {
+    function focusOut(event) {
         lookup.removeEventListener("input", input);
+        removeChildren(results);
     }
 
     function input(event) {
+        getVernacular(event);
+    }
+
+    function loadingImage(image) {
+        return new Promise(resolve=>{image.onload = resolve})
+    }
+
+    function getVernacular(event) {
+        function addGroup(group, type, typesort) {
+            let sorting = makeDiv(id=null, 'lookup-result-sorting');
+            let taxonomy = makeDiv(id=null, 'lookup-taxonomy-level ' + typesort, uppercaseFirstLetter(type));
+            appendMultiple(sorting, group);
+            results.append(taxonomy);
+            results.append(sorting);
+        }
+
         let value = event.target.innerHTML.replace('<br>', '').trim();
         if (value.length > 2) {
             let data = { str: value };
             ajax(data, 'lookup/', 'POST', function(r) {
-                for (let i = 0; i < r.values.length; ++i) {
+                removeChildren(results);
+                let length = r.values.length;
+                let previousType;
+                let previousTypeSort;
+                let group = [];
+                for (let i = 0; i < length; ++i) {
                     let entry = r.values[i];
-                    let name = entry.vernacular.charAt(0).toUpperCase() + entry.vernacular.slice(1);
-                    console.log('(' + entry.type.toUpperCase() + ') ' + name + ' - ' + entry.scientific);
+                    let name = entry.vernacular
+                    let vernacular = boldSubstring(name, data.str);
+                    let html = vernacular + '<br><i>' + entry.scientific + '</i>';
+                    let typesort = entry.typesorting;
+                    let type = entry.type;
+
+                    if (typesort != previousTypeSort && group.length > 0) {
+                        addGroup(group, previousType, previousTypeSort);
+                        group = [];
+                    }
+
+                    let label = makeDiv(id=null, c='lookup-label', html=html);
+                    let imageDiv = makeDiv(id=null, c='lookup-image-container');
+                    if (entry.picture !== null) {
+                        let imageMask = makeDiv(id=null, c='lookup-image-mask ' + typesort);
+                        let loader = makeDiv(id=null, c='loader-image');
+                        let image = makeImage(entry.picture, null, null, id=null, c='lookup-image');
+                        loadingImage(image).then(() => { addClass(imageMask, 'loaded') });
+                        imageMask.appendChild(loader);
+                        imageDiv.append(imageMask, image);
+                    }
+                    
+                    let result = makeDiv(id=null, c='lookup-result ' + typesort);
+                    result.append(imageDiv, label);
+
+                    group.push(result);
+                    previousTypeSort = typesort;
+                    previousType = type;
                 }
+                addGroup(group, previousType, previousTypeSort);
             });
+        } else {
+            removeChildren(results);
         }
     }
 
-    lookupcontainer.appendChild(lookup);
-    header.appendChild(lookupcontainer);
-})
+    lookupcontainer.append(lookup, results);
+    modulelookup.appendChild(lookupcontainer);
+    header.appendChild(modulelookup);
+});
