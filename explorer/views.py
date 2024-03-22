@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
-from explorer.models import Vernacular, Pictures
+from explorer.models import Names, Photo
 from explorer.database.tools.database import TABLE_NAMES
 
 # Create your views here.
@@ -19,6 +19,10 @@ def initialization(request):
 
 @csrf_exempt
 def lookup(request, language='fr', limit=10):
+    """
+    Autocomplete tool that returns the right results
+    from a given string.
+    """
     # Add entries until limit is reached
     def add_entries(result, taxons, entries):
         # Loop through provided entries
@@ -26,7 +30,7 @@ def lookup(request, language='fr', limit=10):
             t = e.taxon
             # Check if taxon has not been entered already
             if t not in taxons:
-                pictures = Pictures.objects.filter(observation__taxon__taxon=t)
+                pictures = Photo.objects.filter(observation__taxon__taxon=t)
                 count = pictures.count()
                 link = None
                 if count > 0:
@@ -53,7 +57,7 @@ def lookup(request, language='fr', limit=10):
         value = json.load(request)['str']
 
         # Get the vernacular names starting with the value in priority
-        startwith = Vernacular.objects.filter(language=language, name__istartswith=value).order_by('name')
+        startwith = Names.objects.filter(language=language, name__istartswith=value).order_by('name')
 
         # Define the result dict
         result = { 'values': [] }
@@ -65,7 +69,7 @@ def lookup(request, language='fr', limit=10):
         # If the length of the result is below 10
         if len(result) < limit:
             # Look for entries containing the provided string
-            contains = Vernacular.objects.filter(language='fr', name__icontains=value).order_by('name')
+            contains = Names.objects.filter(language='fr', name__icontains=value).order_by('name')
             # Add these entries
             result, taxons = add_entries(result, taxons, contains)
 

@@ -4,8 +4,6 @@ from django.utils.timezone import make_aware
 from django.db import connection
 from django.db.models import F
 
-from explorer.models import Kingdom, Phylum, Class, Order, Family, Genus, Species, IUCN
-
 TABLE_NAMES = {
     'kingdom': { 'en': 'kingdom', 'fr': 'règne' },
     'phylum': { 'en': 'phylum', 'fr': 'phylum' },

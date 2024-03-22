@@ -7,7 +7,6 @@ import requests
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError
 
-from explorer.models import Taxon, Kingdom, Phylum, Class, Order, Family, Genus, Species, Observations, Vernacular, Pictures
 from explorer.database.tools.files import read_csv, read_entry, get_row_number, progress
 from explorer.database.tools.geography import project
 from explorer.database.tools.database import (

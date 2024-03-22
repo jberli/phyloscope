@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas
 import csv
 import sys
 
@@ -74,12 +75,11 @@ def display_absent(column):
 
 def write_geojson(data, filename, crs):
     gdf = gpd.GeoDataFrame(data, crs=crs)
-
-    records = gdf.to_records()
-    for n in records:
-        print(n)
-
     gdf.to_file('{0}.geojson'.format(filename), driver='GeoJSON')
+
+def write_json(data, filename):
+    df = pandas.DataFrame.from_dict(data)
+    df.to_json('{0}.json'.format(filename))
 
 def read_csv(file, fields):
     """
