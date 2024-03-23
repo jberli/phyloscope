@@ -41,17 +41,17 @@ class Names(models.Model):
     taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False)
     name = models.CharField(db_column='name', max_length=500, blank=False, null=False)
     language = models.CharField(db_column='language', max_length=2, blank=False, null=False)
-    country = models.CharField(db_column='country', max_length=2, blank=True, null=True)
+    country = models.CharField(db_column='country', max_length=50, blank=True, null=True)
     class Meta:
         managed = True
         ordering = ('language', 'country', 'name',)
         db_table = 'explorer\".\"names'
 
 class Photo(models.Model):
-    pid = models.IntegerField(db_column='pid', blank=False, null=False, unique=True)
+    pid = models.IntegerField(db_column='pid', blank=False, null=False, unique=False)
     taxon_id = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon_id', blank=True, null=True)
-    author = models.CharField(db_column='author', max_length=500, blank=True, null=True)
     license = models.CharField(db_column='license', max_length=50, blank=True, null=True)
+    extension = models.CharField(db_column='extension', max_length=10, blank=True, null=True)
     height = models.IntegerField(db_column='height', blank=True, null=True)
     width = models.IntegerField(db_column='width', blank=True, null=True)
     class Meta:

@@ -23,7 +23,11 @@ from explorer.database.tools.database import (
 def inset_data():
     """
     Insert data into the database after preprocessing.
+    TODO: Make the code work for updates only.
     """
+
+    # Fetch API information from iNaturalist
+    # Returns two rows for taxon and photo
     def fetch_api(taxa):
         e = inat.get_taxa_by_id(taxa)
         rows = []
@@ -49,9 +53,8 @@ def inset_data():
             for p in entry['taxon_photos']:
                 if p['photo']['license_code'] is not None:
                     height, width = p['photo']['original_dimensions']['height'], p['photo']['original_dimensions']['width']
-                    splitted = p['photo']['attribution'].split(', some rights reserved')
-                    author = splitted[0][4:].replace('\n', '')
-                    prows.append([ p['photo']['id'], taxon_id, p['photo']['license_code'], author, height, width ])
+                    extension = p['photo']['url'].split('.')[-1]
+                    prows.append([ p['photo']['id'], taxon_id, p['photo']['license_code'], extension, height, width ])
 
             status_fr, status_world = None, None
             for key, value in entry.items():
@@ -79,7 +82,8 @@ def inset_data():
             rows.append([ taxon_id, parent_id, rank_level, rank, name, extinct, default_photo, status_world, status_fr ])
         return rows, prows
 
-###################################
+######################################################################
+##### CREATE THE TAXA_TMP FILE WITH TAXA PRESENTS INSIDE THE OBSERVATION FILE
 
     # # Observations and taxa files
     # ofile = 'explorer/database/data/observations.csv'
@@ -131,32 +135,29 @@ def inset_data():
 
     # w.close()
     # print('Wrote {0} distinct taxon into the file.'.format(len(distinct)))
-
-
     # w.close()
     # print('Wrote {0} distinct taxon into the file.'.format(count))
 
-###################################
+####################################################################################
+## ADD PARENT TAXON API INFO AND PHOTOS
 
-    # tfile = 'explorer/database/data/tmp/taxa_pb.csv'
-
+    # tfile = 'explorer/database/data/tmp/taxa_tmp.csv'
     # # Get the number of rows in the taxa file
     # tnb = get_row_number(tfile)
-
     # r = open(tfile, 'r')
     # reader = csv.reader(r, delimiter='\t')
 
-    # w = open('explorer/database/data/tmp/taxa_pb_tmp.csv', 'w')
+    # w = open('explorer/database/data/tmp/taxa_inat_tmp1.csv', 'w')
     # writer = csv.writer(w, delimiter='\t')
-    # wp = open('explorer/database/data/tmp/photo_pb_tmp.csv', 'w')
+    # writer.writerow([ 'taxon_id', 'parent_id', 'rank_level', 'rank', 'name', 'extinct', 'photo_id', 'status_world', 'status_fr' ])
+    # wp = open('explorer/database/data/tmp/photo_inat_tmp1.csv', 'w')
     # writerp = csv.writer(wp, delimiter='\t')
-    # writerp.writerow(['photo_id', 'taxon_id', 'license_code', 'author', 'height', 'width'])
-    # writer.writerow(['taxon_id', 'parent_id', 'rank_level', 'rank', 'name', 'extinct', 'photo_id', 'status_world', 'status_fr'])
+    # writerp.writerow([ 'photo_id', 'taxon_id', 'license', 'extension', 'height', 'width' ])
 
-    # with Bar('Retrieve API information...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
-    #     taxa = []
+    # taxa = []
+    # with Bar('Fetching API information...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
     #     for row in reader:
-    #         taxa.append(int(row[1]))
+    #         taxa.append(row[0])
     #         if len(taxa) > 29:
     #             rows, rowsp = fetch_api(taxa)
     #             writer.writerows(rows)
@@ -165,8 +166,13 @@ def inset_data():
     #             time.sleep(1)
     #         bar.next()
 
-#######################################
-## RECCURSIVELY ADD PARENT TAXON
+    #     if len(taxa) > 0:
+    #         rows, rowsp = fetch_api(taxa)
+    #         writer.writerows(rows)
+    #         writerp.writerows(rowsp)        
+    
+####################################################################################
+## UPDATE MISSING PARENT TAXON API INFO (RUN MANUALLY UNTIL NO PARENT IS MISSING)
 
     # tfile = 'explorer/database/data/tmp/taxa_inat_tmp.csv'
 
@@ -210,7 +216,8 @@ def inset_data():
     
     # print(count)
 
-###################################
+#################################################################################################################
+####### INSERT TAXON INSIDE THE DATABASE
 
     # # Observations and taxa files
     # tfile = 'explorer/database/data/tmp/taxa_pb_tmp.csv'
@@ -247,8 +254,7 @@ def inset_data():
     #                 writerp.writerow(row)
     #         else:
     #                 writerp.writerow(row)
-            
-            
+   
     #         taxon.save()
     #         bar.next()
 
@@ -298,33 +304,129 @@ def inset_data():
     #         bar.next()
 
 ####################################################################
+# UPDATE MISSING PARENT ID
 
-    # Observations and taxa files
-    tfile = 'explorer/database/data/tmp/taxa_inat_tmp.csv'
+    # # Observations and taxa files
+    # tfile = 'explorer/database/data/tmp/taxa_inat_tmp.csv'
 
-    # Get the number of rows in the observation file
-    tnb = get_row_number(tfile)
+    # # Get the number of rows in the observation file
+    # tnb = get_row_number(tfile)
     
-    tfields =  [ 'taxon_id', 'parent_id', 'rank_level', 'rank', 'name', 'photo_id', 'status_world', 'status_fr' ]
+    # tfields =  [ 'taxon_id', 'parent_id', 'rank_level', 'rank', 'name', 'photo_id', 'status_world', 'status_fr' ]
 
-    # Read the observation csv file
+    # # Read the observation csv file
+    # rt, treader, tindexes = read_csv(tfile, tfields)
+
+    # wp = open('explorer/database/data/tmp/taxa_pb.csv', 'w')
+    # writerp = csv.writer(wp, delimiter='\t')
+
+    # taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
+
+    # with Bar('Insert taxa in database...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
+    #     for row in treader:
+    #         entry = read_entry(row, tfields, tindexes)
+    #         if len(entry['parent_id']) > 0:
+    #             t = Taxon.objects.get(tid=int(entry['taxon_id']))
+    #             if t.parent_id is None:
+    #                 parent = Taxon.objects.get(tid=int(entry['parent_id']))
+    #                 t.parent_id = parent
+    #                 t.save()
+    #     bar.next()
+
+
+####################################################################
+######### INSERT PHOTOS WITH TAXON FOREIGN KEY
+
+    # tfile = 'explorer/database/data/tmp/photo_inat_tmp1.csv'
+    # tnb = get_row_number(tfile)
+    # tfields =  [ 'photo_id', 'taxon_id', 'license', 'extension', 'height', 'width' ]
+    # rt, treader, tindexes = read_csv(tfile, tfields)
+
+    # wp = open('explorer/database/data/tmp/photo_pb.csv', 'w')
+    # writerp = csv.writer(wp, delimiter='\t')
+    # writerp.writerow(['photo_id', 'taxon_id'])
+
+    # taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
+
+    # with Bar('Insert taxa in database...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
+    #     for row in treader:
+    #         entry = read_entry(row, tfields, tindexes)
+    #         photo_id = int(entry['photo_id'])
+    #         taxon_id = int(entry['taxon_id'])
+    #         license = entry['license']
+    #         extension = entry['extension']
+    #         height = int(entry['height']) if len(entry['height']) > 0 else None
+    #         width = int(entry['width']) if len(entry['width']) > 0 else None
+
+    #         if taxon_id in taxons:
+    #             taxon = Taxon.objects.get(tid=taxon_id)
+    #             Photo(
+    #                 pid=photo_id,
+    #                 taxon_id=taxon,
+    #                 license=license,
+    #                 extension=extension,
+    #                 height=height,
+    #                 width=width
+    #             ).save()
+    #         else:
+    #             writerp.writerow([photo_id, taxon_id])
+    #         bar.next()
+
+####################################################################
+######### UPDATE TAXON TO ADD FOREIGN KEY TO THE DEFAULT PHOTO
+
+    # tfile = 'explorer/database/data/tmp/taxa_inat_tmp.csv'
+    # tnb = get_row_number(tfile)
+    # tfields =  [ 'taxon_id', 'parent_id', 'rank_level', 'rank', 'name', 'photo_id', 'status_world', 'status_fr' ]
+    # rt, treader, tindexes = read_csv(tfile, tfields)
+
+    # wp = open('explorer/database/data/tmp/photo_pb.csv', 'w')
+    # writerp = csv.writer(wp, delimiter='\t')
+    # writerp.writerow(['photo_id', 'taxon_id'])
+
+    # with Bar('Update taxon default photo...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
+    #     for row in treader:
+    #         entry = read_entry(row, tfields, tindexes)
+    #         taxon_id = int(entry['taxon_id'])
+    #         photo_id = int(entry['photo_id']) if len(entry['photo_id']) else None
+
+    #         if photo_id is not None:
+    #             photos = Photo.objects.filter(pid=photo_id)
+    #             if len(photos) > 0:
+    #                 taxon = Taxon.objects.get(tid=taxon_id)
+    #                 taxon.default_photo = photos[0]
+    #             else:
+    #                 writerp.writerow([photo_id, taxon_id])
+    #         bar.next()
+
+#####################################################################
+
+    tfile = 'explorer/database/data/tmp/names_en.csv'
+    tnb = get_row_number(tfile)
+    tfields =  [ 'taxon_id', 'name', 'language', 'country' ]
     rt, treader, tindexes = read_csv(tfile, tfields)
 
-    wp = open('explorer/database/data/tmp/taxa_pb.csv', 'w')
-    writerp = csv.writer(wp, delimiter='\t')
+    # wp = open('explorer/database/data/tmp/photo_pb.csv', 'w')
+    # writerp = csv.writer(wp, delimiter='\t')
+    # writerp.writerow(['photo_id', 'taxon_id'])
 
     taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
 
-    with Bar('Insert taxa in database...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
+    with Bar('Update taxon default photo...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
         for row in treader:
             entry = read_entry(row, tfields, tindexes)
-            if len(entry['parent_id']) > 0:
-                t = Taxon.objects.get(tid=int(entry['taxon_id']))
-                if t.parent_id is None:
-                    parent = Taxon.objects.get(tid=int(entry['parent_id']))
-                    t.parent_id = parent
-                    t.save()
-        bar.next()
+            taxon_id = int(entry['taxon_id'])
+            if taxon_id in taxons:
+                name, language, country = entry['name'], entry['language'], entry['country']
+                taxon = Taxon.objects.get(tid=taxon_id)
+                Names(
+                    taxon=taxon,
+                    name=name,
+                    language=language,
+                    country=country
+                ).save()
+
+            bar.next()
 
 #####################################################################
 

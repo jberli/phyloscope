@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 from explorer.models import Names, Photo
-from explorer.database.tools.database import TABLE_NAMES
+from explorer.database.tools.database import RANKS
 
 # Create your views here.
 
@@ -27,25 +27,21 @@ def lookup(request, language='fr', limit=10):
     def add_entries(result, taxons, entries):
         # Loop through provided entries
         for e in entries:
-            t = e.taxon
             # Check if taxon has not been entered already
-            if t not in taxons:
-                pictures = Photo.objects.filter(observation__taxon__taxon=t)
-                count = pictures.count()
-                link = None
-                if count > 0:
-                    link = pictures[random.randint(0, count - 1)].link
+            if e.taxon.tid not in taxons:
+                miniature = e.taxon.default_photo
+                link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/square.{1}'.format(miniature.pid, miniature.extension)
                 # Add the entry
                 result['values'].append({
-                    'taxon': t,
+                    'taxon': e.taxon.tid,
                     'vernacular': e.name.lower(),
-                    'scientific': e.content_object.name,
-                    'type': TABLE_NAMES[e.content_type.name]['fr'],
-                    'typesorting': e.content_type.name,
+                    'scientific': e.taxon.name,
+                    'type': RANKS[e.taxon.rank]['fr'],
+                    'typesorting': e.taxon.rank,
                     'picture': link
                 })
                 # Add the taxon as being added
-                taxons.append(e.taxon)
+                taxons.append(e.taxon.tid)
                 # Break the loop if limit is reached
                 if len(result['values']) > (limit - 1):
                     break
@@ -69,12 +65,12 @@ def lookup(request, language='fr', limit=10):
         # If the length of the result is below 10
         if len(result) < limit:
             # Look for entries containing the provided string
-            contains = Names.objects.filter(language='fr', name__icontains=value).order_by('name')
+            contains = Names.objects.filter(language=language, name__icontains=value).order_by('name')
             # Add these entries
             result, taxons = add_entries(result, taxons, contains)
 
     # Map the table names to a dict ordered
-    map = { v: i for i, v in enumerate(TABLE_NAMES.keys()) }
+    map = { v: i for i, v in enumerate(RANKS.keys()) }
 
     # Order the returned list of entries by their scientific names (common genus will be kept in order)
     result['values'] = sorted(result['values'], key=lambda d: d['scientific'])
