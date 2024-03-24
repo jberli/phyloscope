@@ -34,11 +34,11 @@ RANKS = {
     'section': { 'en': 'Section', 'fr': 'Section' },
     'subsection': { 'en': 'Subsection', 'fr': 'Sous-section' },
     'complex': { 'en': 'Complex', 'fr': 'Complexe' },
-    'hybrid': { 'en': 'Hybrid', 'fr': 'Hybride' },
     'species': { 'en': 'Species', 'fr': 'Espèce' },
-    'variety': { 'en': 'Variety', 'fr': 'Variété' },
+    'hybrid': { 'en': 'Hybrid', 'fr': 'Hybride' },
     'subspecies': { 'en': 'Subspecies', 'fr': 'Sous-espèce' },
     'infrahybrid': { 'en': 'Infrahybrid', 'fr': 'Infra-hybride' },
+    'variety': { 'en': 'Variety', 'fr': 'Variété' },
     'form': { 'en': 'Form', 'fr': 'Forme' }, 
 }
 

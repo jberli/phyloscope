@@ -3,11 +3,11 @@
  * Defines OpenLayers's object and related functions.
  */
 
-function initializeMap(div) {
+function initializeMap(params) {
     // View definition
     view = new ol.View({
         center: [ 270980, 5930193 ],
-        zoom: 6,
+        zoom: 7,
     })
 
     // OSM layer definition

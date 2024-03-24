@@ -400,33 +400,49 @@ def inset_data():
     #         bar.next()
 
 #####################################################################
+############ INSERT VERNACULAR NAMES
 
-    tfile = 'explorer/database/data/tmp/names_en.csv'
-    tnb = get_row_number(tfile)
-    tfields =  [ 'taxon_id', 'name', 'language', 'country' ]
-    rt, treader, tindexes = read_csv(tfile, tfields)
+    # tfile = 'explorer/database/data/tmp/names_en.csv'
+    # tnb = get_row_number(tfile)
+    # tfields =  [ 'taxon_id', 'name', 'language', 'country' ]
+    # rt, treader, tindexes = read_csv(tfile, tfields)
 
-    # wp = open('explorer/database/data/tmp/photo_pb.csv', 'w')
-    # writerp = csv.writer(wp, delimiter='\t')
-    # writerp.writerow(['photo_id', 'taxon_id'])
+    # # wp = open('explorer/database/data/tmp/photo_pb.csv', 'w')
+    # # writerp = csv.writer(wp, delimiter='\t')
+    # # writerp.writerow(['photo_id', 'taxon_id'])
 
-    taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
+    # taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
 
-    with Bar('Update taxon default photo...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
-        for row in treader:
-            entry = read_entry(row, tfields, tindexes)
-            taxon_id = int(entry['taxon_id'])
-            if taxon_id in taxons:
-                name, language, country = entry['name'], entry['language'], entry['country']
-                taxon = Taxon.objects.get(tid=taxon_id)
-                Names(
-                    taxon=taxon,
-                    name=name,
-                    language=language,
-                    country=country
-                ).save()
+    # with Bar('Update taxon default photo...', max=tnb, fill='#', suffix='%(percent)d%%') as bar:
+    #     for row in treader:
+    #         entry = read_entry(row, tfields, tindexes)
+    #         taxon_id = int(entry['taxon_id'])
+    #         if taxon_id in taxons:
+    #             name, language, country = entry['name'], entry['language'], entry['country']
+    #             taxon = Taxon.objects.get(tid=taxon_id)
+    #             Names(
+    #                 taxon=taxon,
+    #                 name=name,
+    #                 language=language,
+    #                 country=country
+    #             ).save()
 
-            bar.next()
+    #         bar.next()
+
+#####################################################################
+### ADD NAME OF LIFE
+
+    # taxon = Taxon.objects.get(tid=48460)
+
+    # Names(
+    #     name='vie',
+    #     taxon=taxon,
+    #     language='fr',
+    # ).save()
+
+    name = Names.objects.filter(name='vie')[0]
+    name.country = ''
+    name.save()
 
 #####################################################################
 

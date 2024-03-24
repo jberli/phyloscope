@@ -47,7 +47,7 @@ function makeInput(id=null, c=null, placeholder=null, spellcheck=false) {
  * @param  {String} alt    Alternative if image is not loaded.
  * @return {DOMElement}    Created element.
  */
-function makeImage(url, height=null, width=null, id=null, c=null, alt='image') {
+function makeImage(url, height=null, width=null, id=null, c=null, alt='') {
     let image = document.createElement('img');
     if (id !== null) { image.setAttribute('id', id); }
     if (c !== null) { image.setAttribute('class', c); }

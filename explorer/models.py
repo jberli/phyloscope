@@ -38,13 +38,12 @@ class Observations(models.Model):
         db_table = 'explorer\".\"observations'
 
 class Names(models.Model):
-    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False)
+    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='vernacular')
     name = models.CharField(db_column='name', max_length=500, blank=False, null=False)
     language = models.CharField(db_column='language', max_length=2, blank=False, null=False)
     country = models.CharField(db_column='country', max_length=50, blank=True, null=True)
     class Meta:
         managed = True
-        ordering = ('language', 'country', 'name',)
         db_table = 'explorer\".\"names'
 
 class Photo(models.Model):

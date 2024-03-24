@@ -4,7 +4,7 @@
 
 .lookup-container {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     top: calc(50px - 1.4em);
 
     background-color: $main-color-light;
@@ -59,7 +59,7 @@
 }
 
 .lookup-result {
-    height: 3em;
+    height: 4em;
     cursor: pointer;
 
     display: flex;
@@ -67,64 +67,25 @@
     justify-content: start;
     flex-shrink: 0;
     overflow: hidden;
-
-    &.species { height: 6em; }
 }
 
 .lookup-image-container {
     position: relative;
-    height: 6em;
-    width: 6em;
+    height: 4em;
+    width: 4em;
     flex-shrink: 0;
 
     &::before {
         opacity: 0;
     }
-
     &.loading::before {
         content: '';
-        
     }
 }
 
-.lookup-image-mask {
-    position: absolute;
-    opacity: 1;
-    
-    height: inherit;
-    width: inherit;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    transition: opacity .2s;
-    &.loaded { opacity: 0; }
-}
-
-.lookup-image {
-    height: inherit;
-    width: inherit;
-    overflow: hidden;
-    object-fit: cover;
-}
-
-.loader-image {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    border: 6px solid #fff;
-    border-color: #fff transparent #fff transparent;
-    animation: rotationcw 1.2s linear infinite;
-}
-
 .lookup-label {
-    margin-left: 10px;
+    margin: 0 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-
-.kingdom { background-color: $kingdom; }
-.phylum { background-color: $phylum; }
-.class { background-color: $class; }
-.order { background-color: $order; }
-.family { background-color: $family; }
-.genus { background-color: $genus; }
-.species { background-color: $species; }
