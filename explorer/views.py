@@ -105,7 +105,7 @@ def taxon(request, id=None):
 
     taxon = Taxon.objects.get(tid=id)
     parent = taxon.parent
-    siblings = parent.children.filter(rank=taxon.rank).exclude(tid=id)
+    siblings = parent.children.exclude(tid=id)
     grandparent = parent.parent
     parentsiblings = grandparent.children.filter(rank=parent.rank).exclude(tid=parent.tid)
     children = taxon.children.all()

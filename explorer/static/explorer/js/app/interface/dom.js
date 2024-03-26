@@ -58,22 +58,6 @@ function makeImage(url, height=null, width=null, id=null, c=null, alt='') {
     return image
 }
 
-// function cropImageCenter(img, posX, posY, width, height) {
-//         var canvas = document.createElement('canvas');
-//         canvas.width = recWidth;
-//         canvas.height = recHeight;
-//         var context = canvas.getContext('2d');
-//         context.drawImage(img, -posX, -posY);
-//         img.parentNode.replaceChild(canvas, img);
-//     }
-
-//     window.addEventListener("DOMContentLoaded", function() {
-//         var img = document.createElement('img');
-//         img.src = "image.png";
-//         document.body.appendChild(img);
-//         img.onload = function() { cropImage(img, 10, 5, img.width - 40, img.height - 80); }
-// });
-
 /**
  * Remove all the children from a given DOM Element.
  * @param  {DOMElement} element The DOM Element to remove all children from.
