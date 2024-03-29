@@ -4,7 +4,10 @@
  */
 
 window.addEventListener('DOMContentLoaded', function() {
-    params = { 'language': 'fr' }
+    params = {
+        'language': 'fr',
+        'current': 3000
+    }
 
     let container = makeDiv(id='container');
     let contentContainer = makeDiv(id='content-container');

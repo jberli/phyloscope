@@ -59,6 +59,13 @@ function makeImage(url, height=null, width=null, id=null, c=null, alt='') {
 }
 
 /**
+ * Wait for a given number of milliseconds before executing a function.
+ * @param  {int} duration      Duration to wait.
+ * @param  {function} callback Function to execute.
+ */
+function wait(duration, callback) { setTimeout(callback, duration); };
+
+/**
  * Remove all the children from a given DOM Element.
  * @param  {DOMElement} element The DOM Element to remove all children from.
  */
@@ -139,6 +146,15 @@ function removeClass(e, c) {
 };
 
 /**
+ * Remove the given class from a list of given elements.
+ * @param  {Array} e   Elements to remove the class from.
+ * @param  {String} c  Class to remove.
+ */
+function removeClassList(e, c) {
+    for (let i = 0; i < e.length; ++i) { removeClass(e[i], c) }
+};
+
+/**
  * Add the given class to a given element.
  * @param  {DOMElement} e Element to add the class to.
  * @param  {String} c     Class to add.
@@ -147,4 +163,13 @@ function addClass(e, c) {
     if (e.classList)
         e.classList.add(c)
     else if (!hasClass(e, c)) e.c += " " + c
+};
+
+/**
+ * Add the given class to a list of given elements.
+ * @param  {Array} e   Elements to add the class to.
+ * @param  {String} c  Class to add.
+ */
+function addClassList(e, c) {
+    for (let i = 0; i < e.length; ++i) { addClass(e[i], c) }
 };

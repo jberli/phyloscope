@@ -6,8 +6,6 @@ from django.http import JsonResponse
 from explorer.models import Names, Taxon
 from explorer.database.tools.database import RANKS
 
-# Create your views here.
-
 def initialization(request):
     return render(request, 'explorer/index.html', {
             'name': 'Oazo',
@@ -105,26 +103,27 @@ def taxon(request, id=None):
 
     taxon = Taxon.objects.get(tid=id)
     parent = taxon.parent
-    siblings = parent.children.exclude(tid=id)
+    siblings = parent.children
     grandparent = parent.parent
-    parentsiblings = grandparent.children.filter(rank=parent.rank).exclude(tid=parent.tid)
+    parentsiblings = grandparent.children.filter(rank=parent.rank)
     children = taxon.children.all()
 
-    if len(siblings) > 0:
-        result['values']['siblings'] = [ get_info(taxon) ] + [ get_info(sibling) for sibling in siblings ]
-    else:
-        result['values']['siblings'] = [ get_info(taxon) ]
+    result['values']['pindex'] = (*parentsiblings.all(),).index(parent)
 
-    if len(parentsiblings) > 0:
-        result['values']['parents'] = [ get_info(parent) ] + [ get_info(sibling) for sibling in parentsiblings ]
-    else:
-        result['values']['parents'] = [ get_info(parent) ]
+    siblingslist = [ get_info(sibling) for sibling in siblings.all() ]
+    result['values']['siblings'] = sorted(siblingslist, key=lambda k: k['level'], reverse=True)
+
+    result['values']['tindex'] = 0
+    for i, s in enumerate(result['values']['siblings']):
+        if s['id'] == taxon.tid:
+            result['values']['tindex'] = i
+
+    result['values']['parents'] = [ get_info(sibling) for sibling in parentsiblings.all() ]
+    result['values']['grandparent'] = [ get_info(grandparent) ]
 
     if len(children) > 0:
-        result['values']['children'] = [ get_info(child) for child in children ]
+        result['values']['children'] = [ get_info(child) for child in children.all() ]
     else:
         result['values']['children'] = None
-    
-    result['values']['grandparent'] = [ get_info(grandparent) ]
     
     return JsonResponse(result)
