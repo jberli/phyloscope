@@ -108,18 +108,6 @@ function uppercaseFirstLetter(str) {
 }
 
 /**
- * Append each child of the list to the parent.
- * @param  {DOMElement} parent Element to append the element to.
- * @param  {Array} children    Children to append to the parent.
- */
-function appendMultiple(parent, children) {
-    for (i = 0; i < children.length; ++i) {
-        parent.appendChild(children[i]);
-    };
-};
-
-
-/**
  * Check if the given element has the class.
  * @param  {DOMElement} e Element to check.
  * @param  {String} c     Class to check.
@@ -173,3 +161,20 @@ function addClass(e, c) {
 function addClassList(e, c) {
     for (let i = 0; i < e.length; ++i) { addClass(e[i], c) }
 };
+
+function calculateTextWidth(text, style, fontsize) {
+    let dummy = document.createElement('div');
+    dummy.style.fontFamily = style.fontFamily;
+    dummy.style.fontSize = fontsize;
+    dummy.style.fontWeight = style.fontWeight;
+    dummy.style.fontStyle = style.fontStyle;
+    dummy.style.height = 'auto';
+    dummy.style.width = 'auto';
+    dummy.style.position = 'absolute';
+    dummy.style.whiteSpace = 'nowrap';
+    dummy.innerHTML = text;
+    document.body.appendChild(dummy);
+    let width = Math.ceil(dummy.clientWidth);
+    dummy.remove();
+    return width;
+}

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.insert import inset_data
+from explorer.database.insert import insert_data
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -23,6 +23,6 @@ This operation might take some time, continue?
 ''')
         if (doit):
             print('Updating database...')
-            inset_data()
+            insert_data()
         else:
             print('Nothing was done')

@@ -1,8 +1,10 @@
-import datetime 
+import datetime
+import random 
 
 from django.utils.timezone import make_aware
 from django.db import connection
 from django.db.models import F
+from django.db.models import Max
 
 RANKS = {
     'stateofmatter': { 'en': 'State of matter', 'fr': 'État de la matière' },
@@ -41,6 +43,14 @@ RANKS = {
     'variety': { 'en': 'Variety', 'fr': 'Variété' },
     'form': { 'en': 'Form', 'fr': 'Forme' }, 
 }
+
+def get_random_model(model):
+    max_id = model.objects.all().aggregate(max_id=Max("id"))['max_id']
+    while True:
+        pk = random.randint(1, max_id)
+        m = model.objects.filter(pk=pk).first()
+        if m:
+            return m
 
 def wipe_database():
     """

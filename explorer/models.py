@@ -8,9 +8,11 @@ class Taxon(models.Model):
     name = models.CharField(db_column='name', max_length=200, blank=False, null=False)
     status_world = models.CharField(db_column='iucn_world', max_length=2, blank=True, null=True)
     status_france =  models.CharField(db_column='iucn_france', max_length=2, blank=True, null=True)
-    count = models.IntegerField(db_column='count', blank=True, null=True)
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)
     default_photo = models.ForeignKey('Photo', models.DO_NOTHING, db_column='default_photo', blank=True, null=True)
+    count_observation = models.IntegerField(db_column='count_observation', blank=True, null=True)
+    count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
+    percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
     class Meta:
         managed = True
         ordering = ('tid',)

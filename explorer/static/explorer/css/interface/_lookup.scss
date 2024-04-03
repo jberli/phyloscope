@@ -1,24 +1,37 @@
+$lookup-font-input: $font-color-dark;
+$lookup-font-result: $font-color-light;
+
+$lookup-background: $interface-button;
+$lookup-background-hover: $interface-button-hover;
+
 #module-lookup {
     width: 500px;
 }
 
 .lookup-container {
     position: relative;
-    z-index: 2;
+    z-index: 100;
     top: calc(50px - 1.4em);
+    background-color: $lookup-background;
 
-    background-color: $main-color-light;
-    border-radius: .3em;
+    border-radius: 4px;
     height: fit-content;
+    overflow: hidden;
     width: 100%;
+
+    transition: box-shadow .1s linear;
+    &:hover, &.active {
+        box-shadow: 0 0 3px $interface-shadows-dark;
+    }
 }
 
 .lookup-input {
-    line-height: 2em;
-    padding: .4em 10px;
+    padding: 5px 10px;
+    height: 30px;
+    line-height: 30px;
     cursor: text;
-
-    &:focus-visible {
+    color: $lookup-font-input;
+    &:focus-visible, &:hover {
         outline: none;
     }
 }
@@ -26,7 +39,11 @@
 .lookup-result-container {
     display: flex;
     flex-direction: column;
-    max-height: 500px;
+    height: 0px;
+    font-size: 13px;
+    color: $lookup-font-result;
+
+    transition: height .1s ease-out;
 
     overflow: auto;
     -ms-overflow-style: none;
@@ -36,19 +53,13 @@
     }
 }
 
-.lookup-taxonomy-level {
+.lookup-result-group {
     margin: 10px 10px 0 10px;
-    padding: 5px 10px;
-    border-top-left-radius: .5em;
-    border-top-right-radius: .5em;
-}
-
-.lookup-result-sorting {
     flex-shrink: 0;
+
+    border-radius: 4px;
     overflow: hidden;
-    margin: 0 10px;
-    border-bottom-left-radius: .5em;
-    border-bottom-right-radius: .5em;
+    transition: transform .1s ease-in-out;
 
     &:first-child {
         margin-top: 0;
@@ -56,10 +67,24 @@
     &:last-child {
         margin-bottom: 10px;
     }
+    &.collapse {
+        transform: scale(0, 0);
+    }
+}
+
+.lookup-result-level {
+    padding: 5px 10px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.lookup-result-sorting {
+    
 }
 
 .lookup-result {
-    height: 4em;
+    position: relative;
+    height: 50px;
     cursor: pointer;
 
     display: flex;
@@ -67,13 +92,27 @@
     justify-content: start;
     flex-shrink: 0;
     overflow: hidden;
+
+    transition: all .1s linear;
+
+    &:first-child {
+        > .lookup-image-container {
+            border-top-right-radius: 4px;
+        }
+    }
+    &:hover {
+        > .lookup-label {
+            //background-color: $main-color-dark;
+        }
+    }
 }
 
 .lookup-image-container {
     position: relative;
-    height: 4em;
-    width: 4em;
+    height: 50px;
+    width: 50px;
     flex-shrink: 0;
+    overflow: hidden;
 
     &::before {
         opacity: 0;
@@ -88,4 +127,5 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-right: 5px;
 }

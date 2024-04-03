@@ -20,7 +20,7 @@ from explorer.database.tools.database import (
     get_taxon_id
 )
 
-def inset_data():
+def insert_data():
     """
     Insert data into the database after preprocessing.
     TODO: Make the code work for updates only.
@@ -440,9 +440,49 @@ def inset_data():
     #     language='fr',
     # ).save()
 
-    name = Names.objects.filter(name='vie')[0]
-    name.country = ''
-    name.save()
+#####################################################################
+### COUNT SPECIES
+
+    # taxon = Taxon.objects.order_by('level')
+    # life = True
+    # while life:
+    #     for t in taxon:
+    #         children = t.children.all()
+    #         if len(children) == 0:
+    #             t.count_species = 1
+    #             t.save()
+    #         else:
+    #             total = 0
+    #             add = True
+    #             for child in children:
+    #                 if child.count_species is None:
+    #                     add = False
+    #                     break
+    #                 total += child.count_species
+    #             if add:
+    #                 t.count_species = total
+    #                 t.save()
+    #                 if int(t.level) == 100:
+    #                     life = False
+                
+#####################################################################
+### PERCENTAGE
+
+    taxon = Taxon.objects.order_by('level')
+    done = []
+    for t in taxon:
+        parent = t.parent
+        if parent is not None:
+            if parent.tid not in done:
+                count = parent.count_species
+                siblings = parent.children.all()
+                for sibling in siblings:
+                    scount = sibling.count_species
+                    sibling.percentage_parent = 100 * scount / count
+                    sibling.save()
+                done.append(parent.tid)
+            
+
 
 #####################################################################
 
