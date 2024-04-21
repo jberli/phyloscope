@@ -3,16 +3,19 @@
  * Taxonomy related functions.
  */
 
-function constructTaxonomy(params, container) {
-    var entryWidth = 150;
+function reloadTaxonomy(params, container) {
+    let taxonomy = container.querySelector('.taxonomy-container');
+    addClass(taxonomy, 'collapse');
+    wait(params.transition, () => {
+        taxonomy.remove();
+        constructTaxonomy(params, container);
+    })
+}
 
-    let taxonomyContainer = makeDiv(id='taxonomy-container');
-    let panelButtonsContainer = makeDiv(id=null, c='panel-button-container');
-    let panelButtonTaxonomy = makeDiv(id=null, c='panel-button', html='Taxonomie');
-    let panelButtonDescription = makeDiv(id=null, c='panel-button', html='Description');
-    let taxonomyView = makeDiv(id=null, c='taxonomy-view');
-    let ancestry = makeDiv(id=null, c='taxonomy-ancestry-container collapse');
-    let view = makeDiv(id=null, c='taxonomy-levels-container collapse');
+function constructTaxonomy(params, container) {
+    let taxonomyContainer = makeDiv(id=null, c='taxonomy-container collapse');
+    let ancestry = makeDiv(id=null, c='taxonomy-ancestry-container');
+    let view = makeDiv(id=null, c='taxonomy-levels-container');
 
     function createTaxonomy(taxon, params) {
         ajaxGet('taxon/' + taxon, (r) => {
@@ -27,14 +30,12 @@ function constructTaxonomy(params, container) {
             createTaxonLevel(params, siblings);
             createChildrenLevel(params, children);
             view.append(grandparent, parent, siblings, children, grandchildren);
-            removeClass(view, 'collapse');
-            removeClass(ancestry, 'collapse');
+            removeClass(taxonomyContainer, 'collapse');
         });
     }
 
-    panelButtonsContainer.append(panelButtonDescription, panelButtonTaxonomy);
-    taxonomyView.append(ancestry, view);
-    taxonomyContainer.append(panelButtonsContainer, taxonomyView);
+    
+    taxonomyContainer.append(ancestry, view);
     createTaxonomy(params.taxonomy, params);
     container.appendChild(taxonomyContainer);
 
@@ -96,7 +97,7 @@ function constructTaxonomy(params, container) {
                 }
             }
             last.style.width = '0px';
-            wait(100, () => { last.remove(); })
+            wait(params.transition, () => { last.remove(); })
         } else {
             let name = value.scientific;
             if (name === 'Life') { name = 'Vie' }
@@ -143,9 +144,8 @@ function constructTaxonomy(params, container) {
         if (parent === taxon) {
             currentParent.click();
         } else {
-            addClass(ancestry, 'collapse');
-            addClass(view, 'collapse');
-            wait(100, () => {
+            addClass(taxonomyContainer, 'collapse');
+            wait(params.transition, () => {
                 removeChildren(ancestry);
                 removeChildren(view);
                 createTaxonomy(taxon, params);
@@ -264,12 +264,13 @@ function constructTaxonomy(params, container) {
             removeClass(newparent, 'smooshed');
             removeClass(siblings, 'taxonomy-levels-main');
             updateAncestry();
-            wait(100, () => {
+            wait(params.transition, () => {
                 children.remove();
                 addClass(parent, 'taxonomy-levels-main');
                 addLevelListeners(parent, slideSibling);
                 removeClassList(parent.lastChild.children, 'collapse');
                 addLevelListeners(siblings, slideChildren);
+                removeClassList(siblings.lastChild.children, 'active');
             });
         })
     }
@@ -294,7 +295,7 @@ function constructTaxonomy(params, container) {
             removeClass(newchildren, 'smooshed');
             removeClass(siblings, 'taxonomy-levels-main');
             updateAncestry(params.taxonomy.parents[params.taxonomy.pindex]);
-            wait(100, () => {
+            wait(params.transition, () => {
                 parent.remove();
                 addClass(children, 'taxonomy-levels-main');
                 addLevelListeners(children, slideSibling);
@@ -348,7 +349,7 @@ function constructTaxonomy(params, container) {
         let childrenContainer = view.lastChild.previousElementSibling;
         ajaxGet('children/' + taxon, (r) => {
             addClass(childrenContainer, 'collapse');
-            wait(100, () => {
+            wait(params.transition, () => {
                 params.taxonomy.children = r.values.children;
                 if (previousType != currentType) {
                     typeNodeLabel.innerHTML = objects[current - 1].type;
@@ -521,9 +522,10 @@ function constructTaxonomy(params, container) {
         
         let label = makeDiv(id=null, c='taxonomy-entry-label', html=html);
         let width = calculateTextWidth(name, getComputedStyle(label), '13px') + 20;
-    
-        if (width > entryWidth) {
-            let height = calculateLabelHeight(name, getComputedStyle(label), '13px', entryWidth);
+
+        let nodeWidth = calculateWidthFromClass('taxonomy-entry');
+        if (width > nodeWidth) {
+            let height = calculateLabelHeight(name, getComputedStyle(label), '13px', nodeWidth);
             node.addEventListener('mouseover', (e) => {
                 label.style.height = height + 'px';
                 label.style.textWrap = 'wrap';
@@ -541,6 +543,8 @@ function constructTaxonomy(params, container) {
         let mask = makeDiv(id=null, c='taxonomy-entry-mask');
         node.append(mask, imageDiv, label, statistics);
         node.setAttribute('taxon', obj.id);
+        node.remove();
+
         return node
     }
 }

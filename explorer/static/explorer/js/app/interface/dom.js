@@ -162,6 +162,19 @@ function addClassList(e, c) {
     for (let i = 0; i < e.length; ++i) { addClass(e[i], c) }
 };
 
+/**
+ * Create a dummy DOM element from a className and return the width property.
+ * @param  {String} c Class to add.
+ * @return {int}      Width of the element.
+ */
+function calculateWidthFromClass(c) {
+    let node = makeDiv(null, c);
+    document.body.append(node);
+    let width = node.offsetWidth;
+    node.remove();
+    return width;
+}
+
 function calculateTextWidth(text, style, fontsize) {
     let dummy = document.createElement('div');
     dummy.style.fontFamily = style.fontFamily;

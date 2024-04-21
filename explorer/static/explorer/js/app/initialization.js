@@ -7,7 +7,8 @@ window.addEventListener('DOMContentLoaded', function(e) {
     ajaxGet('taxonoftheday/', (e) => {
         params = {
             language: 'en',
-            taxonomy: e.values
+            taxonomy: e.values,
+            transition: 100
         }
 
         let container = makeDiv(id='container');
@@ -18,7 +19,7 @@ window.addEventListener('DOMContentLoaded', function(e) {
     
         params = constructHeader(params, container);
         contentContainer.append(mapContainer);
-        params = constructTaxonomy(params, contentContainer);
+        params = constructRightPanel(params, contentContainer);
 
         container.append(contentContainer);
         document.body.appendChild(container);
