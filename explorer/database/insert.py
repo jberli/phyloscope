@@ -9,6 +9,7 @@ import requests
 from progress.bar import Bar
 from explorer.models import Taxon, Names, Photo, Observations
 
+from django.contrib.gis.geos import Point
 from explorer.database.tools.files import read_csv, read_entry, get_row_number, write_json
 from explorer.database.tools.geography import project
 from explorer.database.tools.database import (
@@ -468,21 +469,67 @@ def insert_data():
 #####################################################################
 ### PERCENTAGE
 
-    taxon = Taxon.objects.order_by('level')
-    done = []
-    for t in taxon:
-        parent = t.parent
-        if parent is not None:
-            if parent.tid not in done:
-                count = parent.count_species
-                siblings = parent.children.all()
-                for sibling in siblings:
-                    scount = sibling.count_species
-                    sibling.percentage_parent = 100 * scount / count
-                    sibling.save()
-                done.append(parent.tid)
-            
+    # taxon = Taxon.objects.order_by('level')
+    # done = []
+    # for t in taxon:
+    #     parent = t.parent
+    #     if parent is not None:
+    #         if parent.tid not in done:
+    #             count = parent.count_species
+    #             siblings = parent.children.all()
+    #             for sibling in siblings:
+    #                 scount = sibling.count_species
+    #                 sibling.percentage_parent = 100 * scount / count
+    #                 sibling.save()
+    #             done.append(parent.tid)
 
+#####################################################################
+#### INSERT OBSERVATIONS
+
+    ofile = 'explorer/database/data/observations.csv'
+    onb = get_row_number(ofile)
+    print("Adding {0} observations.".format(onb))
+    ofields =  [ 'id', 'basisOfRecord', 'catalogNumber', 'recordedBy', 'captive', 'eventDate', 'decimalLatitude', 'decimalLongitude', 'coordinateUncertaintyInMeters', 'taxonID', 'license' ,'sex', 'lifeStage', 'reproductiveCondition' ]
+    ot, oreader, oindexes = read_csv(ofile, ofields)
+
+    wp = open('explorer/database/data/tmp/observations_pb.csv', 'w')
+    writerp = csv.writer(wp, delimiter='\t')
+    writerp.writerow([ 'id', 'basisOfRecord', 'catalogNumber', 'recordedBy', 'captive', 'eventDate', 'decimalLatitude', 'decimalLongitude', 'coordinateUncertaintyInMeters', 'taxonID', 'license' ,'sex', 'lifeStage', 'reproductiveCondition' ])
+
+    taxons = [x['tid'] for x in  list(Taxon.objects.order_by('tid').values('tid').distinct())]
+
+    with Bar('Inserting observations...', max=onb, fill='#', suffix='%(percent)d%%') as bar:
+        for row in oreader:
+            entry = read_entry(row, ofields, oindexes)
+            taxon_id = int(entry['taxonID'])
+            if taxon_id in taxons:
+                date = get_date(entry['eventDate'])
+                catalog = entry['catalogNumber']
+                uncertainty = entry['coordinateUncertaintyInMeters']
+                # Retrieve latitude and longitude of observation
+                lat, lon = float(entry['decimalLatitude']), float(entry['decimalLongitude'])
+                # Project coordinates to 3857
+                projected = project([lon, lat], 4326, 3857)
+                Observations(
+                    oid=entry['id'],
+                    taxon=Taxon.objects.get(tid=taxon_id),
+                    license=entry['license'],
+                    basis=entry['basisOfRecord'],
+                    catalog=int(catalog) if len(catalog) > 0 else None,
+                    author=entry['recordedBy'],
+                    sex=entry['sex'],
+                    stage=entry['lifeStage'],
+                    condition=entry['reproductiveCondition'],
+                    captivity=entry['captive'],
+                    date=date,
+                    lat=lat,
+                    lon=lon,
+                    uncertainty=float(uncertainty) if len(uncertainty) > 0 else None,
+                    geom = Point(x=projected[0], y=projected[1], srid=3857)
+                ).save()
+            else:
+                writerp.writerow(row)
+            bar.next()
 
 #####################################################################
 

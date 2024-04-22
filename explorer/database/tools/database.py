@@ -259,8 +259,14 @@ def get_date(time):
         formating = '%Y-%m-%dT%H:%M:%S'
     elif len(time) == 20:
         formating = '%Y-%m-%dT%H:%M:%SZ'
+    elif len(time) == 25:
+        time = time[:22] + time[23:]
+        formating = '%Y-%m-%dT%H:%M:%S%z'
     
     if formating is not None:
-        return make_aware(datetime.datetime.strptime(time, formating))
+        if len(time) < 24 :
+            return make_aware(datetime.datetime.strptime(time, formating))
+        else:
+            return datetime.datetime.strptime(time, formating)
     else:
         return None

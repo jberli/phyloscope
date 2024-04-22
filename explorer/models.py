@@ -20,7 +20,7 @@ class Taxon(models.Model):
 
 class Observations(models.Model):
     oid = models.IntegerField(db_column='oid', blank=False, null=False, unique=True)
-    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False)
+    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='observations')
     license = models.CharField(db_column='license', max_length=50, blank=True, null=True)
     basis = models.CharField(db_column='basis', max_length=100, blank=True, null=True)
     catalog = models.BigIntegerField(db_column='catalog', unique=True)
@@ -28,7 +28,7 @@ class Observations(models.Model):
     sex = models.CharField(db_column='sex', max_length=50, blank=True, null=True)
     stage = models.CharField(db_column='stage', max_length=50, blank=True, null=True)
     condition = models.CharField(db_column='condition', max_length=100, blank=True, null=True)
-    status = models.CharField(db_column='status', max_length=50, blank=True, null=True)
+    captivity = models.CharField(db_column='status', max_length=50, blank=True, null=True)
     date = models.DateTimeField(db_column='date', blank=True, null=True)
     lat = models.FloatField(db_column='lat', blank=True, null=True)
     lon = models.FloatField(db_column='lon', blank=True, null=True)
