@@ -18,27 +18,6 @@ class Taxon(models.Model):
         ordering = ('tid',)
         db_table = 'explorer\".\"taxon'
 
-class Observations(models.Model):
-    oid = models.IntegerField(db_column='oid', blank=False, null=False, unique=True)
-    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='observations')
-    license = models.CharField(db_column='license', max_length=50, blank=True, null=True)
-    basis = models.CharField(db_column='basis', max_length=100, blank=True, null=True)
-    catalog = models.BigIntegerField(db_column='catalog', unique=True)
-    author = models.CharField(db_column='author', max_length=500, blank=True, null=True)
-    sex = models.CharField(db_column='sex', max_length=50, blank=True, null=True)
-    stage = models.CharField(db_column='stage', max_length=50, blank=True, null=True)
-    condition = models.CharField(db_column='condition', max_length=100, blank=True, null=True)
-    captivity = models.CharField(db_column='status', max_length=50, blank=True, null=True)
-    date = models.DateTimeField(db_column='date', blank=True, null=True)
-    lat = models.FloatField(db_column='lat', blank=True, null=True)
-    lon = models.FloatField(db_column='lon', blank=True, null=True)
-    uncertainty = models.FloatField(db_column='uncertainty', blank=True, null=True)
-    geom = models.PointField(db_column='geom', srid=3857, null=True)
-    class Meta:
-        managed = True
-        ordering = ('oid',)
-        db_table = 'explorer\".\"observations'
-
 class Names(models.Model):
     taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='vernacular')
     name = models.CharField(db_column='name', max_length=500, blank=False, null=False)
