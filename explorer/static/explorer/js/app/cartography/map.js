@@ -4,39 +4,57 @@
  */
 
 function initializeMap(params) {
+    let contentContainer = document.getElementById('content-container');
+    let mapContainer = makeDiv(id='map-container');
+    let mapdiv = makeDiv(id='map');
+    let updateButton = makeDiv(id='map-button-update', c='map-button collapse');
+    mapContainer.appendChild(mapdiv);
+    mapContainer.appendChild(updateButton);
+    updateButton.addEventListener('click', (e) => {
+        updateTaxonRange(params);
+    });
+    contentContainer.append(mapContainer);
+
+    let tileDimension = 256;
+    let projection = ol.proj.get('EPSG:3857');
+    let projectionExtent = projection.getExtent();
+    let size = ol.extent.getWidth(projectionExtent) / tileDimension;
+    let resolutions = new Array(19);
+    let matrixIds = new Array(19);
+    for (let z = 0; z < 19; ++z) {
+        resolutions[z] = size / Math.pow(2, z);
+        matrixIds[z] = z;
+    }
+
     // View definition
     view = new ol.View({
-        center: [ 270980, 5930193 ],
-        zoom: 7,
+        center: [ 0, 3000000 ],
+        zoom: 1,
+        maxZoom: 6,
+        // constrainResolution: true,
     })
+
+    // let layer = new ol.layer.Tile({
+    //     preload: Infinity,
+    //     source: new ol.source.OSM()
+    // });
 
     let layer = new ol.layer.Tile({
         preload: Infinity,
-        source: new ol.source.OSM()
+        source: new ol.source.WMTS({
+            url: 'http://localhost:8080/geoserver/NE/gwc/service/wmts',
+            layer: 'NE:basemap',
+            matrixSet: 'WebMercatorQuad',
+            format: 'image/jpeg',
+            dimensions: [tileDimension, tileDimension],
+            tileGrid: new ol.tilegrid.WMTS({
+                origin: ol.extent.getTopLeft(projectionExtent),
+                resolutions: resolutions,
+                matrixIds: matrixIds,
+            }),
+            wrapX: true,
+        })
     });
-
-    // let layer = new ol.layer.Tile({
-    //     preload: 0,
-    //     source: new ol.source.WMTS({
-    //         url: 'https://wxs.ign.fr/decouverte/geoportail/wmts',
-    //         layer: 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2',
-    //         matrixSet: 'PM',
-    //         format: 'image/png',
-    //         style: 'normal',
-    //         dimensions: [256, 256],
-    //         tileGrid: new ol.tilegrid.WMTS({
-    //             origin: [ -20037508, 20037508 ],
-    //             resolutions: [
-    //                 156543.03392804103, 78271.5169640205, 39135.75848201024, 19567.879241005125, 9783.939620502562,
-    //                 4891.969810251281, 2445.9849051256406, 1222.9924525628203, 611.4962262814101, 305.74811314070485,
-    //                 152.87405657035254, 76.43702828517625, 38.218514142588134, 19.109257071294063, 9.554628535647034,
-    //                 4.777314267823517, 2.3886571339117584, 1.1943285669558792, 0.5971642834779396, 0.29858214173896974,
-    //                 0.14929107086948493, 0.07464553543474241
-    //             ],
-    //             matrixIds: [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19" ],
-    //         })
-    //     })
-    // });
 
     // Map definition
     map = new ol.Map({
@@ -46,7 +64,63 @@ function initializeMap(params) {
         controls: ol.control.defaults.defaults({
             zoom: false,
             attribution: false,
-            rotate: false
+            rotate: false,
         })
     });
+
+    map.on('moveend', (e) => {
+        // console.log(e.map.getView().getZoom());
+    })
+
+    params['cartography'] = { map: map };
+}
+
+function updateTaxonRange(params) {
+    let taxon = params.taxonomy.siblings[params.taxonomy.tindex].id
+    let map = params.cartography.map;
+    let range = params.cartography.range;
+    if (range !== null) {
+        range.getSource();
+        map.removeLayer(range);
+    }
+
+    let url = 'https://www.inaturalist.org/taxa/' + taxon + '/range.kml';
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    let onError = function() { xhr.abort() }
+    xhr.onerror = onError;
+    xhr.onload = function() {
+        if (xhr.status == 200) {
+            let map = params.cartography.map;
+            let taxonLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: new ol.format.KML({
+                        extractStyles: false
+                    }).readFeatures(xhr.responseText,{
+                        dataProjection:'EPSG:4326',
+                        featureProjection:'EPSG:3857'
+                    })
+                }),
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(200, 110, 100, 0.7)',
+                    }),
+                })
+            });
+            params.cartography.range = taxonLayer;
+            params.cartography.taxon = taxon;
+            map.addLayer(taxonLayer);
+            map.getView().fit(taxonLayer.getSource().getExtent(), {
+                padding: [ 50, 50, 50, 50 ],
+                duration: 500,
+                easing: ol.easing.easeOut,
+            });
+
+            let updateButton = document.getElementById('map-button-update');
+            addClass(updateButton, 'collapse');
+        } else {
+            onError();
+        }
+    }
+    xhr.send();   
 }

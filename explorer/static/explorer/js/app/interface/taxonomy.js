@@ -3,17 +3,18 @@
  * Taxonomy related functions.
  */
 
-function reloadTaxonomy(params, container) {
-    let taxonomy = container.querySelector('.taxonomy-container');
+function reloadTaxonomy(params) {
+    let taxonomy = document.getElementById('taxonomy-container');
     addClass(taxonomy, 'collapse');
     wait(params.transition, () => {
         taxonomy.remove();
-        constructTaxonomy(params, container);
+        initializeTaxonomy(params);
     })
 }
 
-function constructTaxonomy(params, container) {
-    let taxonomyContainer = makeDiv(id=null, c='taxonomy-container collapse');
+function initializeTaxonomy(params) {
+    let container = document.getElementById('panel-container');
+    let taxonomyContainer = makeDiv(id='taxonomy-container', c='collapse');
     let ancestry = makeDiv(id=null, c='taxonomy-ancestry-container');
     let view = makeDiv(id=null, c='taxonomy-levels-container');
 
@@ -34,12 +35,20 @@ function constructTaxonomy(params, container) {
         });
     }
 
-    
     taxonomyContainer.append(ancestry, view);
     createTaxonomy(params.taxonomy, params);
     container.appendChild(taxonomyContainer);
 
-    return params;
+    function updateActiveTaxon(params) {
+        let updateButton = document.getElementById('map-button-update');
+        let taxonTaxon = params.taxonomy.siblings[params.taxonomy.tindex].id;
+        let taxonCarto = params.cartography.taxon;
+        if (taxonTaxon === taxonCarto) {
+            addClass(updateButton, 'collapse');
+        } else {
+            removeClass(updateButton, 'collapse');
+        }
+    }
 
     function createAncestry(objects) {
         let total = 0;
@@ -251,6 +260,7 @@ function constructTaxonomy(params, container) {
             params.taxonomy.tindex = params.taxonomy.pindex;
             params.taxonomy.parents = r.values.parents;
             params.taxonomy.pindex = r.values.pindex;
+            updateActiveTaxon(params);
 
             let newparent = view.firstChild;
             let siblings = parent.nextElementSibling;
@@ -282,6 +292,8 @@ function constructTaxonomy(params, container) {
             params.taxonomy.siblings = params.taxonomy.children;
             params.taxonomy.tindex = tindex;
             params.taxonomy.children = r.values.children;
+            updateActiveTaxon(params);
+
             let parent = view.firstChild.nextElementSibling;
             let siblings = parent.nextElementSibling;
             let children = siblings.nextElementSibling;
@@ -416,6 +428,7 @@ function constructTaxonomy(params, container) {
             removeClass(entries.children[reveal], 'smooshed');
             removeClass(entries.children[currentindex], 'active');
             updateChildren(entries, current, currentindex);
+            updateActiveTaxon(params);
         }
     }
 

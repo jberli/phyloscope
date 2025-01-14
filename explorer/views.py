@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 
 from explorer.models import Names, Taxon
-from explorer.database.tools.database import get_random_model
-from explorer.database.tools.database import RANKS
+from explorer.setup import APP_CONFIGURATION
+from explorer.management.database.tools.database import get_random_model
+from explorer.management.database.tools.database import RANKS
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
@@ -12,9 +13,8 @@ def initialization(request):
             'version': 1.0,
         })
 
-def taxonoftheday(request):
-    taxon = get_random_model(Taxon)
-    return JsonResponse({'values': taxon.tid})
+def configuration(request):
+    return JsonResponse(APP_CONFIGURATION)
 
 def lookup(request, value):
     """
