@@ -3,8 +3,8 @@ from django.http import JsonResponse
 
 from explorer.models import Names, Taxon
 from explorer.setup import APP_CONFIGURATION
-from explorer.management.database.tools.database import get_random_model
-from explorer.management.database.tools.database import RANKS
+from explorer.maintenance.tools.models import get_random_model
+from explorer.maintenance.tools.information import RANKS
 
 def initialization(request):
     return render(request, 'explorer/index.html', {

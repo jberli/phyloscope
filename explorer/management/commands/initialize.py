@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.update import insert_pictures
+from explorer.maintenance.update import update
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
-    help = 'Initialize application'
+    help = 'Update database'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -17,12 +17,8 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt(
-'''You are about to add entries to the database.
-This operation might take some time, continue?
-''')
+            doit = prompt('''You are about to remove all entries from the database and rebuild it from scratch. Continue? ''')
         if (doit):
-            print('Updating database...')
-            insert_pictures('explorer/database/data/inaturalist/multimedia.csv')
+            update(True)
         else:
             print('Nothing was done')

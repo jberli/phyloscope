@@ -6,11 +6,8 @@ class Taxon(models.Model):
     level = models.FloatField(db_column='level', blank=False, null=False)
     rank = models.CharField(db_column='rank', max_length=50, blank=False, null=False)
     name = models.CharField(db_column='name', max_length=200, blank=False, null=False)
-    status_world = models.CharField(db_column='iucn_world', max_length=2, blank=True, null=True)
-    status_france =  models.CharField(db_column='iucn_france', max_length=2, blank=True, null=True)
+    status = models.CharField(db_column='iucn', max_length=2, blank=True, null=True)
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)
-    default_photo = models.ForeignKey('Photo', models.DO_NOTHING, db_column='default_photo', blank=True, null=True)
-    count_observation = models.IntegerField(db_column='count_observation', blank=True, null=True)
     count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
     class Meta:
@@ -30,6 +27,7 @@ class Names(models.Model):
 class Photo(models.Model):
     pid = models.IntegerField(db_column='pid', blank=False, null=False, unique=False)
     taxon_id = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon_id', blank=True, null=True)
+    default = models.BooleanField(db_column='default', default=False, null=False)
     license = models.CharField(db_column='license', max_length=50, blank=True, null=True)
     extension = models.CharField(db_column='extension', max_length=10, blank=True, null=True)
     height = models.IntegerField(db_column='height', blank=True, null=True)

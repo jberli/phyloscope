@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from explorer.database.insert import insert_data
+from explorer.maintenance.tools.models import wipe_database
 from oazo.management.warnings import prompt
 
 class Command(BaseCommand):
-    help = 'Update database'
+    help = 'Initialize application'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -17,12 +17,8 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt(
-'''You are about to add entries to the database.
-This operation might take some time, continue?
-''')
+            doit = prompt('''You are about to remove all entries from the database. Continue? ''')
         if (doit):
-            print('Updating database...')
-            insert_data()
+            wipe_database()
         else:
             print('Nothing was done')

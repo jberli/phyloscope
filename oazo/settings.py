@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions', # django extensions
     'sass_processor', # Sass processor
     'django.contrib.gis', # GeoDjango
     # Own applications
