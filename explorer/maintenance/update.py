@@ -5,6 +5,7 @@ import shutil
 import zipfile
 import csv
 import logging
+
 from progress.bar import IncrementalBar, Bar
 from django.db.models import Max
 
@@ -44,6 +45,7 @@ def fetch_data(taxons, tmp, batch=30, maximum=10000):
     writerphoto.writerow([ 'id', 'taxon', 'default', 'license', 'extension', 'height', 'width' ])
 
     taxa = []
+    before = datetime.datetime.now()
     bar = IncrementalBar('...fetching API     ', max=len(taxons), suffix='%(percent)d%%')
     nb_request = 0
     for i in taxons:
@@ -74,8 +76,10 @@ def fetch_data(taxons, tmp, batch=30, maximum=10000):
         insert_information(infos, writerinfos, writerphoto)
         bar.next()
     bar.next()
-    print(' data fetching successful.')
-    
+
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
+    print()
     winfos.close()
     wphoto.close()
 
@@ -89,26 +93,31 @@ def insert_data(taxons, tmp):
     ifields = [ 'id', 'parent', 'rank_level', 'rank', 'name', 'extinct', 'status', 'wikipedia' ]
     ir, ireader, iindexes = read_csv(f'{tmp}/taxa_infos.csv', ifields, '|')
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...1/7 taxon               ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
-        entry = read_entry(row, ifields, iindexes)                
+        entry = read_entry(row, ifields, iindexes)
+        tid = int(entry['id'])
         taxon = Taxon(
-            tid = int(entry['id']),
+            tid = tid,
             level = float(entry['rank_level']),
             rank = entry['rank'],
             name = entry['name'],
             status = entry['status'],
             wikipedia = entry['wikipedia'],
         )
+
         taxon.save()
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     pnb = get_row_number(f'{tmp}/taxa_photos.csv')
     pfields = [ 'id', 'taxon', 'default', 'license', 'extension', 'height', 'width' ]
     pr, preader, pindexes = read_csv(f'{tmp}/taxa_photos.csv', pfields, '|')
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...2/7 photo               ', max=pnb, suffix='%(percent)d%%') 
     for row in preader:
         entry = read_entry(row, pfields, pindexes)
@@ -119,19 +128,21 @@ def insert_data(taxons, tmp):
                 taxon_id = Taxon.objects.get(tid=tid),
                 default = entry['default'],
                 license = entry['license'],
-                extension = entry['extension'],
+                extension = entry['extension'] if len(entry['extension']) < 5 else None,
                 height = int(entry['height']) if len(entry['height']) > 0 else None,
                 width = int(entry['width']) if len(entry['width']) > 0 else None,
             )
             photo.save()
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     nenb = get_row_number(f'{tmp}/VernacularNames-english.csv')
     nefields = ['id', 'vernacularName', 'language', 'countryCode']
     ner, nereader, neindexes = read_csv(f'{tmp}/VernacularNames-english.csv', nefields, ',')
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...3/7 english vernacular  ', max=nenb, suffix='%(percent)d%%')
     for row in nereader:
         entry = read_entry(row, nefields, neindexes)
@@ -146,12 +157,14 @@ def insert_data(taxons, tmp):
             name.save()
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     nfnb = get_row_number(f'{tmp}/VernacularNames-french.csv')
     nffields = ['id', 'vernacularName', 'language', 'countryCode']
     nfr, nfreader, nfindexes = read_csv(f'{tmp}/VernacularNames-french.csv', nffields, ',')
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...4/7 french vernacular   ', max=nfnb, suffix='%(percent)d%%')
     for row in nfreader:
         entry = read_entry(row, nffields, nfindexes)
@@ -167,7 +180,8 @@ def insert_data(taxons, tmp):
         
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     # Add the name of life in french if it doesn't exist already
     if len(Taxon.objects.filter(tid=48460)) > 0:
@@ -179,6 +193,7 @@ def insert_data(taxons, tmp):
     ifields = [ 'id', 'parent' ]
     ir, ireader, iindexes = read_csv(f'{tmp}/taxa_infos.csv', ifields, '|')
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...5/7 find parents        ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
@@ -193,11 +208,13 @@ def insert_data(taxons, tmp):
                     taxon.save()
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     taxa = Taxon.objects.order_by('level')
     highest = taxa.last().level
 
+    before = datetime.datetime.now()
     bar = IncrementalBar('...6/7 count species       ', max=len(taxa), suffix='%(percent)d%%')
     for t in taxa:
         children = t.children.all()
@@ -217,9 +234,11 @@ def insert_data(taxons, tmp):
                 t.save()
         bar.next()
     bar.next()
-    bar.finish()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     done = []
+    before = datetime.datetime.now()
     bar = IncrementalBar('...7/7 calculate percentage', max=len(taxa), suffix='%(percent)d%%')
     for t in taxa:
         parent = t.parent
@@ -233,24 +252,16 @@ def insert_data(taxons, tmp):
                     sibling.save()
                 done.append(parent.tid)
         bar.next()
-
-    print(' data insertion successful.')
+    bar.next()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
     bar.finish()
 
-def update(initialize=False, batch=30, maximum=10000, limit=100):
+def update(initialize=False, batch=30, maximum=10000, limit=20000):
     """
     Update the database.
     """
-    # If initialize mode is true, wipe the database
-    if initialize:
-        print("Initializing database...")
-        utype = 'initialization'
-        wipe_database()
-    else:
-        print("Updating database...")
-        utype = 'update'
-
-    directory = 'update'
+    directory = '.update'
     tmp = 'tmp'
 
     number_update = get_row_number(f'{directory}/history') 
@@ -275,13 +286,13 @@ def update(initialize=False, batch=30, maximum=10000, limit=100):
 
     status = 'FAIL'
     try:
-        # Download the file inside the data folder
-        print('Downloading taxonomy file...')
-        download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
+        # # Download the file inside the data folder
+        # print('Downloading taxonomy file...')
+        # download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
 
-        # Extract the zip file in a temporary file
-        with zipfile.ZipFile(pathzip, 'r') as z:
-            z.extractall(pathtmp)
+        # # Extract the zip file in a temporary file
+        # with zipfile.ZipFile(pathzip, 'r') as z:
+        #     z.extractall(pathtmp)
 
         # Retrieve the list of taxon index already present in database
         taxons = [ x['tid'] for x in list(Taxon.objects.order_by('tid').values('tid').distinct()) ]
@@ -307,8 +318,18 @@ def update(initialize=False, batch=30, maximum=10000, limit=100):
         print()
         # If missing taxons were found
         if len(new_taxons) > 0:
-            # Fetch data and write in csv files
-            fetch_data(new_taxons, pathtmp)
+            # # Fetch data and write in csv files
+            # fetch_data(new_taxons, pathtmp)
+
+            # If initialize mode is true, wipe the database
+            if initialize:
+                print("Initializing database...")
+                utype = 'initialization'
+                wipe_database()
+            else:
+                print("Updating database...")
+                utype = 'update'
+
             # Inserting fetched data in database.
             insert_data(new_taxons, pathtmp)
         else:
@@ -331,5 +352,5 @@ def update(initialize=False, batch=30, maximum=10000, limit=100):
         whistory.write(status)
         whistory.close()
 
-        print('Cleaning temporary files...')
-        shutil.rmtree(pathtmp)
+        # print('Cleaning temporary files...')
+        # shutil.rmtree(pathtmp)
