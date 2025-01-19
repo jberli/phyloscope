@@ -1,0 +1,16 @@
+#header-container {
+    flex-shrink: 0;
+    height: 100px;
+    width: 100%;
+    background-color: $interface-background;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-module {
+    display: flex;
+    height: 100%;
+    margin: 0 50px;
+}

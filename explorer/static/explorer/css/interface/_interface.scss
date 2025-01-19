@@ -1,0 +1,173 @@
+@import '_header.scss';
+@import '_loader.scss';
+@import '_lookup.scss';
+@import '_map.scss';
+@import '_panels.scss';
+@import '_photo.scss';
+@import '_taxonomy.scss';
+
+#container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#content-container {
+    height: 100%;
+    display: flex;
+}
+
+.click-mask {
+    position: absolute;
+    z-index: 99;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.stateofmatter {
+    background-color: $stateofmatter;
+    outline-color: $stateofmatter;
+}
+.kingdom { 
+    background-color: $kingdom;
+    outline-color: $kingdom;
+}
+.phylum { 
+    background-color: $phylum;
+    outline-color: $phylum;
+}
+.subphylum { 
+    background-color: $subphylum; 
+    outline-color: $subphylum;
+}
+.superclass { 
+    background-color: $superclass; 
+    outline-color: $superclass;
+}
+.class { 
+    background-color: $class; 
+    outline-color: $class;
+}
+.subclass { 
+    background-color: $subclass; 
+    outline-color: $subclass;
+}
+.infraclass { 
+    background-color: $infraclass; 
+    outline-color: $infraclass;
+}
+.subterclass { 
+    background-color: $subterclass; 
+    outline-color: $subterclass;
+}
+.superorder { 
+    background-color: $superorder; 
+    outline-color: $superorder;
+}
+.order { 
+    background-color: $order; 
+    outline-color: $order;
+}
+.suborder { 
+    background-color: $suborder; 
+    outline-color: $suborder;
+}
+.infraorder { 
+    background-color: $infraorder; 
+    outline-color: $infraorder;
+}
+.parvorder { 
+    background-color: $parvorder; 
+    outline-color: $parvorder;
+}
+.zoosection { 
+    background-color: $zoosection; 
+    outline-color: $zoosection;
+}
+.zoosubsection { 
+    background-color: $zoosubsection; 
+    outline-color: $zoosubsection;
+}
+.superfamily { 
+    background-color: $superfamily; 
+    outline-color: $superfamily;
+}
+.epifamily { 
+    background-color: $epifamily;
+    outline-color: $epifamily;
+ }
+.family { 
+    background-color: $family; 
+    outline-color: $family;
+}
+.subfamily { 
+    background-color: $subfamily; 
+    outline-color: $subfamily;
+}
+.supertribe { 
+    background-color: $supertribe; 
+    outline-color: $supertribe;
+}
+.tribe { 
+    background-color: $tribe; 
+    outline-color: $tribe;
+}
+.subtribe { 
+    background-color: $subtribe; 
+    outline-color: $subtribe;
+}
+.genus { 
+    background-color: $genus; 
+    outline-color: $genus;
+}
+.genushybrid { 
+    background-color: $genushybrid; 
+    outline-color: $genushybrid;
+}
+.subgenus { 
+    background-color: $subgenus; 
+    outline-color: $subgenus;
+}
+.section { 
+    background-color: $section; 
+    outline-color: $section;
+}
+.subsection { 
+    background-color: $subsection; 
+    outline-color: $subsection;
+}
+.complex { 
+    background-color: $complex; 
+    outline-color: $complex;
+}
+.species { 
+    background-color: $species; 
+    outline-color: $species;
+}
+.hybrid { 
+    background-color: $hybrid; 
+    outline-color: $hybrid;
+}
+.subspecies { 
+    background-color: $subspecies; 
+    outline-color: $subspecies;
+}
+.infrahybrid { 
+    background-color: $infrahybrid; 
+    outline-color: $infrahybrid;
+}
+.variety { 
+    background-color: $variety;
+    outline-color: $variety;
+}
+.form { 
+    background-color: $form; 
+    outline-color: $form;
+}

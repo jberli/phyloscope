@@ -1,0 +1,59 @@
+// Main colors
+$main-color-extradark: #575757;
+$main-color-dark: #686868;
+$main-color-mediumdark: #8d8d8d;
+$main-color-medium: #a8a8a8;
+$main-color-mediumlight: #c4c4c4;
+$main-color-light: #e4e4e4;
+$main-color-extralight: #fafafa;
+
+// Font colors
+$font-color-dark: $main-color-extradark;
+$font-color-light: $main-color-extralight;
+
+// Interface colors
+$interface-background: $main-color-medium;
+$interface-foreground: $main-color-light;
+
+$interface-shadows-dark: $main-color-dark;
+$interface-shadows-light: $main-color-light;
+
+$interface-button: $main-color-light;
+$interface-button-hover: $main-color-mediumlight;
+
+// Taxonomy colors
+$stateofmatter: rgb(141, 63, 77);
+$kingdom : rgb(141, 63, 90);
+$phylum : rgb(141, 63, 102);
+$subphylum : rgb(141, 64, 115);
+$superclass :rgb(141, 64, 128);
+$class : rgb(142, 64, 140);
+$subclass : rgb(131, 64, 142);
+$infraclass : rgb(118, 64, 142);
+$subterclass : rgb(106, 65, 142);
+$superorder : rgb(94, 65, 142);
+$order : rgb(82, 65, 142);
+$suborder : rgb(69, 65, 142);
+$infraorder : rgb(65, 74, 142);
+$parvorder : rgb(66, 86, 143);
+$zoosection : rgb(66, 99, 143);
+$zoosubsection : rgb(66, 111, 143);
+$superfamily : rgb(66, 124, 143);
+$epifamily : rgb(66, 136, 143);
+$family : rgb(67, 143, 138);
+$subfamily : rgb(67, 143, 126);
+$supertribe : rgb(67, 143, 114);
+$tribe : rgb(67, 144, 101);
+$subtribe : rgb(67, 144, 89);
+$genus :  rgb(68, 144, 77);
+$genushybrid : rgb(70, 144, 68);
+$subgenus : rgb(83, 144, 68);
+$section : rgb(95, 144, 68);
+$subsection : rgb(108, 144, 69);
+$complex : rgb(120, 144, 69);
+$species : rgb(132, 144, 69);
+$hybrid : rgb(144, 145, 69);
+$subspecies : rgb(145, 133, 69);
+$infrahybrid : rgb(145, 121, 70);
+$variety : rgb(145, 109, 70);
+$form : rgb(145, 97, 70);

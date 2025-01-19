@@ -1,0 +1,26 @@
+$side-panel-background: $interface-background;
+
+#panel-container {
+    flex-shrink: 0;
+    background-color: $side-panel-background;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-button-container {
+    height: 2em;
+    display: flex;
+    margin: 0 20px;
+    column-gap: 10px;
+}
+
+.panel-button {
+    background-color: $interface-button;
+    padding: 0 1em;
+    border-radius: 4px;
+    line-height: 2em;
+    text-align: center;
+    width: 100%;
+    cursor: pointer;
+}

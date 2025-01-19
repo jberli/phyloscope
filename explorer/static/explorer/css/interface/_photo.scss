@@ -1,0 +1,30 @@
+.photo-mask {
+    position: absolute;
+    opacity: 1;
+    background-color: $main-color-dark;
+    
+    height: inherit;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: opacity .2s;
+    &.loaded { opacity: 0; }
+}
+
+.photo {
+    height: inherit;
+    width: inherit;
+    overflow: hidden;
+    object-fit: cover;
+}
+
+.photo-loader {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 6px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: rotationcw 1.2s linear infinite;
+}
