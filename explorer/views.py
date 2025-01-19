@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 
-from explorer.models import Names, Taxon
+from explorer.models import Names, Taxon, Photo
 from explorer.setup import APP_CONFIGURATION
 from explorer.maintenance.tools.models import get_random_model
 from explorer.maintenance.tools.information import RANKS
@@ -28,10 +28,11 @@ def lookup(request, value):
     def add_entries(names, taxons, e, vernacular=None):
         # Check if taxon has not been entered already
         if e.tid not in taxons:
-            miniature = e.default_photo
+            miniature = Photo.objects.filter(taxon_id=e, default=True)
+            # e.default_photo
             link = None
-            if miniature is not None:
-                link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/square.{1}'.format(miniature.pid, miniature.extension)
+            if len(miniature) > 0:
+                link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/square.{1}'.format(miniature[0].pid, miniature[0].extension)
             if vernacular is None:
                 vernaculars = Names.objects.filter(language=language, taxon=e)
                 if len(vernaculars) > 0:
@@ -211,10 +212,10 @@ def get_taxon_info(obj):
     else:
         v = obj.vernacular.all().filter(language='fr')           
         vernacular = v[0].name if v else None
-        miniature = obj.default_photo
+        miniature = Photo.objects.filter(taxon_id=obj, default=True)
         link = None
-        if miniature is not None:
-            link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/medium.{1}'.format(miniature.pid, miniature.extension)
+        if len(miniature) > 0:
+            link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/medium.{1}'.format(miniature[0].pid, miniature[0].extension)
         parent = True
         if obj.parent is None:
             parent = False
