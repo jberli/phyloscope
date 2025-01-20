@@ -261,6 +261,13 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
     """
     Update the database.
     """
+    if initialize:
+        print("Initializing database...")
+        utype = 'initialization'
+    else:
+        print("Updating database...")
+        utype = 'update'
+
     directory = '.update'
     tmp = 'tmp'
 
@@ -323,12 +330,7 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
 
             # If initialize mode is true, wipe the database
             if initialize:
-                print("Initializing database...")
-                utype = 'initialization'
                 wipe_database()
-            else:
-                print("Updating database...")
-                utype = 'update'
 
             # Inserting fetched data in database.
             insert_data(new_taxons, pathtmp)
