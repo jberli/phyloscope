@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from explorer.maintenance.tools.models import wipe_database
-from oazo.management.warnings import prompt
+from phylopedia.management.warnings import prompt
 
 class Command(BaseCommand):
     help = 'Initialize application'

@@ -8,8 +8,8 @@ from explorer.maintenance.tools.information import RANKS
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
-            'name': 'Oazo',
-            'fullname': 'Oazo',
+            'name': 'phylopedia',
+            'fullname': 'phylopedia',
             'version': 1.0,
         })
 

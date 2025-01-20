@@ -3,13 +3,13 @@ Django Settings
 """
 import os
 from pathlib import Path
-from oazo.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD
+from phylopedia.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD, DJANGO_KEY
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Secret key
-SECRET_KEY = 'django-insecure-rl57s0e#^sjp4fje@l2p740hcpp8-tmo#h9355v9rca-f&seef'
+SECRET_KEY = DJANGO_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'oazo.urls'
+ROOT_URLCONF = 'phylopedia.urls'
 
 TEMPLATES = [
     {
@@ -60,7 +60,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'oazo.wsgi.application'
+WSGI_APPLICATION = 'phylopedia.wsgi.application'
 
 # Database
 DATABASES = {
