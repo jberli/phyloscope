@@ -3,8 +3,21 @@
 {% csrf_token %}
 <head>
     {% load static %}
+    {% load sass_tags %}
+
     <link rel=icon href=favicon type=image/png>
-    <meta charset="utf-8"> {% include "./libs.html" %} {% include "./app.html" %}
+
+     <!-- libraries styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'explorer/js/libs/ol/ol.css' %}">
+    <!-- javascript libraries -->
+    <script type="text/javascript" src="{% static 'explorer/js/libs/ol/ol.js' %}"></script>
+
+    <!-- application styles -->
+    <link rel="stylesheet" type="text/css" href="{% sass_src 'explorer/css/style.scss' %}">
+
+    <!--Initialization-->
+    <script type="module" src="{% static 'explorer/js/app/initialization.js' %}" charset="utf-8"></script>
+
     <title>{{ fullname }}</title>
 </head>
 <body></body>

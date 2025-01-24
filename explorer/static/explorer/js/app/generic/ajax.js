@@ -3,6 +3,9 @@
  * Ajax related functions.
  */
 
+/**
+ * Create and send an xhr request.
+ */
 function xhr(type, url, data, options) {
     options = options || {};
     var request = new XMLHttpRequest();
@@ -20,15 +23,25 @@ function xhr(type, url, data, options) {
     request.send(data);
 }
 
-ajax = function(method, url, data, callback) {
+
+/**
+ * Create and send an ajax request.
+ */
+function ajax(method, url, data, callback) {
     return xhr(method, url, data, { success:callback });
 }
 
-ajaxGet = function(url, callback) {
+/**
+ * Create and send an ajax GET request.
+ */
+function ajaxGet(url, callback) {
     return xhr("GET", url, undefined, { success:callback });
 }
 
-ajaxPost = function(url, data, callback) {
+/**
+ * Create and send an ajax POST request.
+ */
+function ajaxPost(url, data, callback) {
     return xhr("POST", url, data, { success:callback });
 }
 
@@ -40,6 +53,8 @@ function parse(text) {
     }
 }
 
-function loadingImage(image) {
-    return new Promise(resolve=>{image.onload = resolve})
+function loadImage(image) {
+    return new Promise(resolve=>{ image.onload = resolve })
 }
+
+export { ajax, ajaxGet, ajaxPost, loadImage }

@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from explorer.api.tools.models import wipe_database
+from explorer.api.requests import update_taxon
 from phylopedia.management.warnings import prompt
 
 class Command(BaseCommand):
-    help = 'Initialize application'
+    help = 'Update the taxon of the day'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -17,8 +17,8 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt('''You are about to remove all entries from the database. Continue? ''')
+            doit = prompt('''You are about to update the taxon of the week. Continue? ''')
         if (doit):
-            wipe_database()
+            update_taxon()
         else:
             print('Nothing was done')

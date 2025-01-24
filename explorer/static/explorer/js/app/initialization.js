@@ -1,13 +1,19 @@
 /**
  * @initialization
- * Defines the initialization of the application.
+ * Initialize the application.
  */
+
+import Application from "./interface/application.js";
+import { ajaxGet } from "./generic/ajax.js";
+import { makeDiv } from "./generic/dom.js";
 
 window.addEventListener('DOMContentLoaded', function(e) {
     // Retrieve the configuration
     ajaxGet('configuration/', (params) => {
-        // Initialize interface using retrieve parameters
-        initializeInterface(params);
+        // Initialize interface using retrieved parameters
+        let container = makeDiv('application');
+        document.body.appendChild(container);
+        let application = new Application(params, container);
     });
 });
 

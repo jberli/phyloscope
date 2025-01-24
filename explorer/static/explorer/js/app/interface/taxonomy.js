@@ -1,7 +1,59 @@
 /**
  * @taxonomy
- * Taxonomy related functions.
+ * Define the taxonomy widget.
  */
+
+import { ajaxGet } from "../generic/ajax.js";
+import { makeDiv } from "../generic/dom.js";
+
+class Taxonomy {
+    constructor(app) {
+        this.app = app;
+        this.container = makeDiv('taxonomy', 'sub-panel');
+        this.app.first.append(this.container);
+
+        // this.initialize();
+        this.taxon = app.taxon;
+    }
+
+    initialize() {
+        this.ancestry = makeDiv(null, 'taxonomy-ancestry-container');
+        this.view = makeDiv(null, 'taxonomy-levels-container');
+        this.container.append(this.ancestry, this.view);
+    }
+
+    reload() {
+        this.destroy(() => {
+            this.initialize();
+        })
+    }
+
+    destroy(callback) {
+        addClass(this.container, 'collapse');
+        wait(this.app.params.transition, () => {
+            this.container.remove();
+            callback();
+        });
+    }
+
+    createTaxonomy() {
+        params.taxonomy = r.values;
+        createAncestry(params.taxonomy.ancestry);
+        let grandparent = makeDiv(id=null, c='taxonomy-levels smooshed');
+        let parent = makeDiv(id=null, c='taxonomy-levels');
+        let siblings = makeDiv(id=null, c='taxonomy-levels taxonomy-levels-main');
+        let children = makeDiv(id=null, c='taxonomy-levels');
+        let grandchildren = makeDiv(id=null, c='taxonomy-levels smooshed');
+        createParentLevel(params, parent);
+        createTaxonLevel(params, siblings);
+        createChildrenLevel(params, children);
+        view.append(grandparent, parent, siblings, children, grandchildren);
+        removeClass(taxonomyContainer, 'collapse');
+    }
+}
+
+
+
 
 function reloadTaxonomy(params) {
     let taxonomy = document.getElementById('taxonomy-container');
@@ -596,3 +648,5 @@ function calculateLabelHeight(text, style, fontsize, width) {
     dummy.remove();
     return height;
 }
+
+export default Taxonomy

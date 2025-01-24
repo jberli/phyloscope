@@ -1,11 +1,26 @@
 /**
  * @header
- * Header related functions.
+ * Define the header of the application.
  */
+
+import { makeDiv } from "../generic/dom.js";
+
+class Header {
+    constructor(app) {
+        this.app = app;
+        this.container = makeDiv('header');
+        this.logo = makeDiv('header-logo', null, 'Phylopedia');
+        this.container.append(this.logo);
+        this.app.container.append(this.container);
+    }
+}
+
+
+
 
 function initializeHeader(params) {
     let container = document.getElementById('container');
-    let headerContainer = makeDiv(id='header-container');
+    let headerContainer = makeDiv('header-container');
 
     let transition = params.transition;
     let heightLimit = 500;
@@ -148,3 +163,5 @@ function initializeHeader(params) {
         }
     }
 }
+
+export default Header;

@@ -1,5 +1,11 @@
 from django.contrib.gis.db import models
 
+class Current(models.Model):
+    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='current')
+    class Meta:
+        managed = True
+        db_table = 'explorer\".\"current'
+
 class Taxon(models.Model):
     tid = models.IntegerField(db_column='tid', blank=False, null=False, unique=True)
     parent = models.ForeignKey('self', models.DO_NOTHING, blank=True, null=True, related_name='children')

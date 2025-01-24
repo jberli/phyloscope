@@ -3,9 +3,11 @@ django
 django-extensions
 django-compressor
 django-sass-processor
+django-livereload-server
 libsass
 progress
 pyproj
 pyyaml
-pyinaturalist
 pause
+pyinaturalist
+wikipedia

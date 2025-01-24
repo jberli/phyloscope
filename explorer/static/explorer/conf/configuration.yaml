@@ -1,6 +1,6 @@
 # Here are languages options, this must be reflected on texts
 languages:
-  current: fr
+  current: en
   available: [ fr, en ]
 # Transition time for interface small animations
 transition: 100

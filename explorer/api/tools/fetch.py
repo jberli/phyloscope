@@ -1,6 +1,6 @@
 import pyinaturalist as inat
 
-from explorer.maintenance.tools.information import IUCN
+from explorer.api.tools.information import IUCN
 
 def fetch_api(taxa):
     def treat_photo(t, p, default):

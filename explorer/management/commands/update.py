@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.maintenance.update import update
+from explorer.api.update import update
 from phylopedia.management.warnings import prompt
 
 class Command(BaseCommand):

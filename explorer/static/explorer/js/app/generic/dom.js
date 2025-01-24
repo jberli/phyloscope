@@ -3,6 +3,8 @@
  * DOM related functions.
  */
 
+import { ajaxGet } from "./ajax.js";
+
 /**
  * Create a div with custom properties. Append the div to the parent if provided.
  * @param  {String} id         ID of the element.
@@ -175,6 +177,15 @@ function calculateWidthFromClass(c) {
     return width;
 }
 
+/**
+ * Adds an svg as the inner HTML of the target div.
+ * @param  {DOMElement} target Target to place the svg.
+ * @param  {String}            SVG file url.
+ */
+function addSVG(target, url) {
+    ajaxGet(url, (svg) => { target.innerHTML = svg; });
+}
+
 function calculateTextWidth(text, style, fontsize) {
     let dummy = document.createElement('div');
     dummy.style.fontFamily = style.fontFamily;
@@ -190,4 +201,20 @@ function calculateTextWidth(text, style, fontsize) {
     let width = Math.ceil(dummy.clientWidth);
     dummy.remove();
     return width;
+}
+
+// function loadImage(url) {
+//     let imageDiv = makeDiv(null, c='taxonomy-image-container');
+//     let imageMask = makeDiv(null, 'photo-mask loading');
+//     let loader = makeDiv(null, 'photo-loader');
+//     let image = makeImage(url, null, null, null, 'photo');
+//     loadingImage(image).then(() => { removeClass(imageMask, 'loading') });
+//     imageMask.appendChild(loader);
+//     imageDiv.append(imageMask, image);
+//     return imageDiv;
+// }
+
+export {
+    addClass, removeClass, addClassList, removeClassList,
+    makeDiv, makeInput, makeImage, wait, addSVG
 }

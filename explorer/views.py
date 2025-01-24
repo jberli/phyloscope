@@ -1,22 +1,29 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+import requests
+import yaml
+import xml.dom.minidom
+import wikipediaapi as wiki
 
-from explorer.models import Names, Taxon, Photo
-from explorer.setup import APP_CONFIGURATION
-from explorer.maintenance.tools.models import get_random_model
-from explorer.maintenance.tools.information import RANKS
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse
+
+from explorer.models import Names, Taxon, Photo, Current
+from explorer.api.tools.models import get_random_model
+from explorer.api.tools.information import RANKS
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
             'name': 'phylopedia',
-            'fullname': 'phylopedia',
+            'fullname': 'Phylopedia',
             'version': 1.0,
         })
 
 def configuration(request):
-    return JsonResponse(APP_CONFIGURATION)
+    configuration = yaml.safe_load(open('explorer/static/explorer/conf/configuration.yaml', 'r'))
+    current = Current.objects.all()[0].taxon
+    configuration['taxon'] = get_taxon_info(current, configuration['languages']['current'])
+    return JsonResponse(configuration)
 
-def lookup(request, value):
+def lookup(request, lang, value):
     """
     Autocomplete tool that returns the right results
     from a given string.
@@ -115,57 +122,73 @@ def lookup(request, value):
     # Return the JSON
     return JsonResponse({ 'values': names })
 
-def taxon(request, id=None):
+def taxon(request, lang, id):
     """
     Retrieve taxon informations.
     """
-    result = { 'values': {} }
+    result = { 'taxonomy': {} }
 
     taxon = Taxon.objects.get(tid=id)
     parent = taxon.parent
     ancestry = []
     
     if parent is not None:
-        ancestry.append(get_taxon_info(parent))
+        ancestry.append(get_taxon_info(parent, lang))
         siblings = parent.children
         grandparent = parent.parent
         if grandparent is not None:
-            ancestry.insert(0, get_taxon_info(grandparent))
+            ancestry.insert(0, get_taxon_info(grandparent, lang))
             parentsiblings = grandparent.children.filter(rank=parent.rank)
-            result['values']['pindex'] = (*parentsiblings.all(),).index(parent)
-            result['values']['parents'] = [ get_taxon_info(sibling) for sibling in parentsiblings.all() ]
+            result['taxonomy']['pindex'] = (*parentsiblings.all(),).index(parent)
+            result['taxonomy']['parents'] = [ get_taxon_info(sibling, lang) for sibling in parentsiblings.all() ]
             elder = grandparent.parent
             while elder is not None:
-                ancestry.insert(0, get_taxon_info(elder))
+                ancestry.insert(0, get_taxon_info(elder, lang))
                 elder = elder.parent
         else:
-            result['values']['parents'] = [ get_taxon_info(parent) ]
-            result['values']['pindex'] = 0
+            result['taxonomy']['parents'] = [ get_taxon_info(parent, lang) ]
+            result['taxonomy']['pindex'] = 0
 
-        siblingslist = [ get_taxon_info(sibling) for sibling in siblings.all() ]
-        result['values']['siblings'] = sorted(siblingslist, key=lambda k: k['level'], reverse=True)
-        result['values']['tindex'] = 0
-        for i, s in enumerate(result['values']['siblings']):
+        siblingslist = [ get_taxon_info(sibling, lang) for sibling in siblings.all() ]
+        result['taxonomy']['siblings'] = sorted(siblingslist, key=lambda k: k['level'], reverse=True)
+        result['taxonomy']['tindex'] = 0
+        for i, s in enumerate(result['taxonomy']['siblings']):
             if s['id'] == taxon.tid:
-                result['values']['tindex'] = i 
+                result['taxonomy']['tindex'] = i 
     else:
-        result['values']['parents'] = None
-        result['values']['pindex'] = None
-        result['values']['siblings'] = [ get_taxon_info(taxon) ]
-        result['values']['tindex'] = 0
+        result['taxonomy']['parents'] = None
+        result['taxonomy']['pindex'] = None
+        result['taxonomy']['siblings'] = [ get_taxon_info(taxon, lang) ]
+        result['taxonomy']['tindex'] = 0
     
-    result['values']['ancestry'] = ancestry
+    result['taxonomy']['ancestry'] = ancestry
     children = taxon.children.all()
 
     if len(children) > 0:
-        childrenlist = [ get_taxon_info(child) for child in children.all() ]
-        result['values']['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+        childrenlist = [ get_taxon_info(child, lang) for child in children.all() ]
+        result['taxonomy']['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
     else:
-        result['values']['children'] = None
+        result['taxonomy']['children'] = None
+
+
+    name = taxon.wikipedia.split('/')[-1].replace(" ", "_")
+    if len(name) == 0:
+        name = taxon.name
+
+    wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language='en')
+    page = wikipedia.page(name)
+
+    if page.exists():
+        result['description'] = {
+            'title': page.title,
+            'summary': page.summary,
+        }
+    else:
+        result['description'] = None
     
     return JsonResponse(result)
 
-def children(request, id=None):
+def children(request, lang, id):
     """
     Get only the new children from a given taxon id.
     """
@@ -173,13 +196,13 @@ def children(request, id=None):
     taxon = Taxon.objects.get(tid=id)
     children = taxon.children.all()
     if len(children) > 0:
-        childrenlist = [ get_taxon_info(child) for child in children.all() ]
+        childrenlist = [ get_taxon_info(child, lang) for child in children.all() ]
         result['values']['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
     else:
         result['values']['children'] = None
     return JsonResponse(result)
 
-def parent(request, id=None):
+def parent(request, lang, id):
     """
     Get only the parents of a given taxon id.
     """
@@ -190,44 +213,93 @@ def parent(request, id=None):
         grandparent = parent.parent
         if grandparent is not None:
             parentsiblings = grandparent.children
-            parents = [ get_taxon_info(sibling) for sibling in parentsiblings.all() ]
+            parents = [ get_taxon_info(sibling, lang) for sibling in parentsiblings.all() ]
             result['values']['parents'] = sorted(parents, key=lambda k: k['level'], reverse=True)
             for i, s in enumerate(result['values']['parents']):
                 if s['id'] == parent.tid:
                     result['values']['pindex'] = i
         else:
-            result['values']['parents'] = [ get_taxon_info(parent) ]
+            result['values']['parents'] = [ get_taxon_info(parent, lang) ]
             result['values']['pindex'] = 0
     else:
         result['values']['parents'] = None
 
     return JsonResponse(result)
 
-def get_taxon_info(obj):
+def range(request, id):
+    """
+    Get the taxon range.
+    """
+    if id is not None:
+        rangeurl = f'https://www.inaturalist.org/taxa/{id}/range.kml'
+        response = requests.get(rangeurl).content
+        try:
+            xml.dom.minidom.parseString(response)
+            taxonrange = response
+        except:
+            taxonrange = ''
+        finally:
+            return HttpResponse(taxonrange)
+
+def description(request, lang, id):
+    """
+    Get the wikipedia description.
+    """
+    if id is not None:
+        taxon = Taxon.objects.get(tid=id)
+        name = taxon.wikipedia.split('/')[-1].replace(" ", "_")
+
+        if len(name) == 0:
+            name = taxon.name
+
+        wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language='en')
+        page = wikipedia.page(name)
+
+        if page.exists():
+            result = {
+                'title': page.title,
+                'summary': page.summary,
+            }
+            return JsonResponse(result)
+        else:
+            return HttpResponse('')
+
+
+def get_taxon_info(obj, lang):
     """
     Construct a taxon dict from the given taxon object.
     """
     if obj is None:
         return None
     else:
-        v = obj.vernacular.all().filter(language='fr')           
-        vernacular = v[0].name if v else None
-        miniature = Photo.objects.filter(taxon_id=obj, default=True)
-        link = None
-        if len(miniature) > 0:
-            link = 'https://inaturalist-open-data.s3.amazonaws.com/photos/{0}/medium.{1}'.format(miniature[0].pid, miniature[0].extension)
+        vern = obj.vernacular.all().filter(language=lang)           
+        vernaculars = [ v.name for v in vern ] if vern else []
+        photographs = Photo.objects.filter(taxon_id=obj)
+
+        photos = []
+        if len(photographs) > 0:
+            for p in photographs:
+                default = True if p.default else False
+                extension = p.extension
+                if len(extension) > 0:
+                    photo = { "id": p.pid, "default": default, "extension": extension }
+                    if default:
+                        photos.insert(0, photo)
+                    else:
+                        photos.append(photo)
+
         parent = True
         if obj.parent is None:
             parent = False
         return {
             'id': obj.tid,
             'scientific': obj.name,
-            'vernacular': vernacular,
+            'vernaculars': vernaculars,
             'parent': parent,
-            'type': RANKS[obj.rank]['fr'],
+            'type': RANKS[obj.rank][lang],
             'typesorting': obj.rank,
             'level': obj.level,
-            'picture': link,
             'count': obj.count_species,
             'percentage': obj.percentage_parent,
+            'photographs': photos
         }

@@ -1,0 +1,32 @@
+.description-content {
+    margin: 20px;
+}
+
+.description-title {
+    font-weight: bold;
+    font-size: 22px;
+    text-align: center;
+}
+
+.description-names {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+
+    & > div {
+        font-size: 18px;
+    }    
+}
+
+.description-scientific {
+    font-style: italic;
+}
+
+.description-vernacular {
+    text-align: end;
+
+    &:first-letter {
+        text-transform: uppercase;
+    }
+}

@@ -4,18 +4,100 @@
 @import '_map.scss';
 @import '_panels.scss';
 @import '_photo.scss';
-@import '_taxonomy.scss';
 
-#container {
+@import '_taxonomy.scss';
+@import '_description.scss';
+@import '_cartography.scss';
+@import '_photography.scss';
+@import '_footer.scss';
+
+html, body {
+    margin: 0;
+}
+
+#application {
     position: absolute;
-    height: 100%;
-    width: 100%;
     top: 0;
     left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+#header {
+    height: 6rem;
+
+    background-color: $interface-background;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#content {
+    height: calc(100% - 8rem);
+    
+    display: flex;
+    margin: 1rem;
+    gap: 1rem;
+}
+
+.panel {
+    display: flex;
+    gap: 1rem;
+}
+
+#first-panel {
+    flex: 3;
+}
+
+#second-panel {
+    flex: 2;
 
     display: flex;
     flex-direction: column;
 }
+
+#third-panel {
+    flex: 2;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.sub-panel {
+    position: relative;
+    flex: 1;
+    border-radius: .2rem;
+    background-color: $interface-background;
+    overflow: auto;
+}
+
+
+#taxonomy {
+    
+}
+
+#description {
+    font-family: 'Cantarell';
+    color: $interface-foreground;
+    flex: 5;
+}
+
+#footer {
+
+}
+
+#photography {
+    display: flex;
+}
+
+#cartography {
+
+}
+
+
+
+
+
 
 #content-container {
     height: 100%;

@@ -9,9 +9,9 @@ import logging
 from progress.bar import IncrementalBar, Bar
 from django.db.models import Max
 
-from explorer.maintenance.tools.models import wipe_database, display_database_information
-from explorer.maintenance.tools.files import get_row_number, read_csv, read_entry, download
-from explorer.maintenance.tools.fetch import fetch_api
+from explorer.api.tools.models import wipe_database, display_database_information
+from explorer.api.tools.files import get_row_number, read_csv, read_entry, download
+from explorer.api.tools.fetch import fetch_api
 
 # Import models to access the database
 from explorer.models import Taxon, Names, Photo 

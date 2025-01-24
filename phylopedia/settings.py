@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'livereload', # Auto reload on static changes
     'django_extensions', # django extensions
     'sass_processor', # Sass processor
     'django.contrib.gis', # GeoDjango
@@ -40,6 +41,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'livereload.middleware.LiveReloadScript', # This middleware injects the livereload on static changes
 ]
 
 ROOT_URLCONF = 'phylopedia.urls'

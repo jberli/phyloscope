@@ -1,12 +1,13 @@
-#header-container {
-    flex-shrink: 0;
-    height: 100px;
-    width: 100%;
-    background-color: $interface-background;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
+#header-logo {
+    margin: auto 20px;
+
+    font-family: 'Polsyh';
+    font-size: 64px;
+    color: $interface-foreground;
+
+    user-select: none;
 }
 
 .header-module {
