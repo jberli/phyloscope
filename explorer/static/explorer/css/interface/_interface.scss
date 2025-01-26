@@ -42,6 +42,7 @@ html, body {
 
 .panel {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
 
@@ -51,39 +52,37 @@ html, body {
 
 #second-panel {
     flex: 2;
-
-    display: flex;
-    flex-direction: column;
 }
 
 #third-panel {
     flex: 2;
-
-    display: flex;
-    flex-direction: column;
 }
 
 .sub-panel {
     position: relative;
     flex: 1;
-    border-radius: .2rem;
-    background-color: $interface-background;
+
+    border-radius: $border-radius;
     overflow: auto;
+
+    transition: all .2s ease-in-out;
 }
 
-
 #taxonomy {
-    
+    background-color: $interface-background;
 }
 
 #description {
     font-family: 'Cantarell';
     color: $interface-foreground;
-    flex: 5;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 #footer {
-
+    background-color: $interface-background;
 }
 
 #photography {
@@ -91,8 +90,19 @@ html, body {
 }
 
 #cartography {
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

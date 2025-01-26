@@ -23,7 +23,7 @@ def configuration(request):
     configuration['taxon'] = get_taxon_info(current, configuration['languages']['current'])
     return JsonResponse(configuration)
 
-def lookup(request, lang, value):
+def search(request, lang, value):
     """
     Autocomplete tool that returns the right results
     from a given string.
@@ -51,7 +51,7 @@ def lookup(request, lang, value):
                 'taxon': e.tid,
                 'vernacular': vernacular,
                 'scientific': e.name,
-                'type': RANKS[e.rank]['fr'],
+                'type': RANKS[e.rank][lang],
                 'typesorting': e.rank,
                 'picture': link
             })
@@ -175,7 +175,7 @@ def taxon(request, lang, id):
     if len(name) == 0:
         name = taxon.name
 
-    wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language='en')
+    wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language=lang)
     page = wikipedia.page(name)
 
     if page.exists():
@@ -241,30 +241,6 @@ def range(request, id):
         finally:
             return HttpResponse(taxonrange)
 
-def description(request, lang, id):
-    """
-    Get the wikipedia description.
-    """
-    if id is not None:
-        taxon = Taxon.objects.get(tid=id)
-        name = taxon.wikipedia.split('/')[-1].replace(" ", "_")
-
-        if len(name) == 0:
-            name = taxon.name
-
-        wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language='en')
-        page = wikipedia.page(name)
-
-        if page.exists():
-            result = {
-                'title': page.title,
-                'summary': page.summary,
-            }
-            return JsonResponse(result)
-        else:
-            return HttpResponse('')
-
-
 def get_taxon_info(obj, lang):
     """
     Construct a taxon dict from the given taxon object.
@@ -272,7 +248,7 @@ def get_taxon_info(obj, lang):
     if obj is None:
         return None
     else:
-        vern = obj.vernacular.all().filter(language=lang)           
+        vern = obj.vernacular.all().filter(language=lang)
         vernaculars = [ v.name for v in vern ] if vern else []
         photographs = Photo.objects.filter(taxon_id=obj)
 

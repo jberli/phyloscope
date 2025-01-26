@@ -30,9 +30,9 @@ function makeDiv(id=null, c=null, html=null, parent=null) {
  * @param  {boolean} spellcheck If spellcheck is enabled. Default to false.
  * @return {DOMElement}         Created element.
  */
-function makeInput(id=null, c=null, placeholder=null, spellcheck=false) {
+function makeInput(id=null, c=null, editable=true, placeholder=null, spellcheck=false) {
     let input = makeDiv(id=id, c=c)
-    input.setAttribute('contenteditable', 'true');
+    input.setAttribute('contenteditable', editable);
     if (placeholder !== null) { input.setAttribute('placeholder', placeholder); }
     if (spellcheck) { input.setAttribute('spellcheck', 'true'); }
     else { input.setAttribute('spellcheck', 'false'); }
@@ -61,6 +61,15 @@ function makeImage(url, height=null, width=null, id=null, c=null, alt='') {
 }
 
 /**
+ * Adds an svg as the inner HTML of the target div.
+ * @param  {DOMElement} target Target to place the svg.
+ * @param  {String}            SVG file url.
+ */
+function addSVG(target, url) {
+    ajaxGet(url, (svg) => { target.innerHTML = svg; });
+}
+
+/**
  * Wait for a given number of milliseconds before executing a function.
  * @param  {int} duration      Duration to wait.
  * @param  {function} callback Function to execute.
@@ -75,38 +84,6 @@ function removeChildren(element) {
     while (element.firstChild) {
         element.firstChild.remove();
     }
-}
-
-/**
- * Return the provided string with html <strong> tag around the substring to bold.
- * @param  {String} str    The string to split.
- * @param  {String} substr The substring to split the string.
- * @return {String}        The string with html <strong> tag around the substring.
- */
-function boldSubstring(str, substr) {
-    str = str.toLowerCase();
-    substr = substr.toLowerCase();
-    let split = str.split(substr);
-    let result = ''
-    for (let i = 0; i < split.length; ++i) {
-        let value = split[i]
-        if (i == 0 && value.length > 0) { value = uppercaseFirstLetter(value) }
-        result += value;
-        if (i !== split.length - 1) {
-            if (result.length == 0) { result += '<strong>' + uppercaseFirstLetter(substr) + '</strong>' }
-            else { result += '<strong>' + substr + '</strong>' }
-        }
-    }
-    return result;
-}
-
-/**
- * Uppercase the first letter of a given string.
- * @param  {String} str The string to uppercase.
- * @return {String}     The uppercased string.
- */
-function uppercaseFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 /**
@@ -177,15 +154,6 @@ function calculateWidthFromClass(c) {
     return width;
 }
 
-/**
- * Adds an svg as the inner HTML of the target div.
- * @param  {DOMElement} target Target to place the svg.
- * @param  {String}            SVG file url.
- */
-function addSVG(target, url) {
-    ajaxGet(url, (svg) => { target.innerHTML = svg; });
-}
-
 function calculateTextWidth(text, style, fontsize) {
     let dummy = document.createElement('div');
     dummy.style.fontFamily = style.fontFamily;
@@ -203,18 +171,7 @@ function calculateTextWidth(text, style, fontsize) {
     return width;
 }
 
-// function loadImage(url) {
-//     let imageDiv = makeDiv(null, c='taxonomy-image-container');
-//     let imageMask = makeDiv(null, 'photo-mask loading');
-//     let loader = makeDiv(null, 'photo-loader');
-//     let image = makeImage(url, null, null, null, 'photo');
-//     loadingImage(image).then(() => { removeClass(imageMask, 'loading') });
-//     imageMask.appendChild(loader);
-//     imageDiv.append(imageMask, image);
-//     return imageDiv;
-// }
-
 export {
     addClass, removeClass, addClassList, removeClassList,
-    makeDiv, makeInput, makeImage, wait, addSVG
+    makeDiv, makeInput, makeImage, wait, addSVG, removeChildren
 }

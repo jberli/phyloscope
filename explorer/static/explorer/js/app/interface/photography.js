@@ -32,7 +32,7 @@ class Photography {
     }
 
     reload() {
-        let l = this.photographs.length
+        let l = this.photographs.length;
         if (l > 0) { this.current.setImage(this.photographs[this.photoid], 'original'); }
     }
 
@@ -89,6 +89,37 @@ class PhotoContainer {
         this.image = makeImage(this.url + photo.id + '/' + size + '.' + photo.extension, null, null, null, 'image');
         loadImage(this.image).then(() => { this.loaded() });
         this.div.append(this.image);
+        this.activateAdjustment();
+    }
+
+    activateAdjustment() {
+        let self = this;
+
+        function restore(e) {
+            e.target.style.objectPosition = '50% 50%';
+        }
+
+        function adjust(e) {
+            if  (self.active) {
+                let i = self.image
+                let dratio = i.width / i.height;
+                let iratio = i.naturalWidth / i.naturalHeight;
+                if (dratio !== iratio) {
+                    let rect = e.target.getBoundingClientRect();
+                    if (dratio > iratio) {
+                        let p = (e.clientY - rect.top) * 100 / i.height;
+                        e.target.style.objectPosition = 'center ' + p + '%';
+                    } else {
+                        let p = (e.clientX - rect.left) * 100 / i.width;
+                        e.target.style.objectPosition = p + '% center';
+                    }
+                }
+            }
+        }
+
+        // this.image.addEventListener('mouseenter', adjust);
+        this.image.addEventListener('mousemove', adjust);
+        this.image.addEventListener('mouseleave', restore);
     }
 
     loading() {
@@ -101,10 +132,12 @@ class PhotoContainer {
 
     expand() {
         removeClass(this.div, 'smooshed');
+        this.active = true;
     }
 
     smoosh() {
         addClass(this.div, 'smooshed');
+        this.active = false;
     }
 
     destroy() {

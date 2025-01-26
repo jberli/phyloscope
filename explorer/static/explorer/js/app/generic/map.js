@@ -1,0 +1,44 @@
+/**
+ * @map
+ * Function related to map handling.
+ */
+
+/**
+ * Animate the opacity of an OpenLayers Layer.
+ * @param  {Layer} layer - OpenLayers Layer object to animate.
+ * @param  {int} duration - Duration of the animation (ms).
+ * @param  {int} fps - Frame per second of the animation.
+ * @param  {float} value - Result opacity value.
+ * @param  {function} callback - Callback function.
+ */
+async function animateOpacity(layer, duration, fps, value, callback) {
+    let opacity = layer.getOpacity();
+    const step = (duration/1000)*fps;
+    const delay = duration / step;
+    const increment = (value - opacity) / step;
+
+    function animation() {
+        return new Promise((resolve) => {
+            let pass = 0;
+            function animate() {
+                setTimeout(() => {
+                    opacity += increment;
+                    layer.setOpacity(opacity);
+                    pass += 1;
+                    if (pass < step) {
+                        animate(pass);
+                    } else {
+                        layer.setOpacity(value);
+                        resolve('');
+                    }
+                }, delay)
+            }
+            animate();
+        });
+    }
+
+    await animation();
+    callback();
+}
+
+export { animateOpacity }

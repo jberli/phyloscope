@@ -1,6 +1,12 @@
 # Here are languages options, this must be reflected on texts
 languages:
-  current: en
+  current: fr
   available: [ fr, en ]
 # Transition time for interface small animations
 transition: 100
+# Text in different languages
+texts:
+  description:
+    vernaculars:
+      en: 'Vernacular names:'
+      fr: 'Noms vernaculaires :'

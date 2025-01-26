@@ -3,7 +3,7 @@
  * Define the cartography widget.
  */
 
-import { ajaxGet } from "../generic/ajax.js";
+import { animateOpacity } from "../generic/map.js";
 import { makeDiv, addClass, removeClass, addSVG } from "../generic/dom.js";
 
 class Cartography {
@@ -60,6 +60,9 @@ class Cartography {
             })
         });
 
+        this.range;
+        this.visibleRange;
+
         this.centerButton = makeDiv(null, 'cartography-center collapse');
         addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
         this.container.append(this.centerButton);
@@ -71,7 +74,7 @@ class Cartography {
 
         // Check if a range has been found
         if (r.length > 0) {
-            this.rangeLayer = new ol.layer.Vector({
+            this.range = new ol.layer.Vector({
                 source: new ol.source.Vector({
                     features: new ol.format.KML({
                         extractStyles: false
@@ -84,10 +87,14 @@ class Cartography {
                     fill: new ol.style.Fill({
                         color: 'rgba(200, 110, 100, 0.7)',
                     }),
-                })
+                }),
+                opacity: 0,
+                updateWhileAnimating: true,
+                updateWhileInteracting: true,
             });
 
-            map.addLayer(this.rangeLayer);
+            this.visibleRange = false;
+            map.addLayer(this.range);
             this.center();
         }
         // Here, no range has been found
@@ -97,15 +104,26 @@ class Cartography {
     }
 
     center() {
-        this.map.getView().fit(this.rangeLayer.getSource().getExtent(), {
+        this.map.getView().fit(this.range.getSource().getExtent(), {
             padding: [ 20, 20, 20, 20 ],
             duration: 500,
-            easing: ol.easing.easeOut,
-            callback: (e) => this.activateCenter()
+            easing: ol.easing.easeInOut,
+            callback: (e) => this.activateCentering()
         });
     }
 
-    activateCenter() {
+    displayRange(display) {
+        let value;
+        if (display) { value = 1 }
+        else { value = 0 }
+        animateOpacity(this.range, 200, 60, value, () => {
+            this.visibleRange = display;
+        });
+    }
+
+    activateCentering() {
+        if (!this.visibleRange) { this.displayRange(true) }
+
         let self = this;
 
         function centerMap() {

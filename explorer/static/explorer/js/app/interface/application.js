@@ -14,10 +14,13 @@ import Taxonomy from "./taxonomy.js";
 
 class Application {
     constructor(params, container) {
-        this.params = params;
-        this.language = params.languages.current;
-        this.languages = params.languages.available;
         this.container = container;
+
+        this.params = params;
+        this.taxon = this.params.taxon;
+        this.language = this.params.languages.current;
+        this.languages = this.params.languages.available;
+
         this.header = new Header(this);
 
         this.content = makeDiv('content');
@@ -40,12 +43,13 @@ class Application {
     updateTaxon() {
         ajaxGet('range/' + this.params.taxon.id + '/', (r) => {
             this.cartography.update(r);
-        })
+        });
 
         ajaxGet('taxon/' + this.language + '/' + this.params.taxon.id + '/', (r) => {
             this.params.taxon = r;
             this.photography.update();
-        })
+            this.description.update();
+        });
     }
 }
 

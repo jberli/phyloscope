@@ -1,17 +1,123 @@
-
-
 #header-logo {
-    margin: auto 20px;
-
     font-family: 'Polsyh';
     font-size: 64px;
-    color: $interface-foreground;
+    color: $main-color-extralight;
 
     user-select: none;
 }
 
 .header-module {
-    display: flex;
-    height: 100%;
-    margin: 0 50px;
+    margin: auto 20px;
 }
+
+// #header-search {
+//     width: 20%;
+// }
+
+// .search-container {
+//     background-color: $main-color-extralight;
+//     border-radius: $border-radius;
+//     height: fit-content;
+//     overflow: hidden;
+
+//     transition: box-shadow .1s linear;
+//     &:hover, &.active {
+//         box-shadow: 0 0 3px $main-color-extradark;
+//     }
+// }
+
+// .search-input {
+//     padding: 5px 10px;
+//     height: 2rem;
+//     line-height: 2rem;
+//     cursor: text;
+//     color: $main-color-extradark;
+
+//     &:focus-visible, &:hover {
+//         outline: none;
+//     }
+// }
+
+// .search-result-container {
+//     display: flex;
+//     flex-direction: column;
+
+//     height: 0rem;
+//     font-size: 13px;
+//     color: $main-color-extralight;
+
+//     transition: height .1s ease-out;
+// }
+
+// .search-result-group {
+//     margin: 10px 10px 0 10px;
+//     flex-shrink: 0;
+
+//     border-radius: 4px;
+//     overflow: hidden;
+//     transition: transform .1s ease-in-out;
+
+//     &:first-child {
+//         margin-top: 0;
+//     }
+//     &:last-child {
+//         margin-bottom: 10px;
+//     }
+//     &.collapse {
+//         transform: scale(0, 0);
+//     }
+// }
+
+// .search-result-level {
+//     padding: 5px 10px;
+//     border-top-left-radius: 4px;
+//     border-top-right-radius: 4px;
+// }
+
+// .search-result {
+//     position: relative;
+//     height: 50px;
+//     cursor: pointer;
+
+//     display: flex;
+//     align-items: center;
+//     justify-content: start;
+//     flex-shrink: 0;
+//     overflow: hidden;
+
+//     transition: all .1s linear;
+
+//     &:first-child {
+//         > .search-image-container {
+//             border-top-right-radius: 4px;
+//         }
+//     }
+//     &:hover {
+//         > .lookup-label {
+//             background-color: $main-color-dark;
+//         }
+//     }
+// }
+
+// .search-image-container {
+//     position: relative;
+//     height: 50px;
+//     width: 50px;
+//     flex-shrink: 0;
+//     overflow: hidden;
+
+//     &::before {
+//         opacity: 0;
+//     }
+//     &.loading::before {
+//         content: '';
+//     }
+// }
+
+// .search-label {
+//     margin: 0 10px;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     white-space: nowrap;
+//     padding-right: 5px;
+// }
