@@ -3,6 +3,7 @@ Django Settings
 """
 import os
 from pathlib import Path
+# This will raise an Import Error if you don't create the private/privacy.py file
 from phylopedia.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD, DJANGO_KEY
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -17,7 +18,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -93,29 +93,17 @@ DATABASES = {
 # Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 
 # Internationalization
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Europe/Paris'
-
 USE_I18N = True
-
 USE_TZ = True
 
 # The list of finder backends that know how to find static files in various location
