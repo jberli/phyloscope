@@ -6,8 +6,7 @@ django-sass-processor
 django-livereload-server
 libsass
 progress
-pyproj
 pyyaml
 pause
 pyinaturalist
-wikipedia
+wikipedia-api
