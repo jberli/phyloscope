@@ -4,17 +4,87 @@
  */
 
 import { animateOpacity } from "../generic/map.js";
-import { makeDiv, addClass, removeClass, addSVG } from "../generic/dom.js";
+import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
 
+/**
+ * Create the cartography widget to display
+ * geographical information about the current taxon.
+ */
 class Cartography {
-    constructor(app) {
+    /**
+     * @param {Application} app - Application object.
+     * @param {Object} params - Parameters of the application.
+     */
+    constructor(app, params) {
         this.app = app;
+        this.params = params;
+
+        // Create DOM elements
         this.container = makeDiv('cartography', 'sub-panel');
         this.app.third.append(this.container);
-        
+
+        // Mask and loader
+        this.mask = makeDiv(null, 'cartography-mask mask');
+        this.loader = makeDiv(null, 'cartography-loader loader');
+        this.mask.append(this.loader)
+        this.container.append(this.mask);
+
+        // Map DOM element
         this.mapdiv = makeDiv('map', 'ol-map');
         this.container.append(this.mapdiv);
 
+        // Create the basemap
+        this.basemap();
+
+        // Create the taxon range object
+        this.range = new Range(this, this.params);
+
+        // Create the button to center the map
+        this.centerButton = makeDiv(null, 'cartography-center collapse');
+        addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
+        this.container.append(this.centerButton);
+
+        // Activate the button to center the map when clicked
+        this.centerButton.addEventListener('click', () => {
+            addClass(this.centerButton, 'collapse');
+            this.range.center(() => {
+                this.range.listen = true;
+            });
+        });
+        
+        // Display the button when moving the map
+        this.listener = this.map.on('movestart', (e) => {
+            if (this.range.listen) {
+                this.range.listen = false;
+                removeClass(this.centerButton, 'collapse');
+            }            
+        });
+    }
+
+    /**
+     * Display the loader on the widget and block interractions.
+     */
+    loading() { removeClass(this.mask, 'loaded'); }
+
+    /**
+     * Hide the loader and allow interractions.
+     */
+    loaded() { addClass(this.mask, 'loaded'); }
+
+    /**
+     * Update the range on the map.
+     * @param {string} range - The range to display on the map as a KML file.
+     */
+    update(range) {
+        this.range.set(range, () => {
+            this.loaded();
+        });
+    }
+
+    /**
+     * Create the basemap.
+     */
+    basemap() {
         let tileDimension = 256;
         let projection = ol.proj.get('EPSG:3857');
         let projectionExtent = projection.getExtent();
@@ -32,26 +102,26 @@ class Cartography {
             maxZoom: 6,
         })
 
-        this.basemapLayer = new ol.layer.Tile({
-            preload: Infinity,
-            source: new ol.source.WMTS({
-                url: 'http://localhost:8080/geoserver/NE/gwc/service/wmts',
-                layer: 'NE:basemap',
-                matrixSet: 'WebMercatorQuad',
-                format: 'image/jpeg',
-                dimensions: [tileDimension, tileDimension],
-                tileGrid: new ol.tilegrid.WMTS({
-                    origin: ol.extent.getTopLeft(projectionExtent),
-                    resolutions: resolutions,
-                    matrixIds: matrixIds,
-                }),
-                wrapX: true,
-            })
-        });
-    
         this.map = new ol.Map({
             target: 'map',
-            layers: [ this.basemapLayer ],
+            layers: [ 
+                new ol.layer.Tile({
+                    preload: Infinity,
+                    source: new ol.source.WMTS({
+                        url: 'http://localhost:8080/geoserver/NE/gwc/service/wmts',
+                        layer: 'NE:basemap',
+                        matrixSet: 'WebMercatorQuad',
+                        format: 'image/jpeg',
+                        dimensions: [tileDimension, tileDimension],
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        wrapX: true,
+                    })
+                })
+            ],
             view: this.view,
             controls: ol.control.defaults.defaults({
                 zoom: false,
@@ -59,84 +129,136 @@ class Cartography {
                 rotate: false,
             })
         });
+    }
+}
 
-        this.range;
-        this.visibleRange;
+/**
+ * The range of the taxon on the map.
+ */
+class Range {
+    /**
+     * @param {Cartography} cartography - The cartography widget object. 
+     * @param {Object} params - The application parameters.
+     */
+    constructor(cartography, params) {
+        this.cartography = cartography;
+        this.params = params;
+        
+        // Flag to see if the centering button should be displayed
+        this.listen = false;
 
-        this.centerButton = makeDiv(null, 'cartography-center collapse');
-        addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
-        this.container.append(this.centerButton);
+        // Store for the OpenLayers layer object
+        this.layer;
     }
 
-    update(r) {
-        let map = this.map;
-        this.taxon = this.app.params.taxon;
-
-        // Check if a range has been found
-        if (r.length > 0) {
-            this.range = new ol.layer.Vector({
+    /**
+     * 
+     * @param {string} range - The range to display on the map as a KML file.
+     * @param {function} callback - Callback fired when the range is displayed on the map. 
+     */
+    set(range, callback) {
+        // Check if a range is not an empty string
+        if (range.length !== '') {
+            // The vector layer
+            this.layer = new ol.layer.Vector({
                 source: new ol.source.Vector({
                     features: new ol.format.KML({
+                        // Don't extract the style from the KML
                         extractStyles: false
-                    }).readFeatures(r, {
+                    }).readFeatures(range, {
+                        // Project to 3857 projection
                         dataProjection:'EPSG:4326',
                         featureProjection:'EPSG:3857'
                     })
                 }),
                 style: new ol.style.Style({
                     fill: new ol.style.Fill({
-                        color: 'rgba(200, 110, 100, 0.7)',
+                        // Set the style from the parameters
+                        color: this.params.interface.cartography.range.color,
                     }),
                 }),
+                // Keep it hidden
                 opacity: 0,
+                // Avoid the range to pop-up when moving on the map
                 updateWhileAnimating: true,
                 updateWhileInteracting: true,
             });
 
-            this.visibleRange = false;
-            map.addLayer(this.range);
-            this.center();
+            // Add the layer to the map
+            this.cartography.map.addLayer(this.layer);
+
+            // Center the map on the layer
+            this.center(() => {
+                // Now display the range
+                this.display(() => {});
+                // Activate the centering button
+                this.listen = true;
+                callback();
+            });
         }
         // Here, no range has been found
         else {
 
         }
     }
+    
+    /**
+     * Checks if a range layer exists on the map.
+     * @returns {boolean}
+     */
+    exists() {
+        if (this.layer !== undefined) { return true; }
+        else { return false; }
+    }
 
-    center() {
-        this.map.getView().fit(this.range.getSource().getExtent(), {
-            padding: [ 20, 20, 20, 20 ],
-            duration: 500,
+    /**
+     * Center the map on the range layer.
+     * @param {function} callback - Callback fired when the map has been centered. 
+     */
+    center(callback) {
+        // Get padding and transition time
+        let padding = this.params.interface.cartography.range.padding;
+        let transition = this.params.interface.cartography.range.transition.center;
+        this.cartography.map.getView().fit(this.layer.getSource().getExtent(), {
+            // Keep a padding
+            padding: [ padding, padding, padding, padding ],
+            duration: transition,
             easing: ol.easing.easeInOut,
-            callback: (e) => this.activateCentering()
+            callback: () => { callback(); }
         });
     }
 
-    displayRange(display) {
-        let value;
-        if (display) { value = 1 }
-        else { value = 0 }
-        animateOpacity(this.range, 200, 60, value, () => {
-            this.visibleRange = display;
-        });
-    }
-
-    activateCentering() {
-        if (!this.visibleRange) { this.displayRange(true) }
-
-        let self = this;
-
-        function centerMap() {
-            this.removeEventListener('click', centerMap);
-            addClass(this, 'collapse');
-            self.center();
-        }
-        
-        let movement = this.map.on('movestart', (e) => {
-            ol.Observable.unByKey(movement);
-            removeClass(this.centerButton, 'collapse');
-            this.centerButton.addEventListener('click', centerMap);
+    /**
+     * Remove the layer from the map after an animation.
+     * @param {function} callback - Callback fired when the layer has been removed from the map. 
+     */
+    remove(callback) {
+        this.hide(() => {
+            this.cartography.map.removeLayer(this.layer);
+            callback();
         })
+    }
+
+    /**
+     * Hide the layer on the map.
+     * @param {function} callback - Callback fired when the layer has been hidden. 
+     */
+    hide(callback) {
+        let transition = this.params.interface.cartography.range.transition.display;
+        if (this.exists()) {
+            animateOpacity(this.layer, transition, 60, 1, () => { callback(); });
+        }
+    }
+
+    /**
+     * Display the layer on the map.
+     * @param {function} callback - Callback fired when the layer has been displayed. 
+     */
+    display(callback) {
+        let transition = this.params.interface.cartography.range.transition.display;
+        if (this.exists()) {
+            animateOpacity(this.layer, transition, 60, 1, () => { callback(); });
+        }
     }
 }
 

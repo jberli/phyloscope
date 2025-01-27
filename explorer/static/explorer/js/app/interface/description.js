@@ -15,11 +15,24 @@ class Description {
         this.search = new Search(this);
         this.text = new Text(this);
 
+        this.mask = makeDiv(null, 'description-mask mask');
+        this.loader = makeDiv(null, 'description-loader loader');
+        this.mask.append(this.loader)
+        this.container.append(this.mask);
+
         this.app.second.append(this.container);
     }
 
     update() {
         this.text.update();
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
     }
 }
 
@@ -47,7 +60,8 @@ class Search {
 
         function search() {
             function activateTaxon(e) {
-                self.description.text.reload(e.target.getAttribute('taxon'));
+                self.description.app.params.taxon.id = e.target.getAttribute('taxon');
+                self.description.app.updateTaxon();
                 close();
             }
 
@@ -63,9 +77,15 @@ class Search {
             function preventEnter(e) {
                 if (e.key === 'Enter') {
                     self.input.removeEventListener('keydown', preventEnter);
-                    self.input.removeEventListener('keyup', input);
                     e.preventDefault();
-                    deactivate();
+
+                    let taxonList = self.description.text.container.getElementsByClassName('search-result');
+                    if (taxonList.length > 0) {
+                        taxonList[0].click();
+                    } else {
+                        self.input.removeEventListener('input', input);
+                        deactivate();
+                    }
                 }
             }
 
@@ -94,8 +114,8 @@ class Search {
                                 let label = makeDiv(null, 'search-label', html);
                                 let imageDiv = makeDiv(null, 'search-image-container');
                                 if (entry.picture !== null) {
-                                    let imageMask = makeDiv(null, 'photo-mask ' + typesort);
-                                    let loader = makeDiv(null, 'photo-loader');
+                                    let imageMask = makeDiv(null, 'mask ' + typesort);
+                                    let loader = makeDiv(null, 'search-loader');
                                     let image = makeImage(entry.picture, null, null, null, 'photo');
                                     loadImage(image).then(() => { addClass(imageMask, 'loaded') });
                                     imageMask.appendChild(loader);
@@ -112,15 +132,14 @@ class Search {
                                 previousType = type;
                             }
                             self.results.push(addGroup(sorting, previousType, previousTypeSort));
-                            self.description.text.addResults(self.results);
+                            self.description.text.addResults(self.results, previousTypeSort);
                         } else {
                             self.description.text.clear();
                         }
                     });
                 } else {
                     self.description.text.clear();
-                }
-                
+                }            
             }
 
             function open() {
@@ -135,16 +154,19 @@ class Search {
                     self.input.focus();
                     self.searchbutton.addEventListener('click', search);
                     self.input.addEventListener('keydown', preventEnter);
-                    self.input.addEventListener('keyup', input);
+                    self.input.addEventListener('input', input);
                 })
             }
 
             function close() {
+                self.description.text.clear();
                 self.input.setAttribute('contenteditable', false);
                 removeClass(self.searchbutton, 'active');
                 removeClass(self.input, 'active');
                 addClass(self.container, 'collapse');
                 self.active = false;
+                self.input.removeEventListener('keydown', preventEnter);
+                self.input.removeEventListener('input', input);
 
                 wait(200, () => {
                     self.input.innerHTML = '';
@@ -154,7 +176,6 @@ class Search {
 
             function deactivate() {
                 close();
-                self.description.text.clear();
                 self.description.text.update();
             }
 
@@ -184,11 +205,16 @@ class Text {
         let wikipedia = this.taxon.description;
 
         let t;
-        if (compare(wikipedia.title, infos.scientific, true, [['_', ' ']])) {
-            if (v.length > 0) { t = v.shift(); }
-            else { t = wikipedia.title }
+        if (wikipedia !== null) {
+            if (compare(wikipedia.title, infos.scientific, true, [['_', ' ']])) {
+                if (v.length > 0) { t = v.shift(); }
+                else { t = wikipedia.title }
+            } else {
+                t = wikipedia.title;
+            }
         } else {
-            t = wikipedia.title;
+            if (v.length > 0) { t = v.shift(); }
+            else { t = infos.scientific }
         }
 
         this.content = makeDiv(null, 'text-content hidden');
@@ -216,14 +242,30 @@ class Text {
             }
         }
         
-        let summary = makeDiv(null, 'text-summary', removeTrailing(wikipedia.summary.replace('== References ==', '')));
-        this.content.append(summary);
+        if (wikipedia !== null) {
+            let summary = makeDiv(null, 'text-summary', removeTrailing(wikipedia.summary.replace('== References ==', '')));
+            this.content.append(summary);
+        }
         
-        wait(10, () => { removeClass(this.content, 'hidden'); })
+        wait(10, () => {
+            removeClass(this.content, 'hidden');
+            this.description.loaded();
+        })
     }
 
-    addResults(r) {
+    default() {
+        let cl = this.container.classList;
+        for (let i = 0; i < cl.length; ++i) {
+            if (cl[i] !== 'text-container') { removeClass(this.container, cl[i]) }
+        }
+    }
+
+    addResults(r, typesort) {
+        this.default();
+        
         removeChildren(this.container);
+        addClass(this.container, typesort);
+
         if (r.length > 0) {
             let results = makeDiv(null, 'search-result-container no-scrollbar');
             results.append(...r);
@@ -246,6 +288,7 @@ class Text {
 
     clear() {
         removeChildren(this.container);
+        this.default();
     }
 }
 

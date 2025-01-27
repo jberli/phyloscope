@@ -4,7 +4,7 @@
  */
 
 import { ajaxGet } from "../generic/ajax.js";
-import { makeDiv } from "../generic/dom.js";
+import { addClass, removeClass, makeDiv } from "../generic/dom.js";
 import Cartography from "./cartography.js";
 import Description from "./description.js";
 import Footer from "./footer.js";
@@ -13,43 +13,86 @@ import Photography from "./photography.js";
 import Taxonomy from "./taxonomy.js";
 
 class Application {
-    constructor(params, container) {
-        this.container = container;
+    constructor() {
+        // Create the application div and append it to the document body
+        this.container = makeDiv('application');
+        this.mask = makeDiv('application-mask', 'mask');
+        this.container.append(this.mask);
+        document.body.appendChild(this.container);
 
-        this.params = params;
-        this.taxon = this.params.taxon;
-        this.language = this.params.languages.current;
-        this.languages = this.params.languages.available;
+        // Wait for the DOM the finish loading
+        window.addEventListener('DOMContentLoaded', () => {
+            // Retrieve the configuration parameters
+            ajaxGet('configuration/', (params) => {
+                this.params = params;
 
-        this.header = new Header(this);
+                // Create the header
+                this.header = new Header(this);
+                // Create the main interface
+                this.content = makeDiv('content');
+                this.first = makeDiv('first-panel', 'panel');
+                this.second = makeDiv('second-panel', 'panel');
+                this.third = makeDiv('third-panel', 'panel');
+                this.content.append(this.first, this.second, this.third);
+                this.container.append(this.content);
 
-        this.content = makeDiv('content');
-        this.first = makeDiv('first-panel', 'panel');
-        this.second = makeDiv('second-panel', 'panel');
-        this.third = makeDiv('third-panel', 'panel');
+                // Instanciate widgets of the application
+                this.taxonomy = new Taxonomy(this);
+                this.description = new Description(this);
+                this.footer = new Footer(this);
+                this.photography = new Photography(this, this.params);
+                this.cartography = new Cartography(this, this.params);
 
-        this.content.append(this.first, this.second, this.third);
-        this.container.append(this.content);
+                // Reveal the interface
+                this.loaded();
 
-        this.taxonomy = new Taxonomy(this);
-        this.description = new Description(this);
-        this.footer = new Footer(this);
-        this.photography = new Photography(this);
-        this.cartography = new Cartography(this);
-
-        this.updateTaxon();
+                // Update the application by fetching the new taxon
+                this.update();
+            });        
+        });
     }
 
-    updateTaxon() {
-        ajaxGet('range/' + this.params.taxon.id + '/', (r) => {
-            this.cartography.update(r);
-        });
+    /**
+     * Update the application by fetching the current taxon information.
+     */
+    update() {
+        // Set widgets on loading mode
 
-        ajaxGet('taxon/' + this.language + '/' + this.params.taxon.id + '/', (r) => {
-            this.params.taxon = r;
-            this.photography.update();
-            this.description.update();
-        });
+        // this.description.loading();
+        // this.photography.loading();
+        // this.cartography.loading();
+
+        // let taxon = this.taxon();
+        // console.log(this.params)
+
+        // this.cartography.update(this.params.range);
+
+        // // Hide and remove the range
+        // this.cartography.removeRange();
+
+        // // Retrieve the range file.
+        // ajaxGet('range/' + this.params.taxonomy.id + '/', (r) => {
+        //     this.cartography.update(r);
+        // });
+
+        // ajaxGet('taxon/' + this.language + '/' + this.params.taxon.id + '/', (r) => {
+        //     this.params.taxonomy = r;
+        //     this.photography.update();
+        //     this.description.update();
+        // });
+    }
+
+    taxon() {
+        let i = this.params.taxonomy.tindex;
+        return this.params.taxonomy.siblings[i]
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
     }
 }
 

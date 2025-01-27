@@ -7,92 +7,124 @@ import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { makeDiv, makeImage, addClass, removeClass, wait } from "../generic/dom.js";
 
 class Photography {
-    constructor(app) {
+    constructor(app, params) {
         this.app = app;
-        this.div = makeDiv('photography', 'sub-panel');
-        this.app.third.append(this.div);
+        this.params = params;
+
+        // Store photographs and the index of the default
         this.photographs = [];
         this.photoid = 0;
 
-        this.previous = new PhotoContainer(false, this.div, false);
-        this.current = new PhotoContainer(true, this.div, false);
-        this.next = new PhotoContainer(false, this.div, false);
+        // Create DOM elements
+        this.container = makeDiv('photography', 'sub-panel');
+        this.app.third.append(this.container);
+
+        // Create individual photo objects
+        this.previous = new PhotoContainer(this, false, false);
+        this.current = new PhotoContainer(this, true, false);
+        this.next = new PhotoContainer(this, false, false);
+
+        this.active = false;
     }
 
     update() {
-        this.current.loading();
+        this.loading();
+
         this.taxon = this.app.params.taxon;
         let index = this.taxon.taxonomy.tindex;
         this.photographs = this.taxon.taxonomy.siblings[index].photographs;
         this.photoid = 0;
 
-        if (this.photographs.length > 1) { this.activateSlide(); }
+        if (this.photographs.length > 1) {
+            if (!this.active) { this.sliding(true); }
+        } else {
+            if (this.active) { this.sliding(false); }
+        }
 
         this.reload();
     }
 
     reload() {
         let l = this.photographs.length;
-        if (l > 0) { this.current.setImage(this.photographs[this.photoid], 'original'); }
+        if (l > 0) { this.current.set(this.photographs[this.photoid], 'original'); }
     }
 
-    activateSlide() {
-        let p = this;
-        this.div.addEventListener('wheel', slide)
+    loading() {
+        this.current.loading();
+    }
+
+    loaded() {
+        this.current.loaded();
+    }
+
+    sliding(activate) {
+        let self = this;
+
         function slide(e) {
-            this.removeEventListener('wheel', slide);
+            self.container.removeEventListener('wheel', slide, true);
             if (e.type === 'wheel') {
                 if (e.deltaY > 0) {
-                    p.previous.destroy();
-                    p.current.smoosh();
-                    p.previous = p.current;
-                    p.current = p.next;
-                    p.current.expand();
-                    p.next = new PhotoContainer(false, p.div, false);
-                    if (p.photoid == 0) { p.photoid = p.photographs.length - 1 }
-                    else { p.photoid -= 1 }
+                    self.previous.destroy();
+                    self.current.smoosh();
+                    self.previous = self.current;
+                    self.current = self.next;
+                    self.current.expand();
+                    self.next = new PhotoContainer(self, false, false);
+                    if (self.photoid == 0) { self.photoid = self.photographs.length - 1 }
+                    else { self.photoid -= 1 }
                 } else {
-                    p.next.destroy();
-                    p.current.smoosh();
-                    p.next = p.current;
-                    p.current = p.previous;
-                    p.current.expand();
-                    p.previous = new PhotoContainer(false, p.div, true);
-                    if (p.photoid == p.photographs.length - 1) { p.photoid = 0 }
-                    else { p.photoid += 1 }
+                    self.next.destroy();
+                    self.current.smoosh();
+                    self.next = self.current;
+                    self.current = self.previous;
+                    self.current.expand();
+                    self.previous = new PhotoContainer(self, false, true);
+                    if (self.photoid == self.photographs.length - 1) { self.photoid = 0 }
+                    else { self.photoid += 1 }
                 }
-                p.reload();
+                self.reload();
             }
-            wait(200, () => { p.activateSlide(); })
+            wait(200, () => {
+                self.sliding(true);
+            })
+        }
+
+        if (activate) {
+            self.active = true;
+            self.container.addEventListener('wheel', slide, true);
+        } else {
+            self.active = false;
+            self.container.removeEventListener('wheel', slide, true);
         }
     }
 }
 
 class PhotoContainer {
-    constructor(active, container, start) {
+    constructor(photography, active, start) {
         this.active = active;
         this.url = 'https://inaturalist-open-data.s3.amazonaws.com/photos/';
 
         let c = '';
         if (!this.active) { c = ' smooshed' }
-        this.div = makeDiv(null, 'photography-container' + c);
+        this.container = makeDiv(null, 'photography-container' + c);
         this.mask = makeDiv(null, 'photography-mask mask');
-        this.loader = makeDiv(null, 'photography-loader');
+        this.loader = makeDiv(null, 'loader');
         this.mask.append(this.loader);
-        this.div.append(this.mask);
+        this.container.append(this.mask);
 
-        if (start) { container.insertBefore(this.div, container.firstChild); }
-        else { container.append(this.div); }
+        if (start) { photography.container.insertBefore(this.container, photography.container.firstChild); }
+        else { photography.container.append(this.container); }
     }
 
-    setImage(photo, size) {
+    set(photo, size) {
+        if (this.image !== undefined) { this.image.remove(); }
         this.image = makeImage(this.url + photo.id + '/' + size + '.' + photo.extension, null, null, null, 'image');
+        this.container.append(this.image);
         loadImage(this.image).then(() => { this.loaded() });
-        this.div.append(this.image);
-        this.activateAdjustment();
+        this.adjusting();
     }
 
-    activateAdjustment() {
+    adjusting() {
         let self = this;
 
         function restore(e) {
@@ -131,17 +163,17 @@ class PhotoContainer {
     }
 
     expand() {
-        removeClass(this.div, 'smooshed');
+        removeClass(this.container, 'smooshed');
         this.active = true;
     }
 
     smoosh() {
-        addClass(this.div, 'smooshed');
+        addClass(this.container, 'smooshed');
         this.active = false;
     }
 
     destroy() {
-        this.div.remove()
+        this.container.remove()
     }
 }
 

@@ -1,0 +1,40 @@
+.loader {
+    width: .8rem;
+    height: .8rem;
+    border-radius: 50%;
+    border: .4rem solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: rotationcw 1.2s linear infinite;
+}
+
+.mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+
+    opacity: 1;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+
+    transition: opacity .2s;
+    &.loaded {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.image {
+    height: inherit;
+    width: inherit;
+    overflow: hidden;
+    object-fit: cover;
+    object-position: 50% 50%;
+    
+    transition: all .1s linear;
+}
