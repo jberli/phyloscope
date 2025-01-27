@@ -1,8 +1,11 @@
 Phylopedia
 ##########
 
-**Phylopedia** is web application that aims at providing a smooth interface to
-navigate through the diversity of life on Earth.
+**Phylopedia** is a web application that aims at providing a smooth interface to
+navigate through the diversity of life using different data visualization methods.
+You can easily explore the taxonomic tree and read about each `taxon, <https://en.wikipedia.org/wiki/Taxon>`_
+explore the geographic range of different species, etc.
 
-Phylopedia can be understood as the association of two greek words:
-`*phûlon* <https://en.wiktionary.org/wiki/-pedia>`_ and `*paideía* <https://en.wiktionary.org/wiki/%CF%86%E1%BF%A6%CE%BB%CE%BF%CE%BD>`_
+The data is taken from the `iNaturalist Taxonomy DarwinCore Archive. <https://www.inaturalist.org/pages/developers>`_
+`iNaturalist <https://www.inaturalist.org>`_ is a crowdsourced platform and a social network of worldwide naturalists that aims at
+sharing information about biodiversity and helping people learn about nature.
