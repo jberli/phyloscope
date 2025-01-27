@@ -2,8 +2,15 @@
 languages:
   current: fr
   available: [ fr, en ]
-# Transition time for interface small animations
-transition: 100
+# Interface parameters
+interface:
+  cartography:
+    range:
+      transition:
+        display: 200
+        center: 500
+      color: 'rgba(200, 110, 100, 0.7)'
+      padding: 20
 # Text in different languages
 texts:
   description:
