@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.api.requests import update_taxon
+from explorer.api.showcase import update_taxon
 from phylopedia.management.warnings import prompt
 
 class Command(BaseCommand):
