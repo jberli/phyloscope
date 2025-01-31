@@ -64,10 +64,17 @@ def update_taxon(ranks=['species']):
 
         if r and w:
             print(f'Taxon {taxon.name} ({taxon.tid}) has range and wikipedia page, setting as showcased.')
-            # Clean the current taxon
-            clean_tables('explorer', 'current')
-            # Create a new entry for the current taxon
-            current = Current(taxon = taxon).save()
+
+            # Load the configuration file
+            filename = 'explorer/static/explorer/conf/configuration.yaml'
+            data = yaml.load(open(filename, 'r'), Loader=yaml.FullLoader)
+
+            # Update the current taxon id
+            data['taxonomy']['current'] = taxon.tid
+
+            # Write the file
+            with open(filename, 'w') as yamlfile:
+                yamlfile.write(yaml.dump(data, default_flow_style=False))
             break
         else:
             if not r:

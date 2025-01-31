@@ -20,7 +20,7 @@ class Header {
 class Logo {
     constructor(header) {
         this.header = header;
-        this.container = makeDiv('header-logo', 'header-module', 'Phylopedia');
+        this.container = makeDiv('header-logo', 'header-module', this.header.app.params.interface.title);
         this.header.container.append(this.container);
     }
 }

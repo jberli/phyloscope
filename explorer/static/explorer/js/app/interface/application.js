@@ -20,35 +20,35 @@ class Application {
         this.container.append(this.mask);
         document.body.appendChild(this.container);
 
-        // Wait for the DOM the finish loading
-        window.addEventListener('DOMContentLoaded', () => {
-            // Retrieve the configuration parameters
-            ajaxGet('configuration/', (params) => {
-                this.params = params;
+        // Retrieve the configuration parameters
+        ajaxGet('configuration/', (params) => {
+            this.params = params;
 
-                // Create the header
-                this.header = new Header(this);
-                // Create the main interface
-                this.content = makeDiv('content');
-                this.first = makeDiv('first-panel', 'panel');
-                this.second = makeDiv('second-panel', 'panel');
-                this.third = makeDiv('third-panel', 'panel');
-                this.content.append(this.first, this.second, this.third);
-                this.container.append(this.content);
+            // Create the header
+            this.header = new Header(this);
+            // Create the main interface
+            this.content = makeDiv('content');
+            this.first = makeDiv('first-panel', 'panel');
+            this.second = makeDiv('second-panel', 'panel');
+            this.third = makeDiv('third-panel', 'panel');
+            this.content.append(this.first, this.second, this.third);
+            this.container.append(this.content);
 
-                // Instanciate widgets of the application
-                this.taxonomy = new Taxonomy(this);
-                this.description = new Description(this);
-                this.footer = new Footer(this);
-                this.photography = new Photography(this, this.params);
-                this.cartography = new Cartography(this, this.params);
+            // Instanciate widgets of the application
+            this.taxonomy = new Taxonomy(this);
+            this.description = new Description(this);
+            this.footer = new Footer(this);
+            this.photography = new Photography(this, this.params);
+            this.cartography = new Cartography(this, this.params);
 
-                // Reveal the interface
-                this.loaded();
+            this.photography.update();
+            this.cartography.update();
 
-                // Update the application by fetching the new taxon
-                this.update();
-            });        
+            // Reveal the interface
+            this.loaded();
+
+            // Update the application by fetching the new taxon
+            this.update();
         });
     }
 

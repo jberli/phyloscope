@@ -52,7 +52,8 @@ def display_database_information(db='phylopedia'):
                 tcount = Taxon.objects.all().count()
                 ncount = Names.objects.all().count()
                 pcount = Photo.objects.all().count()
-                print(f'{tcount} taxons - {ncount} vernacular names - {pcount} photos')
+                rcount = Taxon.objects.filter(range__isnull=False).count()
+                print(f'{tcount} taxons - {ncount} vernacular names - {pcount} photos - {rcount} ranges')
 
 def get_taxonomy():
     """

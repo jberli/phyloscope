@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 
-from explorer.api.search import lookup
 from explorer.api.configuration import get_configuration
-from explorer.api.taxonomy import get_taxon, get_children, get_parents, get_range
+from explorer.api.range import get_range
+from explorer.api.search import lookup
+from explorer.api.taxonomy import get_taxon, get_children, get_parents
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
@@ -37,8 +38,8 @@ def range(request, id):
     """
     Retrieve the range of a taxon given its index.
     """
-    get_range(id)
-    return HttpResponse(rangestr)
+    result = get_range(id)
+    return HttpResponse(result)
 
 def parents(request, lang, id):
     """

@@ -6,7 +6,11 @@
 import Application from "./interface/application.js";
 
 // Initialize the application
-new Application();
+// Wait for the DOM the finish loading
+window.addEventListener('DOMContentLoaded', () => {
+    new Application();
+});
+
 
 
 

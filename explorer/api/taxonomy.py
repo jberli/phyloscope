@@ -1,8 +1,6 @@
-import requests
-import xml.dom.minidom
 import wikipediaapi as wiki
 
-from explorer.models import Taxon, Photo, Current
+from explorer.models import Taxon, Photo
 from explorer.api.tools.information import RANKS
 
 def get_taxon_information(obj, lang):
@@ -105,6 +103,8 @@ def get_taxon(language, index):
     else:
         result['description'] = None
 
+    result['range'] = taxon.range.wkt
+
     return result
 
 def get_parents(language, index):
@@ -141,19 +141,3 @@ def get_children(language, index):
         return sorted(childrenlist, key=lambda k: k['level'], reverse=True)
     else:
         return None
-
-def get_range(index):
-    """
-    Get the range from a given taxon index.
-    """
-    rangeurl = f'https://www.inaturalist.org/taxa/{index}/range.kml'
-    response = requests.get(rangeurl)
-    string = ''
-    try:
-        # If the KML is parsable return the kml as a string
-        xml.dom.minidom.parseString(response.content)
-        string = response.text
-    except:
-        string = ''
-    finally:
-        return string

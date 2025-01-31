@@ -73,12 +73,9 @@ class Cartography {
 
     /**
      * Update the range on the map.
-     * @param {string} range - The range to display on the map as a KML file.
      */
-    update(range) {
-        this.range.set(range, () => {
-            this.loaded();
-        });
+    update() {
+        this.range.set(this.params.taxonomy.range, () => { this.loaded(); });
     }
 
     /**
@@ -97,9 +94,9 @@ class Cartography {
         }
 
         this.view = new ol.View({
-            center: [ 0, 3000000 ],
+            center: [ 0, 0 ],
             zoom: 1,
-            maxZoom: 6,
+            maxZoom: this.params.interface.cartography.maxzoom,
         })
 
         this.map = new ol.Map({
@@ -158,18 +155,11 @@ class Range {
      */
     set(range, callback) {
         // Check if a range is not an empty string
-        if (range.length !== '') {
+        if (range !== null) {
             // The vector layer
             this.layer = new ol.layer.Vector({
                 source: new ol.source.Vector({
-                    features: new ol.format.KML({
-                        // Don't extract the style from the KML
-                        extractStyles: false
-                    }).readFeatures(range, {
-                        // Project to 3857 projection
-                        dataProjection:'EPSG:4326',
-                        featureProjection:'EPSG:3857'
-                    })
+                    features: [new ol.format.WKT().readFeature(range)]
                 }),
                 style: new ol.style.Style({
                     fill: new ol.style.Fill({

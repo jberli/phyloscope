@@ -293,13 +293,13 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
 
     status = 'FAIL'
     try:
-        # # Download the file inside the data folder
-        # print('Downloading taxonomy file...')
-        # download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
+        # Download the file inside the data folder
+        print('Downloading taxonomy file...')
+        download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
 
-        # # Extract the zip file in a temporary file
-        # with zipfile.ZipFile(pathzip, 'r') as z:
-        #     z.extractall(pathtmp)
+        # Extract the zip file in a temporary file
+        with zipfile.ZipFile(pathzip, 'r') as z:
+            z.extractall(pathtmp)
 
         # Retrieve the list of taxon index already present in database
         taxons = [ x['tid'] for x in list(Taxon.objects.order_by('tid').values('tid').distinct()) ]
@@ -325,8 +325,8 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
         print()
         # If missing taxons were found
         if len(new_taxons) > 0:
-            # # Fetch data and write in csv files
-            # fetch_data(new_taxons, pathtmp)
+            # Fetch data and write in csv files
+            fetch_data(new_taxons, pathtmp)
 
             # If initialize mode is true, wipe the database
             if initialize:
@@ -354,5 +354,5 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
         whistory.write(status)
         whistory.close()
 
-        # print('Cleaning temporary files...')
-        # shutil.rmtree(pathtmp)
+        print('Cleaning temporary files...')
+        shutil.rmtree(pathtmp)

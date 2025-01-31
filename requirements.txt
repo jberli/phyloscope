@@ -10,3 +10,6 @@ pyyaml
 pause
 pyinaturalist
 wikipedia-api
+lxml
+fastkml
+shapely

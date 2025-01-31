@@ -1,11 +1,5 @@
 from django.contrib.gis.db import models
 
-class Current(models.Model):
-    taxon = models.ForeignKey('Taxon', models.DO_NOTHING, db_column='taxon', blank=False, null=False, related_name='current')
-    class Meta:
-        managed = True
-        db_table = 'explorer\".\"current'
-
 class Taxon(models.Model):
     tid = models.IntegerField(db_column='tid', blank=False, null=False, unique=True)
     parent = models.ForeignKey('self', models.DO_NOTHING, blank=True, null=True, related_name='children')
@@ -16,6 +10,8 @@ class Taxon(models.Model):
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)
     count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
+    present = models.BooleanField(db_column='present', default=True, null=False)
+    range = models.MultiPolygonField(db_column='range', srid=3857, blank=True, null=True, unique=False)
     class Meta:
         managed = True
         ordering = ('tid',)
