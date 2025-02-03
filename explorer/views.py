@@ -8,8 +8,8 @@ from explorer.api.taxonomy import get_taxon, get_children, get_parents
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
-            'name': 'phylopedia',
-            'fullname': 'Phylopedia',
+            'name': 'phyloscope',
+            'fullname': 'phyloscope',
             'version': 1.0,
         })
 

@@ -6,7 +6,7 @@
 @import '_photo.scss';
 
 @import '_taxonomy.scss';
-@import '_description.scss';
+@import '_information.scss';
 @import '_cartography.scss';
 @import '_photography.scss';
 @import '_footer.scss';
@@ -21,28 +21,14 @@ html, body {
     left: 0;
     height: 100%;
     width: 100%;
+
+    display: flex;
+    gap: 1rem;
 }
 
 #application-mask {
     background-color: $interface-background;
     z-index: 200;
-}
-
-#header {
-    height: 6rem;
-
-    background-color: $interface-background;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#content {
-    height: calc(100% - 8rem);
-    
-    display: flex;
-    margin: 1rem;
-    gap: 1rem;
 }
 
 .panel {
@@ -52,15 +38,18 @@ html, body {
 }
 
 #first-panel {
-    flex: 3;
+    flex: 2;
+    margin: 1rem 0 1rem 1rem;
 }
 
 #second-panel {
-    flex: 2;
+    flex: 3;
+    margin: 1rem 0;
 }
 
 #third-panel {
     flex: 2;
+    margin: 1rem 1rem 1rem 0;
 }
 
 .sub-panel {
@@ -73,11 +62,22 @@ html, body {
     transition: all .2s ease-in-out;
 }
 
+#header {
+    height: 6rem;
+
+    background-color: $interface-background;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex: unset;
+}
+
 #taxonomy {
     background-color: $interface-background;
 }
 
-#description {
+#information {
     font-family: 'Cantarell';
     color: $interface-foreground;
 

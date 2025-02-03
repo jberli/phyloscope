@@ -32,7 +32,7 @@ def has_wikipedia(url):
     name = url.split('/')[-1].replace(" ", "_")
     has_all = True
     for l in languages:
-        wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language=l)
+        wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language=l)
         page = wikipedia.page(name)
         if not page.exists():
             has_all = False

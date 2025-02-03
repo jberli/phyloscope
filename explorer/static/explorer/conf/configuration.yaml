@@ -1,5 +1,5 @@
 interface:
-  title: Phylopedia
+  title: Phyloscope
   cartography:
     maxzoom: 6
     range:

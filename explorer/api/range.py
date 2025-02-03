@@ -19,12 +19,20 @@ def get_range(index):
     """
     Get the range from a given taxon index.
     """
+    taxon = Taxon.objects.get(tid=index)
+    return taxon.range.wkt
+
+
+def get_iucn_range(index):
+    """
+    Get the range from iNaturalist KML range.
+    """
     rangeurl = f'https://www.inaturalist.org/taxa/{index}/range.kml'
     response = requests.get(rangeurl)
 
     if response.status_code == 429:
         pause.seconds(10)
-        get_range(index)
+        get_iucn_range(index)
     else:
         string = ''
         try:
@@ -54,7 +62,7 @@ def update_range(all=False):
                 check = False
 
         if check:
-            r = get_range(taxon.tid)
+            r = get_iucn_range(taxon.tid)
             if r != '':
                 r = r.replace("http://earth.google.com/kml/2.1", "http://www.opengis.net/kml/2.2")
                 try:

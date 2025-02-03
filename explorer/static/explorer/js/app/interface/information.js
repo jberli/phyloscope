@@ -1,26 +1,26 @@
 /**
- * @description
- * Define the description widget.
+ * @information
+ * Define the information widget.
  */
 
 import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, makeDiv, makeImage, makeInput, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { boldSubstring, compare, removeTrailing, uppercaseFirstLetter } from "../generic/parsing.js";
 
-class Description {
+class Information {
     constructor(app) {
         this.app = app;
-        this.container = makeDiv('description', 'sub-panel');
+        this.container = makeDiv('information', 'sub-panel');
 
         this.search = new Search(this);
         this.text = new Text(this);
 
-        this.mask = makeDiv(null, 'description-mask mask');
-        this.loader = makeDiv(null, 'description-loader loader');
+        this.mask = makeDiv(null, 'information-mask mask');
+        this.loader = makeDiv(null, 'information-loader loader');
         this.mask.append(this.loader)
         this.container.append(this.mask);
 
-        this.app.second.append(this.container);
+        this.app.first.append(this.container);
     }
 
     update() {
@@ -37,14 +37,14 @@ class Description {
 }
 
 class Search {
-    constructor(description) {
-        this.description = description;
+    constructor(information) {
+        this.information = information;
         this.active = false;
         this.results = []
 
         this.searchbutton = makeDiv(null, 'search-button');
         addSVG(this.searchbutton, new URL('/static/explorer/img/search.svg', import.meta.url));
-        this.description.container.append(this.searchbutton);
+        this.information.container.append(this.searchbutton);
 
         this.activateSearch();
 
@@ -52,7 +52,7 @@ class Search {
         this.input = makeInput(null, 'search-input', false);
         this.container.append(this.input);
         
-        this.description.container.append(this.container);
+        this.information.container.append(this.container);
     }
 
     activateSearch() {
@@ -60,8 +60,8 @@ class Search {
 
         function search() {
             function activateTaxon(e) {
-                self.description.app.params.taxon.id = e.target.getAttribute('taxon');
-                self.description.app.updateTaxon();
+                self.information.app.params.taxon.id = e.target.getAttribute('taxon');
+                self.information.app.updateTaxon();
                 close();
             }
 
@@ -79,7 +79,7 @@ class Search {
                     self.input.removeEventListener('keydown', preventEnter);
                     e.preventDefault();
 
-                    let taxonList = self.description.text.container.getElementsByClassName('search-result');
+                    let taxonList = self.information.text.container.getElementsByClassName('search-result');
                     if (taxonList.length > 0) {
                         taxonList[0].click();
                     } else {
@@ -92,7 +92,7 @@ class Search {
             function input(e) {
                 let value = e.target.innerHTML.replace('<br>', '').trim();
                 if (value.length > 2) {
-                    ajaxGet('search/' + self.description.app.language + '/' + value, function(r) {
+                    ajaxGet('search/' + self.information.app.language + '/' + value, function(r) {
                         let length = r.values.length;
                         if (r.values.length > 0) {
                             let previousType;
@@ -132,24 +132,24 @@ class Search {
                                 previousType = type;
                             }
                             self.results.push(addGroup(sorting, previousType, previousTypeSort));
-                            self.description.text.addResults(self.results, previousTypeSort);
+                            self.information.text.addResults(self.results, previousTypeSort);
                         } else {
-                            self.description.text.clear();
+                            self.information.text.clear();
                         }
                     });
                 } else {
-                    self.description.text.clear();
+                    self.information.text.clear();
                 }            
             }
 
             function open() {
-                self.description.text.hide();
+                self.information.text.hide();
                 addClass(self.searchbutton, 'active');
                 addClass(self.input, 'active');
                 removeClass(self.container, 'collapse');
                 self.active = true;
                 wait(200, () => {
-                    self.description.text.clear();
+                    self.information.text.clear();
                     self.input.setAttribute('contenteditable', true);
                     self.input.focus();
                     self.searchbutton.addEventListener('click', search);
@@ -159,7 +159,7 @@ class Search {
             }
 
             function close() {
-                self.description.text.clear();
+                self.information.text.clear();
                 self.input.setAttribute('contenteditable', false);
                 removeClass(self.searchbutton, 'active');
                 removeClass(self.input, 'active');
@@ -176,7 +176,7 @@ class Search {
 
             function deactivate() {
                 close();
-                self.description.text.update();
+                self.information.text.update();
             }
 
             self.searchbutton.removeEventListener('click', search);
@@ -189,20 +189,20 @@ class Search {
 }
 
 class Text {
-    constructor(description) {
-        this.description = description;
+    constructor(information) {
+        this.information = information;
         this.container = makeDiv(null, 'text-container');
-        this.description.container.append(this.container);
+        this.information.container.append(this.container);
     }
 
     update() {
-        this.taxon = this.description.app.params.taxon;
+        this.taxon = this.information.app.params.taxon;
         let index = this.taxon.taxonomy.tindex;
 
         let infos = this.taxon.taxonomy.siblings[index];
         let v = infos.vernaculars.slice(0)
 
-        let wikipedia = this.taxon.description;
+        let wikipedia = this.taxon.information;
 
         let t;
         if (wikipedia !== null) {
@@ -236,7 +236,7 @@ class Text {
             }
 
             if (vstring !== '') {
-                let vernacular = makeDiv(null, 'text-vernacular', this.description.app.params.texts.description.vernaculars[this.description.app.language])
+                let vernacular = makeDiv(null, 'text-vernacular', this.information.app.params.texts.description.vernaculars[this.information.app.language])
                 let vernaculars = makeDiv(null, 'text-vernaculars', vstring);
                 this.content.append(vernacular, vernaculars);
             }
@@ -249,7 +249,7 @@ class Text {
         
         wait(10, () => {
             removeClass(this.content, 'hidden');
-            this.description.loaded();
+            this.information.loaded();
         })
     }
 
@@ -275,10 +275,10 @@ class Text {
 
     reload(taxon) {
         this.clear();
-        ajaxGet('taxon/' + this.description.app.language + '/' + taxon + '/', (r) => {
-            this.description.app.params.taxon = r;
-            this.description.app.photography.update();
-            this.description.update();
+        ajaxGet('taxon/' + this.information.app.language + '/' + taxon + '/', (r) => {
+            this.information.app.params.taxon = r;
+            this.information.app.photography.update();
+            this.information.update();
         });
     }
 
@@ -292,4 +292,4 @@ class Text {
     }
 }
 
-export default Description
+export default Information

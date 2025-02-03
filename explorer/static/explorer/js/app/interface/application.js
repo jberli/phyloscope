@@ -6,11 +6,12 @@
 import { ajaxGet } from "../generic/ajax.js";
 import { addClass, removeClass, makeDiv } from "../generic/dom.js";
 import Cartography from "./cartography.js";
-import Description from "./description.js";
+import Information from "./information.js";
 import Footer from "./footer.js";
 import Header from "./header.js";
 import Photography from "./photography.js";
 import Taxonomy from "./taxonomy.js";
+import Updater from "./updater.js";
 
 class Application {
     constructor() {
@@ -24,31 +25,29 @@ class Application {
         ajaxGet('configuration/', (params) => {
             this.params = params;
 
-            // Create the header
-            this.header = new Header(this);
-            // Create the main interface
-            this.content = makeDiv('content');
+            // Create the first, second and third column panel
             this.first = makeDiv('first-panel', 'panel');
             this.second = makeDiv('second-panel', 'panel');
             this.third = makeDiv('third-panel', 'panel');
-            this.content.append(this.first, this.second, this.third);
-            this.container.append(this.content);
+            // Append the panels to the application container
+            this.container.append(this.first, this.second, this.third);
 
-            // Instanciate widgets of the application
-            this.taxonomy = new Taxonomy(this);
-            this.description = new Description(this);
+            // Create the information and footer widgets in the first panel
+            this.information = new Information(this);
             this.footer = new Footer(this);
+            // Create the header and taxonomy widgets in the second panel
+            this.header = new Header(this);
+            this.taxonomy = new Taxonomy(this);
+            // Create the photography and cartography widgets in the second panel
             this.photography = new Photography(this, this.params);
             this.cartography = new Cartography(this, this.params);
 
-            this.photography.update();
-            this.cartography.update();
+            // Create the updater object to update the widgets on demand
+            this.updater = new Updater(this);
+            this.updater.update(this.params.taxonomy.current);
 
             // Reveal the interface
             this.loaded();
-
-            // Update the application by fetching the new taxon
-            this.update();
         });
     }
 
@@ -56,30 +55,7 @@ class Application {
      * Update the application by fetching the current taxon information.
      */
     update() {
-        // Set widgets on loading mode
-
-        // this.description.loading();
-        // this.photography.loading();
-        // this.cartography.loading();
-
-        // let taxon = this.taxon();
-        // console.log(this.params)
-
-        // this.cartography.update(this.params.range);
-
-        // // Hide and remove the range
-        // this.cartography.removeRange();
-
-        // // Retrieve the range file.
-        // ajaxGet('range/' + this.params.taxonomy.id + '/', (r) => {
-        //     this.cartography.update(r);
-        // });
-
-        // ajaxGet('taxon/' + this.language + '/' + this.params.taxon.id + '/', (r) => {
-        //     this.params.taxonomy = r;
-        //     this.photography.update();
-        //     this.description.update();
-        // });
+        
     }
 
     taxon() {

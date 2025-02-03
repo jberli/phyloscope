@@ -75,7 +75,7 @@ class Cartography {
      * Update the range on the map.
      */
     update() {
-        this.range.set(this.params.taxonomy.range, () => { this.loaded(); });
+        this.range.set(this.params.range, () => { this.loaded(); });
     }
 
     /**
@@ -154,42 +154,35 @@ class Range {
      * @param {function} callback - Callback fired when the range is displayed on the map. 
      */
     set(range, callback) {
-        // Check if a range is not an empty string
-        if (range !== null) {
-            // The vector layer
-            this.layer = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    features: [new ol.format.WKT().readFeature(range)]
+        // The vector layer
+        this.layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [new ol.format.WKT().readFeature(range)]
+            }),
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    // Set the style from the parameters
+                    color: this.params.interface.cartography.range.color,
                 }),
-                style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        // Set the style from the parameters
-                        color: this.params.interface.cartography.range.color,
-                    }),
-                }),
-                // Keep it hidden
-                opacity: 0,
-                // Avoid the range to pop-up when moving on the map
-                updateWhileAnimating: true,
-                updateWhileInteracting: true,
-            });
+            }),
+            // Keep it hidden
+            opacity: 0,
+            // Avoid the range to pop-up when moving on the map
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+        });
 
-            // Add the layer to the map
-            this.cartography.map.addLayer(this.layer);
+        // Add the layer to the map
+        this.cartography.map.addLayer(this.layer);
 
-            // Center the map on the layer
-            this.center(() => {
-                // Now display the range
-                this.display(() => {});
-                // Activate the centering button
-                this.listen = true;
-                callback();
-            });
-        }
-        // Here, no range has been found
-        else {
-
-        }
+        // Center the map on the layer
+        this.center(() => {
+            // Now display the range
+            this.display(() => {});
+            // Activate the centering button
+            this.listen = true;
+            callback();
+        });
     }
     
     /**

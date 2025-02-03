@@ -92,7 +92,7 @@ def get_taxon(language, index):
     if len(name) == 0:
         name = taxon.name
 
-    wikipedia = wiki.Wikipedia(user_agent='phylopedia.org', language=language)
+    wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language=language)
     page = wikipedia.page(name)
 
     if page.exists():
@@ -102,8 +102,6 @@ def get_taxon(language, index):
         }
     else:
         result['description'] = None
-
-    result['range'] = taxon.range.wkt
 
     return result
 

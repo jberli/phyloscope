@@ -1,7 +1,7 @@
-Phylopedia
+phyloscope
 ##########
 
-**Phylopedia** is a web application that aims at providing a smooth interface to
+**phyloscope** is a web application that aims at providing a smooth interface to
 navigate through the diversity of life using different data visualization methods.
 You can easily explore the taxonomic tree and read about each `taxon, <https://en.wikipedia.org/wiki/Taxon>`_
 explore the geographic range of different species, etc.

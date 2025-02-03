@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from explorer.api.update import update
-from phylopedia.management.warnings import prompt
+from phyloscope.management.warnings import prompt
 
 class Command(BaseCommand):
     help = 'Update database'

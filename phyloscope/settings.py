@@ -4,7 +4,7 @@ Django Settings
 import os
 from pathlib import Path
 # This will raise an Import Error if you don't create the private/privacy.py file
-from phylopedia.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD, DJANGO_KEY
+from phyloscope.private import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PWD, DJANGO_KEY
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +44,7 @@ MIDDLEWARE = [
     'livereload.middleware.LiveReloadScript', # This middleware injects the livereload on static changes
 ]
 
-ROOT_URLCONF = 'phylopedia.urls'
+ROOT_URLCONF = 'phyloscope.urls'
 
 TEMPLATES = [
     {
@@ -62,7 +62,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'phylopedia.wsgi.application'
+WSGI_APPLICATION = 'phyloscope.wsgi.application'
 
 # Database
 DATABASES = {

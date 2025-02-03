@@ -10,7 +10,7 @@ class Taxonomy {
     constructor(app) {
         this.app = app;
         this.container = makeDiv('taxonomy', 'sub-panel');
-        this.app.first.append(this.container);
+        this.app.second.append(this.container);
 
         // this.initialize();
         this.taxon = app.taxon;

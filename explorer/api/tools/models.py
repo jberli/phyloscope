@@ -39,7 +39,7 @@ def clean_tables(schema, *tables):
             cursor.execute(t)
             cursor.execute(s)
 
-def display_database_information(db='phylopedia'):
+def display_database_information(db='phyloscope'):
     """
     Display database information.
     """

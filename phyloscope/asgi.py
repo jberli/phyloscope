@@ -1,11 +1,11 @@
 """
-ASGI config for phylopedia project.
+ASGI config for phyloscope project.
 It exposes the ASGI callable as a module-level variable named ``application``.
 """
 import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phylopedia.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'phyloscope.settings')
 
 application = get_asgi_application()
