@@ -75,6 +75,8 @@ html, body {
 
 #taxonomy {
     background-color: $interface-background;
+    display: flex;
+    flex-direction: column;
 }
 
 #information {

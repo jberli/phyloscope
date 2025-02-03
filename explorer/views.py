@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 
 from explorer.api.configuration import get_configuration
 from explorer.api.range import get_range
@@ -39,7 +39,7 @@ def range(request, id):
     Retrieve the range of a taxon given its index.
     """
     result = get_range(id)
-    return HttpResponse(result)
+    return JsonResponse(result)
 
 def parents(request, lang, id):
     """

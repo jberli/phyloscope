@@ -20,8 +20,16 @@ def get_range(index):
     Get the range from a given taxon index.
     """
     taxon = Taxon.objects.get(tid=index)
-    return taxon.range.wkt
-
+    r = taxon.range
+    t = taxon.rank
+    if taxon.range is not None:
+        r = r.wkt
+    else:
+        r = ''
+    return {
+        'range': r,
+        'typesorting': t
+    }
 
 def get_iucn_range(index):
     """

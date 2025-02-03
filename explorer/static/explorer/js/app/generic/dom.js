@@ -142,6 +142,24 @@ function addClassList(e, c) {
 };
 
 /**
+ * Retrieve the CSS color variables.
+ * @param  {String} themes The themes to retrieve the colors from.
+ * @return {Object}        Css colors.
+ */
+function getColorsByClassNames(...className) {
+    let colors = {};
+    for (let i = 0; i < className.length; i++) {
+        let c = className[i];
+        let div = makeDiv(null, c);
+        document.body.append(div);
+        let style = window.getComputedStyle(div);
+        colors[c] = style.backgroundColor
+        div.remove();
+    }
+    return colors;
+}
+
+/**
  * Create a dummy DOM element from a className and return the width property.
  * @param  {String} c Class to add.
  * @return {int}      Width of the element.
@@ -173,5 +191,5 @@ function calculateTextWidth(text, style, fontsize) {
 
 export {
     addClass, removeClass, addClassList, removeClassList,
-    makeDiv, makeInput, makeImage, wait, addSVG, removeChildren
+    makeDiv, makeInput, makeImage, wait, addSVG, removeChildren, getColorsByClassNames
 }

@@ -1,321 +1,352 @@
-$taxonomy-panel-background: $side-panel-background;
-$taxonomy-entry-background: $interface-foreground;
-
-$taxonomy-font-dark: $font-color-dark;
-$taxonomy-font-light: $font-color-light;
-
-#taxonomy-container {
-    display: flex;
-    flex-direction: column;
-    margin: 20px;
-    width: 530px;
-    &.collapse {
-        & > .taxonomy-ancestry-container {
-            transform: translate(calc(-100% - 20px));
-        }
-        & > .taxonomy-levels-container {
-            transform: translate(calc(100% + 20px));
-        }
-    }
-}
-
-.taxonomy-ancestry-container {
-    display: flex;
-    justify-content: start;
-    flex-wrap: nowrap;
-    width: fit-content;
-    margin-bottom: 20px;
-    font-size: 13px;
-    height: 35px;
-    transition: transform .1s ease-out;
-
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
 .taxonomy-ancestry {
-    position: relative;
-    color: $taxonomy-font-light;
-    margin-right: -5px;
-    transition: all .1s linear;
-    transform: scale(1, 1);
-    &:first-child > .taxonomy-ancestry-label {
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 0% 0%);
-    }
-    &.small > .taxonomy-ancestry-label {
-        &:hover + .taxonomy-ancestry-tooltip {
-            transform: translate(-50%, 0) scale(1, 1);
-        }
-    }
-}
-
-.taxonomy-ancestry-label {
-    line-height: 35px;
-    height: 35px;
-    text-overflow: ellipsis;
-    text-wrap: nowrap;
-    clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 10px 50%, 0% 0%);
-    cursor: pointer;
-    border-radius: 4px;
-    transition: transform .1s linear;
-    overflow: hidden;
-    text-align: center;
-}
-
-.taxonomy-ancestry-tooltip {
-    position: absolute;
-    top: -32px;
-    z-index: 2;
-    line-height: 20px;
-    height: 20px;
-    left: 50%;
-    transform: translate(-50%, 0) scale(0, 0);
-    white-space: nowrap;
-    padding: 5px 20px;
-    border-radius: 4px;
-    overflow: hidden;
-    transition: transform .1s linear;
-}
-
-.taxonomy-levels-container {
-    height: 760px;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    flex-grow: 0;
-    transition: transform .1s ease-out;
+    height: 4rem;
 }
 
 .taxonomy-levels {
+    flex: 1;
+
     display: flex;
-    align-items: center;
-    color: $taxonomy-font-dark;
-    margin-bottom: 20px;
-    border-radius: 4px;
     flex-direction: column;
-    min-height: 240px;
-    flex: 1;
-    overflow: hidden;
+}
 
-    transition: all .1s linear;
-
-    &:firs-child {
-        margin-top: 0;
-    }
-    &:last-child {
-        margin-bottom: 0;
-    }
+.taxonomy-level {
+    flex: 4;
 
     &.smooshed {
         flex: 0;
-        margin: 0;
-        min-height: 0;
-        transition: all .1s linear;
-    }
-
-    &.collapse {
-        transform: scale(0, 0);
-        transition: all .1s linear;
     }
 }
 
-.taxonomy-levels-main {
-    > .taxonomy-entry-container > .taxonomy-entry.active {
-        outline-width: 5px;
-        box-shadow: 0 0 3px 5px $interface-shadows-dark;
-    }
+.taxonomy-level-main {
+    flex: 5;
 }
 
-.taxonomy-level-type {
-    z-index: 1;
-    margin-bottom: 15px;
-    flex-shrink: 0;
-    color: $taxonomy-font-light;
 
-    height: 40px;
-    overflow: hidden;
-    white-space: nowrap;
-    border-radius: 4px;
 
-    transition: all .1s linear;
-    clip-path: polygon(100% 0, 100% calc(100% - 15px), 50% 100%, 0 calc(100% - 15px), 0 0);
 
-    & > .taxonomy-level-type-label {
-        margin: 0 15px;
-        height: 25px;
-        line-height: 25px;
-        -webkit-user-select: none;  
-        -moz-user-select: none;    
-        -ms-user-select: none;      
-        user-select: none;
-    }
 
-    &.collapse {
-        transform: scale(0, 0);
-    }
-}
 
-.taxonomy-entry-container {
-    display: flex;
-    width: 530px;
-    justify-content: center;
-}
 
-.taxonomy-entry {
-    position: relative;
-    color: $taxonomy-font-dark;
-    flex: 1;
-    height: 178px;
-    max-width: 150px;
-    margin: 0 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 13px;
-    pointer-events: all;
-    overflow: hidden;
 
-    outline-style: solid;
-    outline-color: $taxonomy-entry-background;
-    outline-width: 0;
 
-    box-shadow: 0 0 3px $interface-shadows-dark;
+// $taxonomy-panel-background: $side-panel-background;
+// $taxonomy-entry-background: $interface-foreground;
 
-    transition: all .1s linear;
+// $taxonomy-font-dark: $font-color-dark;
+// $taxonomy-font-light: $font-color-light;
 
-    -webkit-user-select: none;  
-    -moz-user-select: none;    
-    -ms-user-select: none;      
-    user-select: none;
+// #taxonomy-container {
+//     display: flex;
+//     flex-direction: column;
+//     margin: 20px;
+//     width: 530px;
+//     &.collapse {
+//         & > .taxonomy-ancestry-container {
+//             transform: translate(calc(-100% - 20px));
+//         }
+//         & > .taxonomy-levels-container {
+//             transform: translate(calc(100% + 20px));
+//         }
+//     }
+// }
 
-    &.smooshed {
-        flex: 0;
-        margin: 0;
-        width: 0;
-        box-shadow: unset;
-        transition: all .1s linear;
-    }
+// .taxonomy-ancestry-container {
+//     display: flex;
+//     justify-content: start;
+//     flex-wrap: nowrap;
+//     width: fit-content;
+//     margin-bottom: 20px;
+//     font-size: 13px;
+//     height: 35px;
+//     transition: transform .1s ease-out;
 
-    &.collapse {
-        box-shadow: unset;
-        transform: scale(0, 0);
-        transition: all .1s linear;
-    }
+//     -webkit-user-select: none;
+//     -moz-user-select: none;
+//     -ms-user-select: none;
+//     user-select: none;
+// }
 
-    &.placeholder {
-        cursor: default;
-        pointer-events: none;
-        box-shadow: unset;
-    }
-}
+// .taxonomy-ancestry {
+//     position: relative;
+//     color: $taxonomy-font-light;
+//     margin-right: -5px;
+//     transition: all .1s linear;
+//     transform: scale(1, 1);
+//     &:first-child > .taxonomy-ancestry-label {
+//         border-top-left-radius: 4px;
+//         border-bottom-left-radius: 4px;
+//         clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 0% 0%);
+//     }
+//     &.small > .taxonomy-ancestry-label {
+//         &:hover + .taxonomy-ancestry-tooltip {
+//             transform: translate(-50%, 0) scale(1, 1);
+//         }
+//     }
+// }
 
-.taxonomy-entry-mask {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 5;
+// .taxonomy-ancestry-label {
+//     line-height: 35px;
+//     height: 35px;
+//     text-overflow: ellipsis;
+//     text-wrap: nowrap;
+//     clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 10px 50%, 0% 0%);
+//     cursor: pointer;
+//     border-radius: 4px;
+//     transition: transform .1s linear;
+//     overflow: hidden;
+//     text-align: center;
+// }
+
+// .taxonomy-ancestry-tooltip {
+//     position: absolute;
+//     top: -32px;
+//     z-index: 2;
+//     line-height: 20px;
+//     height: 20px;
+//     left: 50%;
+//     transform: translate(-50%, 0) scale(0, 0);
+//     white-space: nowrap;
+//     padding: 5px 20px;
+//     border-radius: 4px;
+//     overflow: hidden;
+//     transition: transform .1s linear;
+// }
+
+// .taxonomy-levels-container {
+//     height: 760px;
+//     display: flex;
+//     flex-direction: column;
+//     flex-shrink: 0;
+//     flex-grow: 0;
+//     transition: transform .1s ease-out;
+// }
+
+// .taxonomy-levels {
+//     display: flex;
+//     align-items: center;
+//     color: $taxonomy-font-dark;
+//     margin-bottom: 20px;
+//     border-radius: 4px;
+//     flex-direction: column;
+//     min-height: 240px;
+//     flex: 1;
+//     overflow: hidden;
+
+//     transition: all .1s linear;
+
+//     &:firs-child {
+//         margin-top: 0;
+//     }
+//     &:last-child {
+//         margin-bottom: 0;
+//     }
+
+//     &.smooshed {
+//         flex: 0;
+//         margin: 0;
+//         min-height: 0;
+//         transition: all .1s linear;
+//     }
+
+//     &.collapse {
+//         transform: scale(0, 0);
+//         transition: all .1s linear;
+//     }
+// }
+
+// .taxonomy-levels-main {
+//     > .taxonomy-entry-container > .taxonomy-entry.active {
+//         outline-width: 5px;
+//         box-shadow: 0 0 3px 5px $interface-shadows-dark;
+//     }
+// }
+
+// .taxonomy-level-type {
+//     z-index: 1;
+//     margin-bottom: 15px;
+//     flex-shrink: 0;
+//     color: $taxonomy-font-light;
+
+//     height: 40px;
+//     overflow: hidden;
+//     white-space: nowrap;
+//     border-radius: 4px;
+
+//     transition: all .1s linear;
+//     clip-path: polygon(100% 0, 100% calc(100% - 15px), 50% 100%, 0 calc(100% - 15px), 0 0);
+
+//     & > .taxonomy-level-type-label {
+//         margin: 0 15px;
+//         height: 25px;
+//         line-height: 25px;
+//         -webkit-user-select: none;  
+//         -moz-user-select: none;    
+//         -ms-user-select: none;      
+//         user-select: none;
+//     }
+
+//     &.collapse {
+//         transform: scale(0, 0);
+//     }
+// }
+
+// .taxonomy-entry-container {
+//     display: flex;
+//     width: 530px;
+//     justify-content: center;
+// }
+
+// .taxonomy-entry {
+//     position: relative;
+//     color: $taxonomy-font-dark;
+//     flex: 1;
+//     height: 178px;
+//     max-width: 150px;
+//     margin: 0 10px;
+//     cursor: pointer;
+//     border-radius: 4px;
+//     font-size: 13px;
+//     pointer-events: all;
+//     overflow: hidden;
+
+//     outline-style: solid;
+//     outline-color: $taxonomy-entry-background;
+//     outline-width: 0;
+
+//     box-shadow: 0 0 3px $interface-shadows-dark;
+
+//     transition: all .1s linear;
+
+//     -webkit-user-select: none;  
+//     -moz-user-select: none;    
+//     -ms-user-select: none;      
+//     user-select: none;
+
+//     &.smooshed {
+//         flex: 0;
+//         margin: 0;
+//         width: 0;
+//         box-shadow: unset;
+//         transition: all .1s linear;
+//     }
+
+//     &.collapse {
+//         box-shadow: unset;
+//         transform: scale(0, 0);
+//         transition: all .1s linear;
+//     }
+
+//     &.placeholder {
+//         cursor: default;
+//         pointer-events: none;
+//         box-shadow: unset;
+//     }
+// }
+
+// .taxonomy-entry-mask {
+//     position: absolute;
+//     height: 100%;
+//     width: 100%;
+//     z-index: 5;
     
-    opacity: 0;
-    background: $taxonomy-panel-background;
+//     opacity: 0;
+//     background: $taxonomy-panel-background;
     
-    border-radius: 4px;
-    transition: opacity .1s linear;
+//     border-radius: 4px;
+//     transition: opacity .1s linear;
 
-    pointer-events: none;
-    -webkit-user-select: none;  
-    -moz-user-select: none;    
-    -ms-user-select: none;      
-    user-select: none;
+//     pointer-events: none;
+//     -webkit-user-select: none;  
+//     -moz-user-select: none;    
+//     -ms-user-select: none;      
+//     user-select: none;
 
-    &.inactive {
-        opacity: .7;
-    }
-}
+//     &.inactive {
+//         opacity: .7;
+//     }
+// }
 
-.taxonomy-image-container {
-    position: relative;
-    height: 150px;
-    width: 150px;
-    background-color: $main-color-mediumlight;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    overflow: hidden;
-    pointer-events: none;
-    &::before {
-        opacity: 0;
-    }
-    &.loading::before {
-        content: '';
-    }
-}
+// .taxonomy-image-container {
+//     position: relative;
+//     height: 150px;
+//     width: 150px;
+//     background-color: $main-color-mediumlight;
+//     border-top-left-radius: 4px;
+//     border-top-right-radius: 4px;
+//     overflow: hidden;
+//     pointer-events: none;
+//     &::before {
+//         opacity: 0;
+//     }
+//     &.loading::before {
+//         content: '';
+//     }
+// }
 
-.taxonomy-entry-label {
-    position: absolute;
-    bottom: 0;
+// .taxonomy-entry-label {
+//     position: absolute;
+//     bottom: 0;
 
-    width: 150px;
-    height: 28px;
-    line-height: 1.2em;
+//     width: 150px;
+//     height: 28px;
+//     line-height: 1.2em;
 
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    background-color: $taxonomy-entry-background;
+//     border-bottom-left-radius: 4px;
+//     border-bottom-right-radius: 4px;
+//     background-color: $taxonomy-entry-background;
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-wrap: nowrap;
-    text-align: center;
-    padding: 5px 10px;
-    pointer-events: none;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     text-wrap: nowrap;
+//     text-align: center;
+//     padding: 5px 10px;
+//     pointer-events: none;
 
-    transition: all .1s linear;
+//     transition: all .1s linear;
     
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
+//     -webkit-box-sizing: border-box;
+//     -moz-box-sizing: border-box;
+//     box-sizing: border-box;
+// }
 
-.taxonomy-entry-statistics {
-    position: absolute;
-    line-height: 25px;
-    text-align: center;
-    border-bottom-right-radius: 4px;
-    border-top-left-radius: 4px;
-    top: 0;
-    left: 0;
-    background-color: $taxonomy-entry-background;
-    overflow: hidden;
-    transition: all .1s linear;
-}
+// .taxonomy-entry-statistics {
+//     position: absolute;
+//     line-height: 25px;
+//     text-align: center;
+//     border-bottom-right-radius: 4px;
+//     border-top-left-radius: 4px;
+//     top: 0;
+//     left: 0;
+//     background-color: $taxonomy-entry-background;
+//     overflow: hidden;
+//     transition: all .1s linear;
+// }
 
-@media screen and (max-height: 1000px) {
-    .taxonomy-levels-container {
-        height: 610px;
-    }
+// @media screen and (max-height: 1000px) {
+//     .taxonomy-levels-container {
+//         height: 610px;
+//     }
 
-    .taxonomy-levels {
-        min-width: 190px;
-        min-height: 190px;
-    }
+//     .taxonomy-levels {
+//         min-width: 190px;
+//         min-height: 190px;
+//     }
 
-    .taxonomy-entry-container {
-        width: 390px;
-    }
+//     .taxonomy-entry-container {
+//         width: 390px;
+//     }
 
-    .taxonomy-entry {
-        max-width: 100px;
-        height: 128px;
-    }
+//     .taxonomy-entry {
+//         max-width: 100px;
+//         height: 128px;
+//     }
 
-    .taxonomy-image-container {
-        height: 100px;
-        width: 100px;
-    }
+//     .taxonomy-image-container {
+//         height: 100px;
+//         width: 100px;
+//     }
 
-    .taxonomy-entry-label {
-        width: 100px;
-    }
-}
+//     .taxonomy-entry-label {
+//         width: 100px;
+//     }
+// }

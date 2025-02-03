@@ -7,13 +7,26 @@ import { ajaxGet } from "../generic/ajax.js";
 import { makeDiv } from "../generic/dom.js";
 
 class Taxonomy {
-    constructor(app) {
+    constructor(app, params) {
         this.app = app;
+        this.params = params;
+
+        // Create DOM elements
         this.container = makeDiv('taxonomy', 'sub-panel');
         this.app.second.append(this.container);
 
-        // this.initialize();
-        this.taxon = app.taxon;
+        this.ancestrycontainer = makeDiv(null, 'taxonomy-ancestry');
+        this.levelcontainer = makeDiv(null, 'taxonomy-levels');
+        this.grandparent = makeDiv(null, 'taxonomy-level smooshed');
+        this.parent = makeDiv(null, 'taxonomy-level');
+        this.siblings = makeDiv(null, 'taxonomy-level taxonomy-level-main');
+        this.children = makeDiv(null, 'taxonomy-level');
+        this.grandchildren = makeDiv(null, 'taxonomy-level smooshed');
+
+        this.levelcontainer.append(this.grandparent, this.parent, this.siblings, this.children, this.grandchildren);
+        this.container.append(this.ancestrycontainer, this.levelcontainer);
+
+
     }
 
     initialize() {

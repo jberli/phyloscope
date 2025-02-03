@@ -4,7 +4,7 @@
  */
 
 import { ajaxGet } from "../generic/ajax.js";
-import { addClass, removeClass, makeDiv } from "../generic/dom.js";
+import { addClass, removeClass, makeDiv, getColorsByClassNames } from "../generic/dom.js";
 import Cartography from "./cartography.js";
 import Information from "./information.js";
 import Footer from "./footer.js";
@@ -24,6 +24,7 @@ class Application {
         // Retrieve the configuration parameters
         ajaxGet('configuration/', (params) => {
             this.params = params;
+            this.params.colors = getColorsByClassNames(...this.params.typesorting);
 
             // Create the first, second and third column panel
             this.first = makeDiv('first-panel', 'panel');
@@ -37,7 +38,7 @@ class Application {
             this.footer = new Footer(this);
             // Create the header and taxonomy widgets in the second panel
             this.header = new Header(this);
-            this.taxonomy = new Taxonomy(this);
+            this.taxonomy = new Taxonomy(this, this.params);
             // Create the photography and cartography widgets in the second panel
             this.photography = new Photography(this, this.params);
             this.cartography = new Cartography(this, this.params);
@@ -49,13 +50,6 @@ class Application {
             // Reveal the interface
             this.loaded();
         });
-    }
-
-    /**
-     * Update the application by fetching the current taxon information.
-     */
-    update() {
-        
     }
 
     taxon() {

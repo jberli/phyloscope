@@ -1,8 +1,11 @@
 interface:
   cartography:
     maxzoom: 6
+    start:
+      center: [0, 0]
+      zoom: 1
     range:
-      color: rgba(200, 110, 100, 0.7)
+      opacity: 0.7
       padding: 20
       transition:
         center: 500
@@ -14,9 +17,45 @@ languages:
   - fr
   - en
   current: fr
-taxonomy:
-  current: 9199
 texts:
   vernaculars:
     en: 'Vernacular names:'
     fr: 'Noms vernaculaires :'
+taxonomy:
+  current: 9199
+typesorting:
+  - 'stateofmatter'
+  - 'kingdom'
+  - 'phylum'
+  - 'subphylum'
+  - 'superclass'
+  - 'class'
+  - 'subclass'
+  - 'infraclass'
+  - 'subterclass'
+  - 'superorder'
+  - 'order'
+  - 'suborder'
+  - 'infraorder'
+  - 'parvorder'
+  - 'zoosection'
+  - 'zoosubsection'
+  - 'superfamily'
+  - 'epifamily'
+  - 'family'
+  - 'subfamily'
+  - 'supertribe'
+  - 'tribe'
+  - 'subtribe'
+  - 'genus'
+  - 'genushybrid'
+  - 'subgenus'
+  - 'section'
+  - 'subsection'
+  - 'complex'
+  - 'species'
+  - 'hybrid'
+  - 'subspecies'
+  - 'infrahybrid'
+  - 'variety'
+  - 'form'

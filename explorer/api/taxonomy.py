@@ -92,8 +92,19 @@ def get_taxon(language, index):
     if len(name) == 0:
         name = taxon.name
 
-    wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language=language)
+    wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language='en')
     page = wikipedia.page(name)
+
+    if language != 'en':
+        found = False
+        langlinks = page.langlinks
+        for k in sorted(langlinks.keys()):
+            if k == language:
+                page = langlinks[k]
+                found = True
+        if not found:
+            result['description'] = None
+            return result
 
     if page.exists():
         result['description'] = {

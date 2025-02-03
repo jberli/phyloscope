@@ -79,6 +79,23 @@ class Cartography {
     }
 
     /**
+     * Animate the view using the parameters.
+     * @param {Array} center - Target coordinates center.
+     * @param {int} zoom - Target zoom level
+     * @param {int} duration - Duration of the animation in ms.
+     * @param {function} callback - Callback of the animation.
+     */
+    animate(center, zoom, duration, callback) {
+        this.map.getView().animate({
+            center: center,
+            zoom: zoom,
+            duration: duration,
+            easing: ol.easing.easeInOut,
+            callback: () => { callback(); }
+        });
+    }
+
+    /**
      * Create the basemap.
      */
     basemap() {
@@ -93,10 +110,13 @@ class Cartography {
             matrixIds[z] = z;
         }
 
+        let carto = this.params.interface.cartography;
+        const pi = Math.PI;
         this.view = new ol.View({
-            center: [ 0, 0 ],
-            zoom: 1,
-            maxZoom: this.params.interface.cartography.maxzoom,
+            center: carto.start.center,
+            zoom: carto.start.zoom,
+            maxZoom: carto.maxzoom,
+            extent: [ -pi * 6378137, -pi * 6378137, pi * 6378137, pi * 6378137 ]
         })
 
         this.map = new ol.Map({
@@ -150,41 +170,58 @@ class Range {
 
     /**
      * 
-     * @param {string} range - The range to display on the map as a KML file.
+     * @param {Object} r - The range to display on the map as a KML file along with its typesorting.
      * @param {function} callback - Callback fired when the range is displayed on the map. 
      */
-    set(range, callback) {
+    set(r, callback) {
         this.listen = false;
+        let range = r.range;
+        let typesorting = r.typesorting;
 
-        // The vector layer
-        this.layer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [new ol.format.WKT().readFeature(range)]
-            }),
-            style: new ol.style.Style({
-                fill: new ol.style.Fill({
-                    // Set the style from the parameters
-                    color: this.params.interface.cartography.range.color,
+        // Check if range is not null
+        if (range !== '') {
+            // The vector layer
+            this.layer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: [new ol.format.WKT().readFeature(range)]
                 }),
-            }),
-            // Keep it hidden
-            opacity: 0,
-            // Avoid the range to pop-up when moving on the map
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-        });
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        // Set the style from the parameters
+                        color: this.params.colors[typesorting],
+                    }),
+                }),
+                // Keep it hidden
+                opacity: 0,
+                // Avoid the range to pop-up when moving on the map
+                updateWhileAnimating: true,
+                updateWhileInteracting: true,
+            });
 
-        // Add the layer to the map
-        this.cartography.map.addLayer(this.layer);
+            // Add the layer to the map
+            this.cartography.map.addLayer(this.layer);
 
-        // Center the map on the layer
-        this.center(() => {
-            // Now display the range
-            this.display(() => {});
-            // Activate the centering button
-            this.listen = true;
-            callback();
-        });
+            // Center the map on the layer
+            this.center(() => {
+                // Now display the range
+                this.display(() => {});
+                // Activate the centering button
+                this.listen = true;
+                callback();
+            });
+        }
+        // If range is null
+        else {
+            this.layer = undefined;
+            let carto = this.params.interface.cartography;
+            let transition = this.cartography.params.interface.cartography.range.transition.center;
+            this.cartography.animate(carto.start.center, carto.start.zoom, transition, () => {
+                // Activate the centering button
+                this.listen = true;
+                callback();
+            });
+        }
+        
     }
     
     /**
@@ -231,7 +268,7 @@ class Range {
     hide(callback) {
         let transition = this.params.interface.cartography.range.transition.display;
         if (this.exists()) {
-            animateOpacity(this.layer, transition, 60, 1, () => { callback(); });
+            animateOpacity(this.layer, transition, 60, 0, () => { callback(); });
         }
     }
 
@@ -241,8 +278,9 @@ class Range {
      */
     display(callback) {
         let transition = this.params.interface.cartography.range.transition.display;
+        let opacity = this.cartography.params.interface.cartography.range.opacity;
         if (this.exists()) {
-            animateOpacity(this.layer, transition, 60, 1, () => { callback(); });
+            animateOpacity(this.layer, transition, 60, opacity, () => { callback(); });
         }
     }
 }
