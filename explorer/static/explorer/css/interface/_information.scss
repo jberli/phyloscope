@@ -1,7 +1,10 @@
 ///////////////////////////////////////////////////////
 /// INFORMATION
+/// 
+/// ///////////////////////////////////////////////////////
+/// Description
 
-.text-container {
+.description-container {
     flex: 1;
     background-color: $interface-background;
     transition: all .2s ease-in-out;
@@ -10,7 +13,7 @@
     overflow: auto;
 }
 
-.text-content {
+.description-content {
     margin: $text-margin;
     opacity: 1;
     transition: all .2s ease-in-out;
@@ -19,33 +22,33 @@
     }
 }
 
-.text-title {
+.description-title {
     font-weight: bold;
     font-size: 26px;
 }
 
-.text-scientific {
+.description-scientific {
     font-style: italic;
     font-size: 20px;
 }
 
-.text-vernacular {
+.description-vernacular {
     margin-top: 1rem;
     font-weight: bold;
 }
 
-.text-vernaculars {
+.description-vernaculars {
     &:first-letter {
         text-transform: uppercase;
     }
 }
 
-.text-summary {
+.description-summary {
     margin-top: 1rem;
 }
 
 ///////////////////////////////////////////////////////
-/// SEARCH
+/// Search
 
 $search-height: 3rem;
 

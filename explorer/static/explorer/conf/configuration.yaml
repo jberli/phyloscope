@@ -1,5 +1,4 @@
 interface:
-  title: Phyloscope
   cartography:
     maxzoom: 6
     range:
@@ -8,15 +7,16 @@ interface:
       transition:
         center: 500
         display: 200
+  title: Phyloscope
+  transition: 200
 languages:
   available:
   - fr
   - en
   current: fr
 taxonomy:
-  current: 3
+  current: 9199
 texts:
-  description:
-    vernaculars:
-      en: 'Vernacular names:'
-      fr: 'Noms vernaculaires :'
+  vernaculars:
+    en: 'Vernacular names:'
+    fr: 'Noms vernaculaires :'

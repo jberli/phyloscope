@@ -33,7 +33,7 @@ class Application {
             this.container.append(this.first, this.second, this.third);
 
             // Create the information and footer widgets in the first panel
-            this.information = new Information(this);
+            this.information = new Information(this, this.params);
             this.footer = new Footer(this);
             // Create the header and taxonomy widgets in the second panel
             this.header = new Header(this);
@@ -43,7 +43,7 @@ class Application {
             this.cartography = new Cartography(this, this.params);
 
             // Create the updater object to update the widgets on demand
-            this.updater = new Updater(this);
+            this.updater = new Updater(this, this.params);
             this.updater.update(this.params.taxonomy.current);
 
             // Reveal the interface

@@ -154,6 +154,8 @@ class Range {
      * @param {function} callback - Callback fired when the range is displayed on the map. 
      */
     set(range, callback) {
+        this.listen = false;
+
         // The vector layer
         this.layer = new ol.layer.Vector({
             source: new ol.source.Vector({

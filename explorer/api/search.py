@@ -1,6 +1,7 @@
 from explorer.models import Names, Taxon, Photo
+from explorer.api.tools.information import RANKS
 
-def lookup(language, value):
+def lookup(language, value, limit):
     """
     Returns best taxon according to the provided string.
     """

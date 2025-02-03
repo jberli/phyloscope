@@ -25,7 +25,7 @@ def search(request, lang, value, limit=15):
     Autocomplete tool that returns the right results from a given string.
     """
     names = lookup(lang, value, limit)
-    return JsonResponse(names)
+    return JsonResponse({'values': names})
 
 def taxon(request, lang, id):
     """

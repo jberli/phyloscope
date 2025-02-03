@@ -4,23 +4,8 @@ import yaml
 import wikipediaapi as wiki
 import xml.dom.minidom
 
-from explorer.models import Taxon, Current
+from explorer.models import Taxon
 from explorer.api.tools.models import clean_tables
-
-def has_range(index):
-    """
-    Returns True if the taxon has a range file from iNaturalist.
-    Instead returns False
-    """
-    response = requests.get(f'https://www.inaturalist.org/taxa/{index}/range.kml')
-    try:
-        # If the KML is parsable, the range is present
-        xml.dom.minidom.parseString(response.content)
-        has = True
-    except:
-        has = False
-    finally:
-        return has
 
 def has_wikipedia(url):
     """
@@ -59,7 +44,7 @@ def update_taxon(ranks=['species']):
         taxon = taxons[index]
 
         # Checking if taxon has range and wikipedia page
-        r = has_range(taxon.tid)
+        r = True if taxon.range is not None else False
         w = has_wikipedia(taxon.wikipedia)
 
         if r and w:
