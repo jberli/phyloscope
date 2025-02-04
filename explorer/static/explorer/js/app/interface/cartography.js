@@ -116,7 +116,7 @@ class Cartography {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ -pi * 6378137, -pi * 6378137, pi * 6378137, pi * 6378137 ]
+            extent: [ (-pi * 6378137)*1.2, -pi * 6378137, (pi * 6378137)*1.2, pi * 6378137 ]
         })
 
         this.map = new ol.Map({

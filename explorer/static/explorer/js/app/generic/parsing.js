@@ -3,6 +3,8 @@
  * Text parsing related functions.
  */
 
+import { makeDiv } from "./dom.js";
+
 /**
  * Compare two strings.
  * @param  {string} str1 - String 1.
@@ -69,4 +71,44 @@ function boldSubstring(str, substr) {
     return result;
 }
 
-export { compare, removeTrailing, uppercaseFirstLetter, boldSubstring }
+/**
+ * Calculate the width that would take a string of a given style in the DOM.
+ * @param {string} text - String to test.
+ * @param {ElementCSSInlineStyle} style - Style of the element.
+ * @param {float} fontsize - Size of the font in px.
+ * @returns {float} width - Width in px of the text.
+ */
+function calculateTextWidth(text, style, fontsize) {
+    let dummy = document.createElement('div');
+    dummy.style.fontFamily = style.fontFamily;
+    dummy.style.fontSize = fontsize;
+    dummy.style.fontWeight = style.fontWeight;
+    dummy.style.fontStyle = style.fontStyle;
+    dummy.style.height = 'auto';
+    dummy.style.width = 'auto';
+    dummy.style.position = 'absolute';
+    dummy.style.whiteSpace = 'nowrap';
+    dummy.innerHTML = text;
+    document.body.appendChild(dummy);
+    let width = Math.ceil(dummy.clientWidth);
+    dummy.remove();
+    return width;
+}
+
+/**
+ * Create a dummy DOM element from a className and return the width property.
+ * @param  {String} c Class to add.
+ * @return {int}      Width of the element.
+ */
+function calculateWidthFromClass(c) {
+    let node = makeDiv(null, c);
+    document.body.append(node);
+    let width = node.offsetWidth;
+    node.remove();
+    return width;
+}
+
+export {
+    compare, removeTrailing, uppercaseFirstLetter, boldSubstring,
+    calculateTextWidth, calculateWidthFromClass
+}

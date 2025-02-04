@@ -42,6 +42,7 @@ class Updater {
             this.app.params.taxonomy = r;
             this.app.information.update();
             this.app.photography.update();
+            this.app.taxonomy.update();
         });
     }
 }

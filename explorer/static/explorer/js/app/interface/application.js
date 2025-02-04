@@ -52,11 +52,6 @@ class Application {
         });
     }
 
-    taxon() {
-        let i = this.params.taxonomy.tindex;
-        return this.params.taxonomy.siblings[i]
-    }
-
     loading() {
         removeClass(this.mask, 'loaded');
     }

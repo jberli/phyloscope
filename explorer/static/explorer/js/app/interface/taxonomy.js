@@ -3,8 +3,10 @@
  * Define the taxonomy widget.
  */
 
-import { ajaxGet } from "../generic/ajax.js";
-import { makeDiv } from "../generic/dom.js";
+import { ajaxGet, loadImage } from "../generic/ajax.js";
+import { addClass, makeDiv, makeImage } from "../generic/dom.js";
+import { calculateTextWidth, calculateWidthFromClass, uppercaseFirstLetter } from "../generic/parsing.js";
+import { round } from "../generic/math.js";
 
 class Taxonomy {
     constructor(app, params) {
@@ -16,28 +18,31 @@ class Taxonomy {
         this.app.second.append(this.container);
 
         this.ancestrycontainer = makeDiv(null, 'taxonomy-ancestry');
-        this.levelcontainer = makeDiv(null, 'taxonomy-levels');
-        this.grandparent = makeDiv(null, 'taxonomy-level smooshed');
-        this.parent = makeDiv(null, 'taxonomy-level');
-        this.siblings = makeDiv(null, 'taxonomy-level taxonomy-level-main');
-        this.children = makeDiv(null, 'taxonomy-level');
-        this.grandchildren = makeDiv(null, 'taxonomy-level smooshed');
-
-        this.levelcontainer.append(this.grandparent, this.parent, this.siblings, this.children, this.grandchildren);
-        this.container.append(this.ancestrycontainer, this.levelcontainer);
+        this.levels = makeDiv(null, 'taxonomy-levels');
 
 
+        // this.grandparent = makeDiv(null, 'taxonomy-level smooshed');
+        // this.parent = makeDiv(null, 'taxonomy-level');
+        
+        // this.children = makeDiv(null, 'taxonomy-level');
+        // this.grandchildren = makeDiv(null, 'taxonomy-level smooshed');
+
+        this.container.append(this.ancestrycontainer, this.levels);
+
+        this.parent = new Siblings(this);
+        this.siblings = new Siblings(this);
+        this.children = new Siblings(this);
     }
 
-    initialize() {
-        this.ancestry = makeDiv(null, 'taxonomy-ancestry-container');
-        this.view = makeDiv(null, 'taxonomy-levels-container');
-        this.container.append(this.ancestry, this.view);
+    update() {
+        this.parent.update();
+        this.siblings.update();
+        this.children.update();
     }
 
     reload() {
         this.destroy(() => {
-            this.initialize();
+            this.update();
         })
     }
 
@@ -48,22 +53,168 @@ class Taxonomy {
             callback();
         });
     }
+}
 
-    createTaxonomy() {
-        params.taxonomy = r.values;
-        createAncestry(params.taxonomy.ancestry);
-        let grandparent = makeDiv(id=null, c='taxonomy-levels smooshed');
-        let parent = makeDiv(id=null, c='taxonomy-levels');
-        let siblings = makeDiv(id=null, c='taxonomy-levels taxonomy-levels-main');
-        let children = makeDiv(id=null, c='taxonomy-levels');
-        let grandchildren = makeDiv(id=null, c='taxonomy-levels smooshed');
-        createParentLevel(params, parent);
-        createTaxonLevel(params, siblings);
-        createChildrenLevel(params, children);
-        view.append(grandparent, parent, siblings, children, grandchildren);
-        removeClass(taxonomyContainer, 'collapse');
+class Level {
+    constructor(taxonomy) {
+        this.taxonomy = taxonomy;
     }
 }
+
+class Siblings extends Level {
+    constructor(taxonomy) {
+        super(taxonomy);
+    }
+
+    update() {
+        // Create the DOM element
+        this.container = makeDiv(null, 'taxonomy-level');
+        this.taxonomy.levels.append(this.container);
+
+        this.siblings = this.taxonomy.params.taxonomy.siblings;
+        this.index = this.taxonomy.params.taxonomy.tindex;
+
+        let typecontainer = makeDiv(null, 'taxonomy-type-container ' + this.siblings[this.index].typesorting);
+        let typelabel = makeDiv(null, 'taxonomy-type-label ' + this.siblings[this.index].typesorting, this.siblings[this.index].type);
+        typecontainer.append(typelabel);
+
+        let entrycontainer = makeDiv(null, 'taxonomy-entry-container');
+
+        let firstClass = '';
+        if (this.index > 0) { firstClass += ' smooshed'}
+        entrycontainer.appendChild(makeDiv(null, 'taxonomy-entry placeholder' + firstClass));
+        for (let i = 0; i < (this.siblings.length); ++i) {
+            let smooshed = true;
+            let active = false;
+            if (i == this.index - 1) { smooshed = false }
+            if (i == this.index) { smooshed = false; active = true; }
+            if (i == this.index + 1) { smooshed = false }
+
+            let entry = new Taxon(entrycontainer, this.siblings[i], active, false, smooshed);
+
+            // entry.addEventListener('click', slideSibling);
+
+            entrycontainer.appendChild(entry.container);
+        }
+
+        let lastClass = '';
+        if (this.index < this.siblings.length - 1) { lastClass += ' smooshed'}
+        entrycontainer.appendChild(makeDiv(null, 'taxonomy-entry placeholder' + lastClass));
+
+        // entrycontainer.addEventListener('wheel', slideSibling);
+
+        this.container.append(typecontainer, entrycontainer);
+    }
+}
+
+// obj, active, collapse, smooshed
+
+class Taxon {
+    constructor(parent, obj, active, collapse, smooshed) {
+        this.parent = parent;
+        this.obj = obj;
+        this.active = active;
+        this.collapse = collapse;
+        this.smooshed = smooshed;
+        this.url = 'https://inaturalist-open-data.s3.amazonaws.com/photos/';
+        
+        let className = '';
+        if (this.active) { className += ' active' }
+        if (this.collapse) { className += ' collapse' }
+        if (this.smooshed) { className += ' smooshed' }
+
+        this.container = makeDiv(null, 'taxonomy-entry' + className);
+
+        let image = makeDiv(null, 'taxonomy-image-container');
+        console.log(obj)
+
+        let infos = this.obj.photographs[0];
+        if (infos !== undefined) {
+            let imageMask = makeDiv(null, 'photo-mask');
+            let loader = makeDiv(null, 'photo-loader');
+            let i = makeImage(this.url + infos.id + '/medium.' + infos.extension, null, null, null, 'photo');
+            loadImage(i).then(() => { addClass(imageMask, 'loaded') });
+            imageMask.appendChild(loader);
+            image.append(imageMask, i);
+        }
+
+        let html, name;
+        if (obj.vernaculars.length > 0) {
+            name = uppercaseFirstLetter(obj.vernaculars[0]);
+            html = name;
+        } else {
+            name = uppercaseFirstLetter(obj.scientific);
+            html = '<i>' + uppercaseFirstLetter(obj.scientific) + '</i>';
+        }
+
+        let stats = obj.count.toLocaleString();
+        if (obj.parent) {
+            stats += ' (';
+            if (round(obj.percentage, 1) < 10) {
+                if (round(obj.percentage, 1) < 0.1) {
+                    if (round(obj.percentage, 2) < 0.01) {
+                        stats += round(obj.percentage, 3).toFixed(3) + '%';
+                    } else {
+                        stats += round(obj.percentage, 2).toFixed(2) + '%';
+                    }
+                } else {
+                    stats += round(obj.percentage, 1).toFixed(1) + '%';
+                }
+            } else {
+                stats += Math.round(obj.percentage) + '%';
+            }
+            stats += ')';
+        }
+
+        let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
+        let swidth = calculateTextWidth(stats, getComputedStyle(statistics), '13px') + 10;
+    
+        statistics.style.width = '0px';
+        statistics.style.height = '0px';
+
+        this.container.addEventListener('mouseover', (e) => {
+            statistics.style.width = swidth + 'px';
+            statistics.style.height = '25px';
+        });
+
+        this.container.addEventListener('mouseout', (e) => {
+            statistics.style.width = '0px';
+            statistics.style.height = '0px';
+        });
+        
+        let label = makeDiv(null, 'taxonomy-entry-label', html);
+        let width = calculateTextWidth(name, getComputedStyle(label), '13px') + 20;
+
+        let nodeWidth = calculateWidthFromClass('taxonomy-entry');
+        if (width > nodeWidth) {
+            let height = calculateLabelHeight(name, getComputedStyle(label), '13px', nodeWidth);
+            this.container.addEventListener('mouseover', (e) => {
+                label.style.height = height + 'px';
+                label.style.textWrap = 'wrap';
+                label.style.whiteSpace = 'pre-wrap';
+                label.style.wordBreak = 'break-word';
+                label.style.textOverflow = 'unset';
+            });
+            this.container.addEventListener('mouseout', (e) => {
+                label.style.height = '28px';
+                label.style.textWrap = 'nowrap';
+                label.style.textOverflow = 'ellipsis';
+            });
+        }
+    
+        let mask = makeDiv(null, 'taxonomy-entry-mask');
+        this.container.append(mask, image, label, statistics);
+        this.container.setAttribute('taxon', obj.id);
+
+        
+        this.parent.append(this.container);
+    }
+}
+
+
+
+
+
 
 
 

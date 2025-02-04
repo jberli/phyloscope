@@ -159,37 +159,8 @@ function getColorsByClassNames(...className) {
     return colors;
 }
 
-/**
- * Create a dummy DOM element from a className and return the width property.
- * @param  {String} c Class to add.
- * @return {int}      Width of the element.
- */
-function calculateWidthFromClass(c) {
-    let node = makeDiv(null, c);
-    document.body.append(node);
-    let width = node.offsetWidth;
-    node.remove();
-    return width;
-}
-
-function calculateTextWidth(text, style, fontsize) {
-    let dummy = document.createElement('div');
-    dummy.style.fontFamily = style.fontFamily;
-    dummy.style.fontSize = fontsize;
-    dummy.style.fontWeight = style.fontWeight;
-    dummy.style.fontStyle = style.fontStyle;
-    dummy.style.height = 'auto';
-    dummy.style.width = 'auto';
-    dummy.style.position = 'absolute';
-    dummy.style.whiteSpace = 'nowrap';
-    dummy.innerHTML = text;
-    document.body.appendChild(dummy);
-    let width = Math.ceil(dummy.clientWidth);
-    dummy.remove();
-    return width;
-}
-
 export {
     addClass, removeClass, addClassList, removeClassList,
-    makeDiv, makeInput, makeImage, wait, addSVG, removeChildren, getColorsByClassNames
+    makeDiv, makeInput, makeImage, wait, addSVG, removeChildren,
+    getColorsByClassNames
 }
