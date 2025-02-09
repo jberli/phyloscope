@@ -54,7 +54,9 @@ def lookup(language, value, limit):
                 break
         return names, taxons
 
-    if value == 'grisou':
+    mignon = ['grisou', 'tipijon']
+
+    if value in mignon:
         limit -= 1
 
     # Get the vernacular names starting with the value in priority
@@ -65,7 +67,7 @@ def lookup(language, value, limit):
     # Storage to avoid same taxon
     taxons = []
 
-    if value == 'grisou':
+    if value in mignon:
         names, taxons = add_vernacular(names, taxons, Names.objects.filter(language=language, taxon__tid=3017))
 
     # Add entries

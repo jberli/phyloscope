@@ -143,10 +143,10 @@ def get_children(language, index):
     """
     Get the children from a given taxon index.
     """
+    result = {}
     taxon = Taxon.objects.get(tid=index)
     children = taxon.children.all()
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
-        return sorted(childrenlist, key=lambda k: k['level'], reverse=True)
-    else:
-        return None
+        result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+    return result

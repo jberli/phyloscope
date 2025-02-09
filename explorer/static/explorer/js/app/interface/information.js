@@ -28,6 +28,7 @@ class Information {
     }
 
     update() {
+        this.description.clear();
         this.description.update();
     }
 
@@ -224,7 +225,7 @@ class Search {
                             // Deactivate search mode
                             self.deactivate(() => {});
                             // Update the application widgets
-                            self.information.app.updater.update(e.target.getAttribute('taxon'));
+                            self.information.app.updater.full(e.target.getAttribute('taxon'));
                         }
                         result.addEventListener('click', activateTaxon);
 
@@ -324,7 +325,7 @@ class Description {
         // If there is a wikipedia page
         if (wikipedia !== null) {
             // Add the summary
-            let summary = makeDiv(null, 'description-summary', removeTrailing(wikipedia.summary.replace('== References ==', '').replace(',.', '.')));
+            let summary = makeDiv(null, 'description-summary', removeTrailing(wikipedia.summary.replace('== References ==', '').replace(',.', '.').replace(' .', '.')));
             this.content.append(summary);
         }
         

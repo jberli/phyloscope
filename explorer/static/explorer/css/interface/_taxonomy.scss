@@ -7,7 +7,12 @@ $taxonomy-font-light: $font-color-light;
 $taxonomy-margin: 2rem;
 
 .taxonomy-mask {
-    background-color: $main-color-dark;
+    justify-content: end;
+    align-items: start;
+}
+
+.taxonomy-loader {
+    margin: 1rem;
 }
 
 .taxonomy-ancestry {

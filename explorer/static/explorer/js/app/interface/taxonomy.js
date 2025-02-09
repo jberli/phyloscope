@@ -17,11 +17,11 @@ class Taxonomy {
         this.container = makeDiv('taxonomy', 'sub-panel');
         this.app.second.append(this.container);
 
-        // // Mask and loader
-        // this.mask = makeDiv(null, 'taxonomy-mask mask');
-        // this.loader = makeDiv(null, 'taxonomy-loader loader');
-        // this.mask.append(this.loader);
-        // this.container.append(this.mask);
+        // Mask and loader
+        this.mask = makeDiv(null, 'taxonomy-mask mask');
+        this.loader = makeDiv(null, 'taxonomy-loader loader');
+        this.mask.append(this.loader);
+        this.container.append(this.mask);
 
         this.ancestrycontainer = makeDiv(null, 'taxonomy-ancestry');
         this.levels = makeDiv(null, 'taxonomy-levels');
@@ -34,21 +34,38 @@ class Taxonomy {
 
         this.container.append(this.ancestrycontainer, this.levels);
 
+        this.grandparent = new GrandParents(this);
         this.parents = new Parents(this);
         this.siblings = new Siblings(this);
         this.children = new Children(this);
+        this.grandchildren = new GrandChildren(this);
     }
 
     update() {
-        this.collapse();
-
+        this.loading();
         wait(this.params.interface.transition, () => {
             this.destroy();
             this.parents.update();
             this.siblings.update();
             this.children.update();
-            this.reveal();
+            this.loaded();
         })
+    }
+
+    updateChildren() {
+        this.children.destroy();
+        this.children.update();
+        this.children.reveal();
+    }
+
+    loading() {
+        removeClass(this.mask, 'loaded');
+        this.collapse();
+    }
+
+    loaded() {
+        addClass(this.mask, 'loaded');
+        this.reveal();
     }
 
     collapse() {
@@ -73,11 +90,18 @@ class Taxonomy {
 class Level {
     constructor(taxonomy) {
         this.taxonomy = taxonomy;
-        this.type;
+        this.level;
+        this.sliding = false;
+
         this.entrycontainer;
+        this.level;
+
         this.typecontainer;
+        this.typelabel;
+
         this.taxonlevel;
         this.taxons = [];
+        this.current;
     }
 
     update() {
@@ -85,123 +109,160 @@ class Level {
         this.container = makeDiv(null, 'taxonomy-level');
         this.taxonomy.levels.append(this.container);
 
-        // Get the whole list of taxonsin the level
-        this.taxonlevel = this.taxonomy.params.taxonomy[this.type];
+        // Initialize taxons
+        this.taxons = [];
+
+        // Get the whole list of taxons in the level
+        this.taxonlevel = this.taxonomy.params.taxonomy[this.level];
 
         // If parents or siblings, retrieve the parent or current taxon index in the list
-        if (this.type === 'parents') { this.index = this.taxonomy.params.taxonomy.pindex; }
-        else if (this.type === 'siblings') { this.index = this.taxonomy.params.taxonomy.tindex; }
+        if (this.level === 'parents') { this.index = this.taxonomy.params.taxonomy.pindex; }
+        else if (this.level === 'siblings') { this.index = this.taxonomy.params.taxonomy.tindex; }
 
         // Make sure the level is not null
-        if (this.taxonlevel !== null) {
-            let current;
-            if (this.type === 'children') { current = this.taxonlevel[0] }
-            else { current = this.taxonlevel[this.index]; }
+        if (this.taxonlevel) {
+            let i;
+            if (this.level === 'children') { i = 0; }
+            else { i = this.index; }
 
-            this.typecontainer = makeDiv(null, 'taxonomy-type-container ' + current.typesorting);
-            let typelabel = makeDiv(null, 'taxonomy-type-label ' + current.typesorting, current.type);
-            this.typecontainer.append(typelabel);
+            let taxon = this.taxonlevel[i];
+            this.current = i + 1;
+
+            let typesorting = taxon.typesorting;
+            this.typecontainer = makeDiv(null, 'taxonomy-type-container collapse ' + typesorting);
+            this.typelabel = makeDiv(null, 'taxonomy-type-label ' + typesorting, taxon.type);
+            this.typecontainer.append(this.typelabel);
 
             this.entrycontainer = makeDiv(null, 'taxonomy-entry-container');
             this.container.append(this.typecontainer, this.entrycontainer);
     
             let smoosh = false;
-            if (this.type !== 'children') {
+            if (this.level !== 'children') {
                 if (this.index > 0) { smoosh = true; }
             }
-            const first = new Taxon(this, null, smoosh, true);
+            let first = new Taxon(this, null, smoosh, true);
             this.taxons.push(first);
 
             let number = 0;
             let visible;
-            if (this.type === 'children') { visible = [ 0, 1 ]; }
+            if (this.level === 'children') { visible = [ 0, 1 ]; }
             else { visible = [ this.index - 1, this.index, this.index + 1 ]; }
             
             for (let i = 0; i < (this.taxonlevel.length); ++i) {
                 smoosh = true;
                 if (visible.includes(i)) { smoosh = false; }
-                const entry = new Taxon(this, this.taxonlevel[i], smoosh, false);
+                let entry = new Taxon(this, this.taxonlevel[i], smoosh, false);
                 entry.container.addEventListener('click', (e) => { this.slide(e); });
 
+                if (this.level === 'children') { if (i === 0) { entry.activate(); } }
                 if (i === this.index) { entry.activate(); }
 
                 this.taxons.push(entry);
                 ++number;
-    
-                // entry.addEventListener('click', slideSibling);
             }
 
             smoosh = false;
-            if (this.type !== 'children') {
+            if (this.level !== 'children') {
                 if (this.index < this.taxonlevel.length - 1) { smoosh = true; }
             } else {
                 if (number > 1) { smoosh = true; }
             }
-            const last = new Taxon(this, null, smoosh, true);
+            let last = new Taxon(this, null, smoosh, true);
             this.taxons.push(last);
 
-            this.entrycontainer.addEventListener('wheel', (e) => { this.slide(e); });
+            if (this.level !== 'parent') {
+                this.entrycontainer.addEventListener('wheel', (e) => { this.slide(e); });
+            }
         }
     }
 
     slide(e) {
-        let entries = this.entrycontainer;
-        let objects = this.taxonomy.params.taxonomy.children;
-
-        // for (let i = 0; i < (this.taxons.length); ++i) {
-        //     if (!hasClass(this.taxons[i].container, 'smooshed')) {
-        //         console.log(this.taxons[i].container)
-        //     }
-        // }
-
-        let displayed = entries.querySelectorAll('.taxonomy-entry:not(.smooshed)');
-        let firstindex = Array.prototype.indexOf.call(entries.children, displayed[0]);
-        let currentindex = Array.prototype.indexOf.call(entries.children, displayed[1]);
-        let lastindex = Array.prototype.indexOf.call(entries.children, displayed[displayed.length - 1]);
-
-        let hide = null; let reveal = null; let current = null;
-
-        if (e.type === 'wheel') {
-            if (e.deltaY > 0) {
-                if (lastindex < entries.children.length - 1) {
-                    hide = firstindex; current = lastindex; reveal = lastindex + 1;
-                }
-            } else {
-                if (firstindex > 0) {
-                    hide = lastindex; current = firstindex; reveal = firstindex - 1;
-                }
+        if (!this.sliding) {
+            this.sliding = true;
+            let visible = []
+            // Retrieve the visible taxons inside the level
+            for (let i = 0; i < (this.taxons.length); ++i) {
+                if (this.taxons[i].isVisible()) { visible.push(i); }
             }
-        }
-        else if (e.type === 'click') {
-            let targetindex = Array.prototype.indexOf.call(entries.children, e.target);
-            if (targetindex !== currentindex) {
-                if (targetindex < entries.children.length - 1) {
-                    if (targetindex > currentindex) {
-                        hide = firstindex; current = lastindex; reveal = lastindex + 1;
-                    } else {
-                        hide = lastindex; current = firstindex; reveal = firstindex - 1;
+    
+            // Unpack to get the indexes of the three visible taxons
+            let [ i1, i2, i3 ] = visible;
+    
+            let hide; let reveal; let current;
+            // If user is scrolling
+            if (e.type === 'wheel') {
+                if (e.deltaY > 0) {
+                    if (i3 < this.taxons.length - 1) {
+                        hide = i1; current = i3; reveal = i3 + 1;
+                    }
+                } else {
+                    if (i1 > 0) {
+                        hide = i3; current = i1; reveal = i1 - 1;
                     }
                 }
-            } else {
-                addClass(e.currentTarget, 'active');
-                // growChildren(objects[currentindex - 1], currentindex - 1);
             }
-        }
+            // If user has clicked
+            else if (e.type === 'click') {
+                let targetindex = Array.prototype.indexOf.call(this.entrycontainer.children, e.target);
+                if (targetindex !== i2) {
+                    if (targetindex < this.taxons.length - 1) {
+                        if (targetindex > i2) {
+                            hide = i1; current = i3; reveal = i3 + 1;
+                        } else {
+                            hide = i3; current = i1; reveal = i1 - 1;
+                        }
+                    }
+                } else {
+                    // addClass(e.target, 'active');
+                    // growChildren(this.taxonlevel[i2 - 1], i2 - 1);
+                }
+            }
+    
+            // Here the taxonomy level is sliding
+            if (hide !== undefined) {
+                // Smoosh and expand the right taxon
+                this.taxons[hide].smoosh();
+                this.taxons[reveal].expand();
+    
+                let currentype = this.taxons[this.current].taxon.typesorting;
+                let newtype = this.taxons[current].taxon.typesorting;
+                
+                if (newtype === currentype) {
+                    removeClass(this.typecontainer, currentype);
+                    addClass(this.typecontainer, newtype);
+                    this.typelabel.innerHTML = this.taxons[current].taxon.type;
+                }
+    
+                this.taxons[this.current].deactivate();
+                this.taxons[current].activate();
+                this.current = current;
+            }
 
-        if (hide !== null) {
-            let typeNode = entries.parentNode.firstChild;
-            let typeNodeLabel = typeNode.firstChild;
-            addClass(entries.children[hide], 'smooshed');
-            removeClass(entries.children[reveal], 'smooshed');
+            if (this.level === 'siblings') {
+                let index = this.taxons[current].taxon.id;
+                this.taxonomy.app.updater.simple(index);
+                this.taxonomy.children.collapse();
+                let start = new Date();
 
-            // previousType = objects[currentindex - 1].typesorting;
-            // currentType = objects[current - 1].typesorting;
-            // if (previousType != currentType) {
-            //     removeClass(typeNode, previousType);
-            //     addClass(typeNode, currentType);
-            //     typeNodeLabel.innerHTML = objects[current - 1].type;
-            // }
-        }
+                ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
+                    this.taxonomy.params.taxonomy['children'] = r.children;
+                    let end = new Date();
+                    let elapsed = end - start;
+                    let transition = this.taxonomy.params.interface.transition;
+                    if (elapsed < transition) {
+                        wait(transition - elapsed, () => {
+                            this.taxonomy.updateChildren();
+                            this.sliding = false;
+                        })
+                    } else {
+                        this.taxonomy.updateChildren();
+                        this.sliding = false;
+                    }
+                });
+            } else {
+                this.sliding = false;
+            }
+        }        
     }
 
     destroy() {
@@ -209,14 +270,16 @@ class Level {
     }
 
     collapse() {
+        if (this.typecontainer !== undefined) { addClass(this.typecontainer, 'collapse'); }
         for (let i = 0; i < (this.taxons.length); ++i) {
             this.taxons[i].collapse();
         }
     }
 
     reveal() {
+        if (this.typecontainer !== undefined) { removeClass(this.typecontainer, 'collapse'); }
         for (let i = 0; i < (this.taxons.length); ++i) {
-            if (this.type !== 'parents') { this.taxons[i].reveal(); }
+            if (this.level !== 'parents') { this.taxons[i].reveal(); }
             else {
                 if (this.taxons[i].active) { this.taxons[i].reveal(); }
             }
@@ -224,24 +287,38 @@ class Level {
     }
 }
 
+class GrandParents extends Level {
+    constructor(taxonomy) {
+        super(taxonomy);
+        this.level = 'children';
+    }
+}
+
 class Parents extends Level{
     constructor(taxonomy) {
         super(taxonomy);
-        this.type = 'parents';
+        this.level = 'parents';
     }
 }
 
 class Siblings extends Level {
     constructor(taxonomy) {
         super(taxonomy);
-        this.type = 'siblings';
+        this.level = 'siblings';
     }
 }
 
 class Children extends Level {
     constructor(taxonomy) {
         super(taxonomy);
-        this.type = 'children';
+        this.level = 'children';
+    }
+}
+
+class GrandChildren extends Level {
+    constructor(taxonomy) {
+        super(taxonomy);
+        this.level = 'children';
     }
 }
 
@@ -344,6 +421,11 @@ class Taxon {
             this.container.append(mask, image, label, statistics);
             this.container.setAttribute('taxon', this.taxon.id);
         }
+    }
+
+    isVisible() {
+        if (hasClass(this.container, 'smooshed')) { return false; }
+        else { return true; }
     }
 
     activate() {
@@ -944,39 +1026,39 @@ function initializeTaxonomy(params) {
     }
 }
 
-function makePicture(obj) {
-    let imageDiv = makeDiv(id=null, c='taxonomy-image-container');
-        if (obj.picture !== null) {
-            let imageMask = makeDiv(id=null, c='photo-mask');
-            let loader = makeDiv(id=null, c='photo-loader');
-            let image = makeImage(obj.picture, null, null, id=null, c='photo');
-            loadingImage(image).then(() => { addClass(imageMask, 'loaded') });
-            imageMask.appendChild(loader);
-            imageDiv.append(imageMask, image);
-        }
-        return imageDiv;
-}
+// function makePicture(obj) {
+//     let imageDiv = makeDiv(id=null, c='taxonomy-image-container');
+//         if (obj.picture !== null) {
+//             let imageMask = makeDiv(id=null, c='photo-mask');
+//             let loader = makeDiv(id=null, c='photo-loader');
+//             let image = makeImage(obj.picture, null, null, id=null, c='photo');
+//             loadingImage(image).then(() => { addClass(imageMask, 'loaded') });
+//             imageMask.appendChild(loader);
+//             imageDiv.append(imageMask, image);
+//         }
+//         return imageDiv;
+// }
 
-function calculateLabelHeight(text, style, fontsize, width) {
-    let dummy = document.createElement('div');
-    dummy.style.position = 'absolute';
-    dummy.style.fontFamily = style.fontFamily;
-    dummy.style.fontSize = fontsize;
-    dummy.style.fontWeight = style.fontWeight;
-    dummy.style.fontStyle = style.fontStyle;
-    dummy.style.lineHeight = '1.2em';
-    dummy.style.padding = '6px 10px';
-    dummy.style.height = 'auto';
-    dummy.style.width = width + 'px';
-    dummy.style.whiteSpace = 'wrap';
-    dummy.style.whiteSpace = 'pre-wrap';
-    dummy.style.wordBreak = 'break-word';
-    dummy.style.boxSizing = 'border-box';
-    dummy.innerHTML = text;
-    document.body.appendChild(dummy);
-    let height = Math.ceil(dummy.clientHeight);
-    dummy.remove();
-    return height;
-}
+// function calculateLabelHeight(text, style, fontsize, width) {
+//     let dummy = document.createElement('div');
+//     dummy.style.position = 'absolute';
+//     dummy.style.fontFamily = style.fontFamily;
+//     dummy.style.fontSize = fontsize;
+//     dummy.style.fontWeight = style.fontWeight;
+//     dummy.style.fontStyle = style.fontStyle;
+//     dummy.style.lineHeight = '1.2em';
+//     dummy.style.padding = '6px 10px';
+//     dummy.style.height = 'auto';
+//     dummy.style.width = width + 'px';
+//     dummy.style.whiteSpace = 'wrap';
+//     dummy.style.whiteSpace = 'pre-wrap';
+//     dummy.style.wordBreak = 'break-word';
+//     dummy.style.boxSizing = 'border-box';
+//     dummy.innerHTML = text;
+//     document.body.appendChild(dummy);
+//     let height = Math.ceil(dummy.clientHeight);
+//     dummy.remove();
+//     return height;
+// }
 
 export default Taxonomy

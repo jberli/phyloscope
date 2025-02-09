@@ -12,9 +12,14 @@ class Updater {
         this.params = params
     }
 
-    update(index) {
+    full(index) {
         this.range(index);
         this.taxon(index);
+    }
+
+    simple(index, taxonomy=false) {
+        this.range(index);
+        this.taxon(index, taxonomy);
     }
 
     range(index) {
@@ -37,12 +42,15 @@ class Updater {
         });
     }
 
-    taxon(index) {
+    taxon(index, taxonomy=true) {
+        this.app.information.loading();
+        this.app.photography.loading();
+        if (taxonomy) { this.app.taxonomy.loading(); }
         ajaxGet('taxon/' + this.app.params.languages.current + '/' + index + '/', (r) => {
             this.app.params.taxonomy = r;
             this.app.information.update();
             this.app.photography.update();
-            this.app.taxonomy.update();
+            if (taxonomy) { this.app.taxonomy.update(); }
         });
     }
 }
