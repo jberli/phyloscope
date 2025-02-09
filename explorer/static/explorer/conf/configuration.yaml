@@ -19,10 +19,10 @@ languages:
   current: fr
 texts:
   vernaculars:
-    en: 'Vernacular names:'
-    fr: 'Noms vernaculaires :'
+    en: 'Other names:'
+    fr: 'Autres noms :'
 taxonomy:
-  current: 9199
+  current: 3000
 typesorting:
   - 'stateofmatter'
   - 'kingdom'

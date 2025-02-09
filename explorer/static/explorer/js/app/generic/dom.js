@@ -160,7 +160,7 @@ function getColorsByClassNames(...className) {
 }
 
 export {
-    addClass, removeClass, addClassList, removeClassList,
+    addClass, removeClass, addClassList, removeClassList, hasClass,
     makeDiv, makeInput, makeImage, wait, addSVG, removeChildren,
     getColorsByClassNames
 }

@@ -19,6 +19,9 @@ class Cartography {
         this.app = app;
         this.params = params;
 
+        // Boolean to flag if the map view is the same as the starting one
+        this.origin = true;
+
         // Create DOM elements
         this.container = makeDiv('cartography', 'sub-panel');
         this.app.third.append(this.container);
@@ -207,6 +210,7 @@ class Range {
                 this.display(() => {});
                 // Activate the centering button
                 this.listen = true;
+                this.cartography.origin = false;
                 callback();
             });
         }
@@ -214,12 +218,21 @@ class Range {
         else {
             this.layer = undefined;
             let carto = this.params.interface.cartography;
+            let center = carto.start.center;
+            let zoom = carto.start.zoom;
             let transition = this.cartography.params.interface.cartography.range.transition.center;
-            this.cartography.animate(carto.start.center, carto.start.zoom, transition, () => {
-                // Activate the centering button
-                this.listen = true;
+
+            if (!this.cartography.origin) {
+                this.cartography.animate(center, zoom, transition, () => {
+                    // Activate the centering button
+                    this.listen = true;
+                    this.cartography.origin = true;
+                    callback();
+                });
+            }
+            else {
                 callback();
-            });
+            }
         }
         
     }

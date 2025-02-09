@@ -315,7 +315,7 @@ class Description {
             }
             // Add the DOM Element only if vernaculars were found
             if (vstring !== '') {
-                let vernacular = makeDiv(null, 'description-vernacular', this.information.app.params.texts.vernaculars[this.information.app.language])
+                let vernacular = makeDiv(null, 'description-vernacular', this.information.app.params.texts.vernaculars[this.information.params.languages.current])
                 let vernaculars = makeDiv(null, 'description-vernaculars', vstring);
                 this.content.append(vernacular, vernaculars);
             }
@@ -324,7 +324,7 @@ class Description {
         // If there is a wikipedia page
         if (wikipedia !== null) {
             // Add the summary
-            let summary = makeDiv(null, 'description-summary', removeTrailing(wikipedia.summary.replace('== References ==', '')));
+            let summary = makeDiv(null, 'description-summary', removeTrailing(wikipedia.summary.replace('== References ==', '').replace(',.', '.')));
             this.content.append(summary);
         }
         

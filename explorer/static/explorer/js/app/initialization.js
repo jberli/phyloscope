@@ -12,6 +12,30 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
+class Class1 {
+    constructor(number) {
+        this.container = []
+        for (let i = 0; i < (number); ++i) {
+            this.container.push(new Class2(i));
+        }
+    }
+
+    method() {
+        for (let i = 0; i < (this.container.length); ++i) {
+            this.container[i].method();
+        }
+    }
+}
+
+class Class2 {
+    constructor(index) {
+        this.index = index;
+    }
+    method() {
+        console.log("hello. I'm number " + this.index);
+    }
+}
+
 
 
 

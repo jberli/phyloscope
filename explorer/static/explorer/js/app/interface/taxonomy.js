@@ -4,7 +4,7 @@
  */
 
 import { ajaxGet, loadImage } from "../generic/ajax.js";
-import { addClass, makeDiv, makeImage } from "../generic/dom.js";
+import { addClass, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { calculateTextWidth, calculateWidthFromClass, uppercaseFirstLetter } from "../generic/parsing.js";
 import { round } from "../generic/math.js";
 
@@ -17,9 +17,14 @@ class Taxonomy {
         this.container = makeDiv('taxonomy', 'sub-panel');
         this.app.second.append(this.container);
 
+        // // Mask and loader
+        // this.mask = makeDiv(null, 'taxonomy-mask mask');
+        // this.loader = makeDiv(null, 'taxonomy-loader loader');
+        // this.mask.append(this.loader);
+        // this.container.append(this.mask);
+
         this.ancestrycontainer = makeDiv(null, 'taxonomy-ancestry');
         this.levels = makeDiv(null, 'taxonomy-levels');
-
 
         // this.grandparent = makeDiv(null, 'taxonomy-level smooshed');
         // this.parent = makeDiv(null, 'taxonomy-level');
@@ -29,41 +34,50 @@ class Taxonomy {
 
         this.container.append(this.ancestrycontainer, this.levels);
 
-        this.parent = new Siblings(this);
+        this.parents = new Parents(this);
         this.siblings = new Siblings(this);
-        this.children = new Siblings(this);
+        this.children = new Children(this);
     }
 
     update() {
-        this.parent.update();
-        this.siblings.update();
-        this.children.update();
-    }
+        this.collapse();
 
-    reload() {
-        this.destroy(() => {
-            this.update();
+        wait(this.params.interface.transition, () => {
+            this.destroy();
+            this.parents.update();
+            this.siblings.update();
+            this.children.update();
+            this.reveal();
         })
     }
 
-    destroy(callback) {
-        addClass(this.container, 'collapse');
-        wait(this.app.params.transition, () => {
-            this.container.remove();
-            callback();
-        });
+    collapse() {
+        this.parents.collapse();
+        this.siblings.collapse();
+        this.children.collapse();
+    }
+
+    reveal() {
+        this.parents.reveal();
+        this.siblings.reveal();
+        this.children.reveal();
+    }
+
+    destroy() {
+        this.parents.destroy();
+        this.siblings.destroy();
+        this.children.destroy();
     }
 }
 
 class Level {
     constructor(taxonomy) {
         this.taxonomy = taxonomy;
-    }
-}
-
-class Siblings extends Level {
-    constructor(taxonomy) {
-        super(taxonomy);
+        this.type;
+        this.entrycontainer;
+        this.typecontainer;
+        this.taxonlevel;
+        this.taxons = [];
     }
 
     update() {
@@ -71,143 +85,295 @@ class Siblings extends Level {
         this.container = makeDiv(null, 'taxonomy-level');
         this.taxonomy.levels.append(this.container);
 
-        this.siblings = this.taxonomy.params.taxonomy.siblings;
-        this.index = this.taxonomy.params.taxonomy.tindex;
+        // Get the whole list of taxonsin the level
+        this.taxonlevel = this.taxonomy.params.taxonomy[this.type];
 
-        let typecontainer = makeDiv(null, 'taxonomy-type-container ' + this.siblings[this.index].typesorting);
-        let typelabel = makeDiv(null, 'taxonomy-type-label ' + this.siblings[this.index].typesorting, this.siblings[this.index].type);
-        typecontainer.append(typelabel);
+        // If parents or siblings, retrieve the parent or current taxon index in the list
+        if (this.type === 'parents') { this.index = this.taxonomy.params.taxonomy.pindex; }
+        else if (this.type === 'siblings') { this.index = this.taxonomy.params.taxonomy.tindex; }
 
-        let entrycontainer = makeDiv(null, 'taxonomy-entry-container');
+        // Make sure the level is not null
+        if (this.taxonlevel !== null) {
+            let current;
+            if (this.type === 'children') { current = this.taxonlevel[0] }
+            else { current = this.taxonlevel[this.index]; }
 
-        let firstClass = '';
-        if (this.index > 0) { firstClass += ' smooshed'}
-        entrycontainer.appendChild(makeDiv(null, 'taxonomy-entry placeholder' + firstClass));
-        for (let i = 0; i < (this.siblings.length); ++i) {
-            let smooshed = true;
-            let active = false;
-            if (i == this.index - 1) { smooshed = false }
-            if (i == this.index) { smooshed = false; active = true; }
-            if (i == this.index + 1) { smooshed = false }
+            this.typecontainer = makeDiv(null, 'taxonomy-type-container ' + current.typesorting);
+            let typelabel = makeDiv(null, 'taxonomy-type-label ' + current.typesorting, current.type);
+            this.typecontainer.append(typelabel);
 
-            let entry = new Taxon(entrycontainer, this.siblings[i], active, false, smooshed);
+            this.entrycontainer = makeDiv(null, 'taxonomy-entry-container');
+            this.container.append(this.typecontainer, this.entrycontainer);
+    
+            let smoosh = false;
+            if (this.type !== 'children') {
+                if (this.index > 0) { smoosh = true; }
+            }
+            const first = new Taxon(this, null, smoosh, true);
+            this.taxons.push(first);
 
-            // entry.addEventListener('click', slideSibling);
+            let number = 0;
+            let visible;
+            if (this.type === 'children') { visible = [ 0, 1 ]; }
+            else { visible = [ this.index - 1, this.index, this.index + 1 ]; }
+            
+            for (let i = 0; i < (this.taxonlevel.length); ++i) {
+                smoosh = true;
+                if (visible.includes(i)) { smoosh = false; }
+                const entry = new Taxon(this, this.taxonlevel[i], smoosh, false);
+                entry.container.addEventListener('click', (e) => { this.slide(e); });
 
-            entrycontainer.appendChild(entry.container);
+                if (i === this.index) { entry.activate(); }
+
+                this.taxons.push(entry);
+                ++number;
+    
+                // entry.addEventListener('click', slideSibling);
+            }
+
+            smoosh = false;
+            if (this.type !== 'children') {
+                if (this.index < this.taxonlevel.length - 1) { smoosh = true; }
+            } else {
+                if (number > 1) { smoosh = true; }
+            }
+            const last = new Taxon(this, null, smoosh, true);
+            this.taxons.push(last);
+
+            this.entrycontainer.addEventListener('wheel', (e) => { this.slide(e); });
+        }
+    }
+
+    slide(e) {
+        let entries = this.entrycontainer;
+        let objects = this.taxonomy.params.taxonomy.children;
+
+        // for (let i = 0; i < (this.taxons.length); ++i) {
+        //     if (!hasClass(this.taxons[i].container, 'smooshed')) {
+        //         console.log(this.taxons[i].container)
+        //     }
+        // }
+
+        let displayed = entries.querySelectorAll('.taxonomy-entry:not(.smooshed)');
+        let firstindex = Array.prototype.indexOf.call(entries.children, displayed[0]);
+        let currentindex = Array.prototype.indexOf.call(entries.children, displayed[1]);
+        let lastindex = Array.prototype.indexOf.call(entries.children, displayed[displayed.length - 1]);
+
+        let hide = null; let reveal = null; let current = null;
+
+        if (e.type === 'wheel') {
+            if (e.deltaY > 0) {
+                if (lastindex < entries.children.length - 1) {
+                    hide = firstindex; current = lastindex; reveal = lastindex + 1;
+                }
+            } else {
+                if (firstindex > 0) {
+                    hide = lastindex; current = firstindex; reveal = firstindex - 1;
+                }
+            }
+        }
+        else if (e.type === 'click') {
+            let targetindex = Array.prototype.indexOf.call(entries.children, e.target);
+            if (targetindex !== currentindex) {
+                if (targetindex < entries.children.length - 1) {
+                    if (targetindex > currentindex) {
+                        hide = firstindex; current = lastindex; reveal = lastindex + 1;
+                    } else {
+                        hide = lastindex; current = firstindex; reveal = firstindex - 1;
+                    }
+                }
+            } else {
+                addClass(e.currentTarget, 'active');
+                // growChildren(objects[currentindex - 1], currentindex - 1);
+            }
         }
 
-        let lastClass = '';
-        if (this.index < this.siblings.length - 1) { lastClass += ' smooshed'}
-        entrycontainer.appendChild(makeDiv(null, 'taxonomy-entry placeholder' + lastClass));
+        if (hide !== null) {
+            let typeNode = entries.parentNode.firstChild;
+            let typeNodeLabel = typeNode.firstChild;
+            addClass(entries.children[hide], 'smooshed');
+            removeClass(entries.children[reveal], 'smooshed');
 
-        // entrycontainer.addEventListener('wheel', slideSibling);
+            // previousType = objects[currentindex - 1].typesorting;
+            // currentType = objects[current - 1].typesorting;
+            // if (previousType != currentType) {
+            //     removeClass(typeNode, previousType);
+            //     addClass(typeNode, currentType);
+            //     typeNodeLabel.innerHTML = objects[current - 1].type;
+            // }
+        }
+    }
 
-        this.container.append(typecontainer, entrycontainer);
+    destroy() {
+        if (this.container !== undefined) { this.container.remove(); }
+    }
+
+    collapse() {
+        for (let i = 0; i < (this.taxons.length); ++i) {
+            this.taxons[i].collapse();
+        }
+    }
+
+    reveal() {
+        for (let i = 0; i < (this.taxons.length); ++i) {
+            if (this.type !== 'parents') { this.taxons[i].reveal(); }
+            else {
+                if (this.taxons[i].active) { this.taxons[i].reveal(); }
+            }
+        }
     }
 }
 
-// obj, active, collapse, smooshed
+class Parents extends Level{
+    constructor(taxonomy) {
+        super(taxonomy);
+        this.type = 'parents';
+    }
+}
+
+class Siblings extends Level {
+    constructor(taxonomy) {
+        super(taxonomy);
+        this.type = 'siblings';
+    }
+}
+
+class Children extends Level {
+    constructor(taxonomy) {
+        super(taxonomy);
+        this.type = 'children';
+    }
+}
+
 
 class Taxon {
-    constructor(parent, obj, active, collapse, smooshed) {
-        this.parent = parent;
-        this.obj = obj;
-        this.active = active;
-        this.collapse = collapse;
+    constructor(level, taxon=null, smooshed=false, placeholder=false) {
+        this.level = level;
+        this.taxon = taxon;
+        this.placeholder = placeholder;
+        this.active = false;
         this.smooshed = smooshed;
-        this.url = 'https://inaturalist-open-data.s3.amazonaws.com/photos/';
-        
+        this.collapsed = true;
+
         let className = '';
-        if (this.active) { className += ' active' }
-        if (this.collapse) { className += ' collapse' }
-        if (this.smooshed) { className += ' smooshed' }
+        if (smooshed) { className += ' smooshed'; }
+        if (placeholder) { className += ' placeholder'; }
 
-        this.container = makeDiv(null, 'taxonomy-entry' + className);
+        this.container = makeDiv(null, 'taxonomy-entry collapse' + className);
+        this.level.entrycontainer.append(this.container);
 
-        let image = makeDiv(null, 'taxonomy-image-container');
-        console.log(obj)
-
-        let infos = this.obj.photographs[0];
-        if (infos !== undefined) {
-            let imageMask = makeDiv(null, 'photo-mask');
-            let loader = makeDiv(null, 'photo-loader');
-            let i = makeImage(this.url + infos.id + '/medium.' + infos.extension, null, null, null, 'photo');
-            loadImage(i).then(() => { addClass(imageMask, 'loaded') });
-            imageMask.appendChild(loader);
-            image.append(imageMask, i);
-        }
-
-        let html, name;
-        if (obj.vernaculars.length > 0) {
-            name = uppercaseFirstLetter(obj.vernaculars[0]);
-            html = name;
-        } else {
-            name = uppercaseFirstLetter(obj.scientific);
-            html = '<i>' + uppercaseFirstLetter(obj.scientific) + '</i>';
-        }
-
-        let stats = obj.count.toLocaleString();
-        if (obj.parent) {
-            stats += ' (';
-            if (round(obj.percentage, 1) < 10) {
-                if (round(obj.percentage, 1) < 0.1) {
-                    if (round(obj.percentage, 2) < 0.01) {
-                        stats += round(obj.percentage, 3).toFixed(3) + '%';
+        if (!placeholder) {
+            let url = 'https://inaturalist-open-data.s3.amazonaws.com/photos/';
+            let image = makeDiv(null, 'taxonomy-image-container');
+    
+            let infos = this.taxon.photographs[0];
+            if (infos !== undefined) {
+                let imageMask = makeDiv(null, 'photo-mask');
+                let loader = makeDiv(null, 'photo-loader');
+                let i = makeImage(url + infos.id + '/medium.' + infos.extension, null, null, null, 'photo');
+                loadImage(i).then(() => { addClass(imageMask, 'loaded') });
+                imageMask.appendChild(loader);
+                image.append(imageMask, i);
+            }
+    
+            let html, name;
+            if (this.taxon.vernaculars.length > 0) {
+                name = uppercaseFirstLetter(this.taxon.vernaculars[0]);
+                html = name;
+            } else {
+                name = uppercaseFirstLetter(this.taxon.scientific);
+                html = '<i>' + uppercaseFirstLetter(this.taxon.scientific) + '</i>';
+            }
+    
+            let stats = this.taxon.count.toLocaleString();
+            if (this.taxon.parent) {
+                stats += ' (';
+                if (round(this.taxon.percentage, 1) < 10) {
+                    if (round(this.taxon.percentage, 1) < 0.1) {
+                        if (round(this.taxon.percentage, 2) < 0.01) {
+                            stats += round(this.taxon.percentage, 3).toFixed(3) + '%';
+                        } else {
+                            stats += round(this.taxon.percentage, 2).toFixed(2) + '%';
+                        }
                     } else {
-                        stats += round(obj.percentage, 2).toFixed(2) + '%';
+                        stats += round(this.taxon.percentage, 1).toFixed(1) + '%';
                     }
                 } else {
-                    stats += round(obj.percentage, 1).toFixed(1) + '%';
+                    stats += Math.round(this.taxon.percentage) + '%';
                 }
-            } else {
-                stats += Math.round(obj.percentage) + '%';
+                stats += ')';
             }
-            stats += ')';
-        }
-
-        let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
-        let swidth = calculateTextWidth(stats, getComputedStyle(statistics), '13px') + 10;
     
-        statistics.style.width = '0px';
-        statistics.style.height = '0px';
-
-        this.container.addEventListener('mouseover', (e) => {
-            statistics.style.width = swidth + 'px';
-            statistics.style.height = '25px';
-        });
-
-        this.container.addEventListener('mouseout', (e) => {
+            let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
+            let swidth = calculateTextWidth(stats, getComputedStyle(statistics), '13px') + 10;
+        
             statistics.style.width = '0px';
             statistics.style.height = '0px';
-        });
-        
-        let label = makeDiv(null, 'taxonomy-entry-label', html);
-        let width = calculateTextWidth(name, getComputedStyle(label), '13px') + 20;
-
-        let nodeWidth = calculateWidthFromClass('taxonomy-entry');
-        if (width > nodeWidth) {
-            let height = calculateLabelHeight(name, getComputedStyle(label), '13px', nodeWidth);
-            this.container.addEventListener('mouseover', (e) => {
-                label.style.height = height + 'px';
-                label.style.textWrap = 'wrap';
-                label.style.whiteSpace = 'pre-wrap';
-                label.style.wordBreak = 'break-word';
-                label.style.textOverflow = 'unset';
-            });
-            this.container.addEventListener('mouseout', (e) => {
-                label.style.height = '28px';
-                label.style.textWrap = 'nowrap';
-                label.style.textOverflow = 'ellipsis';
-            });
-        }
     
-        let mask = makeDiv(null, 'taxonomy-entry-mask');
-        this.container.append(mask, image, label, statistics);
-        this.container.setAttribute('taxon', obj.id);
-
+            this.container.addEventListener('mouseover', (e) => {
+                statistics.style.width = swidth + 'px';
+                statistics.style.height = '25px';
+            });
+    
+            this.container.addEventListener('mouseout', (e) => {
+                statistics.style.width = '0px';
+                statistics.style.height = '0px';
+            });
+            
+            let label = makeDiv(null, 'taxonomy-entry-label', html);
+            let width = calculateTextWidth(name, getComputedStyle(label), '13px') + 20;
+    
+            let nodeWidth = calculateWidthFromClass('taxonomy-entry');
+            if (width > nodeWidth) {
+                let height = calculateLabelHeight(name, getComputedStyle(label), '13px', nodeWidth);
+                this.container.addEventListener('mouseover', (e) => {
+                    label.style.height = height + 'px';
+                    label.style.textWrap = 'wrap';
+                    label.style.whiteSpace = 'pre-wrap';
+                    label.style.wordBreak = 'break-word';
+                    label.style.textOverflow = 'unset';
+                });
+                this.container.addEventListener('mouseout', (e) => {
+                    label.style.height = '28px';
+                    label.style.textWrap = 'nowrap';
+                    label.style.textOverflow = 'ellipsis';
+                });
+            }
         
-        this.parent.append(this.container);
+            let mask = makeDiv(null, 'taxonomy-entry-mask');
+            this.container.append(mask, image, label, statistics);
+            this.container.setAttribute('taxon', this.taxon.id);
+        }
+    }
+
+    activate() {
+        addClass(this.container, 'active');
+        this.active = true;
+    }
+
+    deactivate() {
+        removeClass(this.container, 'active');
+        this.active = false;
+    }
+
+    smoosh() {
+        addClass(this.container, 'smooshed');
+        this.smooshed = true;
+    }
+
+    expand() {
+        removeClass(this.container, 'smooshed');
+        this.smooshed = false;
+    }
+
+    collapse() {
+        addClass(this.container, 'collapse');
+        this.collapsed = true;
+    }
+
+    reveal() {
+        removeClass(this.container, 'collapse');
+        this.collapsed = false;
     }
 }
 
