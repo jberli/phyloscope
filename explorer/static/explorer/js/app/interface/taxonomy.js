@@ -12,6 +12,7 @@ class Taxonomy {
     constructor(app, params) {
         this.app = app;
         this.params = params;
+        this.active = true;
 
         // Create DOM elements
         this.container = makeDiv('taxonomy', 'sub-panel');
@@ -177,7 +178,8 @@ class Level {
     }
 
     slide(e) {
-        if (!this.sliding) {
+        if (!this.sliding && this.taxonomy.active) {
+            this.taxonomy.active = false;
             this.sliding = true;
             let visible = []
             // Retrieve the visible taxons inside the level
@@ -240,7 +242,7 @@ class Level {
 
             if (this.level === 'siblings') {
                 let index = this.taxons[current].taxon.id;
-                this.taxonomy.app.updater.simple(index);
+                this.taxonomy.app.updater.update(index, false);
                 this.taxonomy.children.collapse();
                 let start = new Date();
 
@@ -261,6 +263,7 @@ class Level {
                 });
             } else {
                 this.sliding = false;
+                this.taxonomy.active = true;
             }
         }        
     }

@@ -12,12 +12,7 @@ class Updater {
         this.params = params
     }
 
-    full(index) {
-        this.range(index);
-        this.taxon(index);
-    }
-
-    simple(index, taxonomy=false) {
+    update(index, taxonomy=true) {
         this.range(index);
         this.taxon(index, taxonomy);
     }
@@ -26,7 +21,9 @@ class Updater {
         let self = this;
         function display(r) {
             self.app.params.range = r;
-            self.app.cartography.update();
+            self.app.cartography.update(() => {
+                self.app.taxonomy.active = true;
+            });
         }
 
         let start = new Date();

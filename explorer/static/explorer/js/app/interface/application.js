@@ -45,7 +45,7 @@ class Application {
 
             // Create the updater object to update the widgets on demand
             this.updater = new Updater(this, this.params);
-            this.updater.full(this.params.taxonomy.current);
+            this.updater.update(this.params.taxonomy.current);
 
             // Reveal the interface
             this.loaded();

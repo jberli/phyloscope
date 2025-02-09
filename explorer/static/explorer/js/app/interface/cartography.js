@@ -77,8 +77,11 @@ class Cartography {
     /**
      * Update the range on the map.
      */
-    update() {
-        this.range.set(this.params.range, () => { this.loaded(); });
+    update(callback) {
+        this.range.set(this.params.range, () => {
+            this.loaded();
+            callback();
+        });
     }
 
     /**
@@ -94,8 +97,10 @@ class Cartography {
             zoom: zoom,
             duration: duration,
             easing: ol.easing.easeInOut,
-            callback: () => { callback(); }
         });
+        wait(duration, () => {
+            callback();
+        })
     }
 
     /**
@@ -206,12 +211,13 @@ class Range {
 
             // Center the map on the layer
             this.center(() => {
-                // Now display the range
-                this.display(() => {});
                 // Activate the centering button
-                this.listen = true;
                 this.cartography.origin = false;
-                callback();
+                this.listen = true;
+                // Now display the range
+                this.display(() => {
+                    callback();
+                });
             });
         }
         // If range is null
@@ -227,6 +233,7 @@ class Range {
                     // Activate the centering button
                     this.listen = true;
                     this.cartography.origin = true;
+                    console.log('connard')
                     callback();
                 });
             }
