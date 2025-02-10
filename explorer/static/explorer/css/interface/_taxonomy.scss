@@ -22,7 +22,7 @@ $taxonomy-margin: 2rem;
 
 .taxonomy-levels {
     height: calc(100% - (4rem + 2 * #{$taxonomy-margin}));
-    margin: $taxonomy-margin;
+    margin: $taxonomy-margin calc(#{$taxonomy-margin} - 1rem);
     display: flex;
     flex-direction: column;
 
@@ -44,18 +44,14 @@ $taxonomy-margin: 2rem;
     align-items: center;
     color: $taxonomy-font-dark;
 
-    margin-bottom: $taxonomy-margin;
     border-radius: $border-radius;
     flex-direction: column;
     overflow: hidden;
 
     transition: all .2s ease-in-out;
 
-    &:firs-child {
-        margin-top: 0;
-    }
-    &:last-child {
-        margin-bottom: 0;
+    &.active {
+        margin: $taxonomy-margin 0;
     }
 
     &.smooshed {
@@ -198,10 +194,13 @@ $taxonomy-margin: 2rem;
 .taxonomy-entry-label {
     position: absolute;
     bottom: 0;
-
     width: 100%;
-    height: 28px;
-    line-height: 1.2em;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 1.4rem;
 
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
@@ -211,15 +210,7 @@ $taxonomy-margin: 2rem;
     overflow: hidden;
     text-overflow: ellipsis;
     text-wrap: nowrap;
-    text-align: center;
-    padding: 5px 10px;
     pointer-events: none;
-
-    transition: all .2s ease-in-out;
-    
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
 .taxonomy-entry-statistics {

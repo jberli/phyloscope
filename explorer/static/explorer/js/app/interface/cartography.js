@@ -96,11 +96,8 @@ class Cartography {
             center: center,
             zoom: zoom,
             duration: duration,
-            easing: ol.easing.easeInOut,
-        });
-        wait(duration, () => {
-            callback();
-        })
+            easing: ol.easing.easeInOut
+        }, callback);
     }
 
     /**
@@ -172,8 +169,19 @@ class Range {
         // Flag to see if the centering button should be displayed
         this.listen = false;
 
-        // Store for the OpenLayers layer object
-        this.layer;
+        // Create and add the layer
+        this.layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: []
+            }),
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+        });
+        this.cartography.map.addLayer(this.layer);
+
+        // this.layer.on('propertychange', (e) => {
+        //     console.log(e)
+        // })
     }
 
     /**
@@ -183,31 +191,34 @@ class Range {
      */
     set(r, callback) {
         this.listen = false;
+        addClass(this.cartography.centerButton, 'collapse');
+
         let range = r.range;
         let typesorting = r.typesorting;
 
         // Check if range is not null
         if (range !== '') {
-            // The vector layer
-            this.layer = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    features: [new ol.format.WKT().readFeature(range)]
-                }),
-                style: new ol.style.Style({
-                    fill: new ol.style.Fill({
-                        // Set the style from the parameters
-                        color: this.params.colors[typesorting],
-                    }),
-                }),
-                // Keep it hidden
-                opacity: 0,
-                // Avoid the range to pop-up when moving on the map
-                updateWhileAnimating: true,
-                updateWhileInteracting: true,
-            });
+            // Create a new feature using the provided WKT
+            let feature = new ol.format.WKT().readFeature(range, {
+                dataProjection: 'EPSG:3857',
+                featureProjection: 'EPSG:3857'
+            })
+            
+            // Set the fill color to represent the typesorting
+            let style = new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: this.params.colors[typesorting]
+                })
+            })
 
-            // Add the layer to the map
-            this.cartography.map.addLayer(this.layer);
+            // Apply the fill style
+            this.layer.setStyle(style);
+
+            // Remove all features from the source and add the current
+            this.layer.getSource().clear();
+            this.layer.getSource().addFeature(feature);
+            // Set opacity to 0 for later reveal
+            this.layer.setOpacity(0);
 
             // Center the map on the layer
             this.center(() => {
@@ -215,14 +226,12 @@ class Range {
                 this.cartography.origin = false;
                 this.listen = true;
                 // Now display the range
-                this.display(() => {
-                    callback();
-                });
+                this.display(callback);
             });
         }
         // If range is null
         else {
-            this.layer = undefined;
+            this.layer.getSource().clear();
             let carto = this.params.interface.cartography;
             let center = carto.start.center;
             let zoom = carto.start.zoom;
@@ -233,7 +242,6 @@ class Range {
                     // Activate the centering button
                     this.listen = true;
                     this.cartography.origin = true;
-                    console.log('connard')
                     callback();
                 });
             }
@@ -245,15 +253,6 @@ class Range {
     }
     
     /**
-     * Checks if a range layer exists on the map.
-     * @returns {boolean}
-     */
-    exists() {
-        if (this.layer !== undefined) { return true; }
-        else { return false; }
-    }
-
-    /**
      * Center the map on the range layer.
      * @param {function} callback - Callback fired when the map has been centered. 
      */
@@ -261,22 +260,23 @@ class Range {
         // Get padding and transition time
         let padding = this.params.interface.cartography.range.padding;
         let transition = this.params.interface.cartography.range.transition.center;
-        this.cartography.map.getView().fit(this.layer.getSource().getExtent(), {
+        let extent = this.layer.getSource().getExtent();
+        this.cartography.map.getView().fit(extent, {
             // Keep a padding
             padding: [ padding, padding, padding, padding ],
             duration: transition,
             easing: ol.easing.easeInOut,
-            callback: () => { callback(); }
+            callback: callback
         });
     }
 
     /**
      * Remove the layer from the map after an animation.
-     * @param {function} callback - Callback fired when the layer has been removed from the map. 
+     * @param {function} callback - Callback fired when the features has been removed from the map. 
      */
     remove(callback) {
         this.hide(() => {
-            this.cartography.map.removeLayer(this.layer);
+            this.layer.getSource().clear();
             callback();
         })
     }
@@ -286,10 +286,9 @@ class Range {
      * @param {function} callback - Callback fired when the layer has been hidden. 
      */
     hide(callback) {
-        let transition = this.params.interface.cartography.range.transition.display;
-        if (this.exists()) {
-            animateOpacity(this.layer, transition, 60, 0, () => { callback(); });
-        }
+        this.opacity(0, callback);
+        // this.layer.setOpacity(0);
+        // callback();
     }
 
     /**
@@ -297,11 +296,36 @@ class Range {
      * @param {function} callback - Callback fired when the layer has been displayed. 
      */
     display(callback) {
-        let transition = this.params.interface.cartography.range.transition.display;
         let opacity = this.cartography.params.interface.cartography.range.opacity;
-        if (this.exists()) {
-            animateOpacity(this.layer, transition, 60, opacity, () => { callback(); });
+        // this.layer.setOpacity(opacity);
+        // callback();
+        this.opacity(opacity, callback);
+    }
+
+    opacity(value, callback) {
+        let opacity = this.layer.getOpacity();
+        let duration = this.params.interface.cartography.range.transition.display;
+        const step = (duration/1000)*60;
+        const delay = duration / step;
+        const increment = (value - opacity) / step;
+        self = this;
+
+        let pass = 0;
+        function animate(c) {
+            setTimeout(() => {
+                opacity += increment;
+                if (opacity < 0) { opacity = 0 }
+                self.layer.setOpacity(opacity);
+                pass += 1;
+                if (pass < step) {
+                    animate(c);
+                } else {
+                    self.layer.setOpacity(value);
+                    c();
+                }
+            }, delay)
         }
+        animate(() => { callback(); });
     }
 }
 

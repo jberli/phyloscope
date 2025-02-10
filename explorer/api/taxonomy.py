@@ -28,6 +28,7 @@ def get_taxon_information(obj, lang):
         parent = True
         if obj.parent is None:
             parent = False
+
         return {
             'id': obj.tid,
             'scientific': obj.name,
@@ -40,6 +41,35 @@ def get_taxon_information(obj, lang):
             'percentage': obj.percentage_parent,
             'photographs': photos
         }
+
+def get_taxon_description(language, taxon):
+    """
+    Retrieve the description from Wikipedia.
+    """
+    name = taxon.wikipedia.split('/')[-1].replace(" ", "_")
+    if len(name) == 0:
+        name = taxon.name
+
+    wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language='en')
+    page = wikipedia.page(name)
+
+    if language != 'en':
+        found = False
+        langlinks = page.langlinks
+        for k in sorted(langlinks.keys()):
+            if k == language:
+                page = langlinks[k]
+                found = True
+        if not found:
+            return None
+
+    if page.exists():
+        return {
+            'title': page.title,
+            'summary': page.summary,
+        }
+    else:
+        return None
 
 def get_taxon(language, index):
     """
@@ -88,31 +118,7 @@ def get_taxon(language, index):
     else:
         result['children'] = None
 
-    name = taxon.wikipedia.split('/')[-1].replace(" ", "_")
-    if len(name) == 0:
-        name = taxon.name
-
-    wikipedia = wiki.Wikipedia(user_agent='phyloscope.org', language='en')
-    page = wikipedia.page(name)
-
-    if language != 'en':
-        found = False
-        langlinks = page.langlinks
-        for k in sorted(langlinks.keys()):
-            if k == language:
-                page = langlinks[k]
-                found = True
-        if not found:
-            result['description'] = None
-            return result
-
-    if page.exists():
-        result['description'] = {
-            'title': page.title,
-            'summary': page.summary,
-        }
-    else:
-        result['description'] = None
+    result['description'] = get_taxon_description(language, taxon)
 
     return result
 
@@ -149,4 +155,16 @@ def get_children(language, index):
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
         result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+    return result
+
+def get_description(language, index):
+    """
+    Get the wikipedia description from a given taxon index.
+    """
+    result = {}
+    taxon = Taxon.objects.get(tid=index)
+    if taxon is not None:
+        result['values'] = get_taxon_description(language, taxon)
+    else:
+        result['values'] = None
     return result

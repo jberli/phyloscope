@@ -9,4 +9,5 @@ urlpatterns = [
     path('range/<int:id>/', views.range),
     path('children/<str:lang>/<int:id>/', views.children),
     path('parents/<str:lang>/<int:id>/', views.parents),
+    path('description/<str:lang>/<int:id>/', views.description),
 ]

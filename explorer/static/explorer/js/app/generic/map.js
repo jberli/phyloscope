@@ -11,34 +11,28 @@
  * @param  {float} value - Result opacity value.
  * @param  {function} callback - Callback function.
  */
-async function animateOpacity(layer, duration, fps, value, callback) {
+function animateOpacity(layer, duration, fps, value, callback) {
     let opacity = layer.getOpacity();
     const step = (duration/1000)*fps;
     const delay = duration / step;
     const increment = (value - opacity) / step;
 
-    function animation() {
-        return new Promise((resolve) => {
-            let pass = 0;
-            function animate() {
-                setTimeout(() => {
-                    opacity += increment;
-                    layer.setOpacity(opacity);
-                    pass += 1;
-                    if (pass < step) {
-                        animate(pass);
-                    } else {
-                        layer.setOpacity(value);
-                        resolve('');
-                    }
-                }, delay)
+    let pass = 0;
+    function animate(c) {
+        setTimeout(() => {
+            opacity += increment;
+            if (opacity < 0) { opacity = 0 }
+            layer.setOpacity(opacity);
+            pass += 1;
+            if (pass < step) {
+                animate(c);
+            } else {
+                layer.setOpacity(value);
+                c();
             }
-            animate();
-        });
+        }, delay)
     }
-
-    await animation();
-    callback();
+    animate(() => { callback(); });
 }
 
 export { animateOpacity }

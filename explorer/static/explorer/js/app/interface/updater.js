@@ -4,7 +4,7 @@
  */
 
 import { ajaxGet } from "../generic/ajax.js";
-import { wait } from "../generic/dom.js";
+import { addClass, wait } from "../generic/dom.js";
 
 class Updater {
     constructor(app, params) {
@@ -12,9 +12,38 @@ class Updater {
         this.params = params
     }
 
-    update(index, taxonomy=true) {
+    fullUpdate(index) {
         this.range(index);
-        this.taxon(index, taxonomy);
+        this.app.information.loading();
+        this.app.photography.loading();
+        this.app.taxonomy.loading();
+        ajaxGet('taxon/' + this.app.params.languages.current + '/' + index + '/', (r) => {
+            this.app.params.taxonomy = r;
+            this.app.information.update();
+            this.app.photography.update();
+            this.app.taxonomy.update();
+        });
+    }
+
+    taxonomyUpdate(index) {
+        let siblings = this.app.params.taxonomy.siblings;
+        let j = -1;
+        for (let i = 0; i < (siblings.length); ++i) {
+            if (siblings[i].id === index) { j = i; break; }
+        }
+        
+        if (j > -1) {
+            this.app.params.taxonomy.tindex = j;
+            this.range(index);
+            this.app.information.loading();
+            this.app.photography.loading();
+            this.app.photography.update();
+
+            ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
+                this.app.params.taxonomy.description = r.values;
+                this.app.information.update();
+            });
+        }
     }
 
     range(index) {
@@ -27,28 +56,16 @@ class Updater {
         }
 
         let start = new Date();
-        this.app.cartography.range.remove(() => {});
-
-        ajaxGet('range/' + index + '/', (r) => {
-            let end = new Date();
-            let elapsed = end - start;
-            let transition = this.params.interface.cartography.range.transition.display;
-            if (elapsed < transition) {
-                wait(transition - elapsed, () => { display(r) })
-            } else { display(r); }
-        });
-    }
-
-    taxon(index, taxonomy=true) {
-        this.app.information.loading();
-        this.app.photography.loading();
-        if (taxonomy) { this.app.taxonomy.loading(); }
-        ajaxGet('taxon/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-            this.app.params.taxonomy = r;
-            this.app.information.update();
-            this.app.photography.update();
-            if (taxonomy) { this.app.taxonomy.update(); }
-        });
+        this.app.cartography.range.remove(() => {
+            ajaxGet('range/' + index + '/', (r) => {
+                let end = new Date();
+                let elapsed = end - start;
+                let transition = this.params.interface.cartography.range.transition.display;
+                if (elapsed < transition) {
+                    wait(transition - elapsed, () => { display(r) })
+                } else { display(r); }
+            });
+        })
     }
 }
 

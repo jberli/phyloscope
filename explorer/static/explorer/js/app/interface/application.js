@@ -35,17 +35,17 @@ class Application {
 
             // Create the information and footer widgets in the first panel
             this.information = new Information(this, this.params);
-            this.footer = new Footer(this);
-            // Create the header and taxonomy widgets in the second panel
+            this.photography = new Photography(this, this.params);            
+
             this.header = new Header(this);
             this.taxonomy = new Taxonomy(this, this.params);
-            // Create the photography and cartography widgets in the second panel
-            this.photography = new Photography(this, this.params);
+
             this.cartography = new Cartography(this, this.params);
+            this.footer = new Footer(this);
 
             // Create the updater object to update the widgets on demand
             this.updater = new Updater(this, this.params);
-            this.updater.update(this.params.taxonomy.current);
+            this.updater.fullUpdate(this.params.taxonomy.current);
 
             // Reveal the interface
             this.loaded();

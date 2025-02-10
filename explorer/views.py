@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from explorer.api.configuration import get_configuration
 from explorer.api.range import get_range
 from explorer.api.search import lookup
-from explorer.api.taxonomy import get_taxon, get_children, get_parents
+from explorer.api.taxonomy import get_taxon, get_children, get_parents, get_description
 
 def initialization(request):
     return render(request, 'explorer/index.html', {
@@ -54,3 +54,10 @@ def children(request, lang, id):
     """
     children = get_children(lang, id)
     return JsonResponse(children)
+
+def description(request, lang, id):
+    """
+    Get only the new children from a given taxon id.
+    """
+    description = get_description(lang, id)
+    return JsonResponse(description)

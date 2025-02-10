@@ -25,7 +25,7 @@ class Photography {
 
         // Create DOM elements
         this.container = makeDiv('photography', 'sub-panel');
-        this.app.third.append(this.container);
+        this.app.first.append(this.container);
 
         // Create individual photo objects
         this.previous = new PhotoContainer(this, false, false);
@@ -64,7 +64,11 @@ class Photography {
     /**
      * Display the loader on the widget and block interractions.
      */
-    loading() { this.current.loading(); }
+    loading() {
+        this.previous.loading();
+        this.current.loading();
+        this.next.loading();
+    }
 
     /**
      * Hide the loader and allow interractions.
