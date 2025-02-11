@@ -27,12 +27,6 @@ class Taxonomy {
         this.ancestrycontainer = makeDiv(null, 'taxonomy-ancestry');
         this.levels = makeDiv(null, 'taxonomy-levels');
 
-        // this.grandparent = makeDiv(null, 'taxonomy-level smooshed');
-        // this.parent = makeDiv(null, 'taxonomy-level');
-        
-        // this.children = makeDiv(null, 'taxonomy-level');
-        // this.grandchildren = makeDiv(null, 'taxonomy-level smooshed');
-
         this.container.append(this.ancestrycontainer, this.levels);
 
         this.grandparents = new GrandParents(this);
@@ -45,7 +39,7 @@ class Taxonomy {
     update() {
         this.loading();
         wait(this.params.interface.transition, () => {
-            this.destroy();
+            this.clear();
             this.grandparents.update();
             this.parents.update();
             this.siblings.update();
@@ -56,9 +50,25 @@ class Taxonomy {
     }
 
     updateChildren() {
-        this.children.destroy();
+        this.children.clear();
         this.children.update();
-        this.children.reveal();
+        wait(10, () => { this.children.reveal(); })
+    }
+
+    grow() {
+        this.grandparents.grow();
+        this.parents.grow();
+        this.siblings.grow();
+        this.children.grow();
+        this.grandchildren.grow();
+    }
+
+    regress() {
+        this.grandparents.regress();
+        this.parents.regress();
+        this.siblings.regress();
+        this.children.regress();
+        this.grandchildren.regress();
     }
 
     loading() {
@@ -83,16 +93,20 @@ class Taxonomy {
         this.children.reveal();
     }
 
-    destroy() {
-        this.parents.destroy();
-        this.siblings.destroy();
-        this.children.destroy();
+    clear() {
+        this.parents.clear();
+        this.siblings.clear();
+        this.children.clear();
     }
 }
 
 class Level {
     constructor(taxonomy) {
         this.taxonomy = taxonomy;
+        // Create the DOM element
+        this.container = makeDiv(null, 'taxonomy-level');
+        this.taxonomy.levels.append(this.container);
+
         this.sliding = false;
         this.active = false;
         this.smooshed = false;
@@ -110,11 +124,6 @@ class Level {
     }
 
     update() {
-        // Create the DOM element
-        this.container = makeDiv('taxonomy-level-' + this.type, 'taxonomy-level');
-        this.taxonomy.levels.append(this.container);
-
-        if ([ 'grandparents', 'grandchildren' ].includes(this.type)) { this.smoosh(); }
         if (this.type === 'siblings') { this.activate(); }
 
         // Initialize taxons
@@ -187,9 +196,11 @@ class Level {
     slide(e) {
         if (!this.sliding && this.taxonomy.active) {
             this.taxonomy.active = false;
+            let transition = this.taxonomy.params.interface.transition;
             this.sliding = true;
 
-            let same = false;
+            let active = false;
+
             let visible = []
             // Retrieve the visible taxons inside the level
             for (let i = 0; i < (this.taxons.length); ++i) {
@@ -224,65 +235,118 @@ class Level {
                         }
                     }
                 } else {
-                    same = true;
-                    // addClass(e.target, 'active');
-                    // growChildren(this.taxonlevel[i2 - 1], i2 - 1);
+                    active = true;
                 }
             }
 
-            // Here the taxonomy level is sliding
-            if (hide !== undefined) {
-                // Smoosh and expand the right taxon
-                this.taxons[hide].smoosh();
-                this.taxons[reveal].expand();
+            // Check if active entry is clicked
+            if (!active) {
+                // Here the taxonomy level is sliding
+                if (hide !== undefined) {
+                    // Smoosh and expand the right taxon
+                    this.taxons[hide].smoosh();
+                    this.taxons[reveal].expand();
+        
+                    let currentype = this.taxons[this.current].taxon.typesorting;
+                    let newtype = this.taxons[current].taxon.typesorting;
+                    
+                    if (newtype === currentype) {
+                        removeClass(this.typecontainer, currentype);
+                        addClass(this.typecontainer, newtype);
+                        this.typelabel.innerHTML = this.taxons[current].taxon.type;
+                    }
+        
+                    this.taxons[this.current].deactivate();
+                    this.taxons[current].activate();
+                    this.current = current;
     
-                let currentype = this.taxons[this.current].taxon.typesorting;
-                let newtype = this.taxons[current].taxon.typesorting;
-                
-                if (newtype === currentype) {
-                    removeClass(this.typecontainer, currentype);
-                    addClass(this.typecontainer, newtype);
-                    this.typelabel.innerHTML = this.taxons[current].taxon.type;
-                }
-    
-                this.taxons[this.current].deactivate();
-                this.taxons[current].activate();
-                this.current = current;
-
-                if (this.type === 'siblings') {
-                    let index = this.taxons[current].taxon.id;
-                    this.taxonomy.app.updater.taxonomyUpdate(index);
-                    this.taxonomy.children.collapse();
-                    let start = new Date();
-    
-                    ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        this.taxonomy.params.taxonomy['children'] = r.children;
-                        let end = new Date();
-                        let elapsed = end - start;
-                        let transition = this.taxonomy.params.interface.transition;
-                        if (elapsed < transition) {
-                            wait(transition - elapsed, () => {
+                    if (this.type === 'siblings') {
+                        let index = this.taxons[current].taxon.id;
+                        this.taxonomy.app.params.taxonomy.tindex = current - 1;
+                        this.taxonomy.app.updater.taxonomyUpdate(index);
+                        this.taxonomy.children.collapse();
+                        let start = new Date();
+        
+                        ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
+                            this.taxonomy.params.taxonomy.children = r.children;
+                            this.taxonomy.app.params.taxonomy.tindex = current - 1;
+                            let end = new Date();
+                            let elapsed = end - start;
+                            if (elapsed < transition) {
+                                wait(transition - elapsed, () => {
+                                    this.taxonomy.updateChildren();
+                                    wait(110, () => { this.sliding = false; })
+                                })
+                            } else {
                                 this.taxonomy.updateChildren();
-                                this.sliding = false;
-                            })
-                        } else {
-                            this.taxonomy.updateChildren();
-                            this.sliding = false;
-                        }
-                    });
+                                wait(110, () => { this.sliding = false; })
+                            }
+                        });
+                    } else {
+                        this.sliding = false;
+                        this.taxonomy.active = true;
+                    }
                 } else {
                     this.sliding = false;
                     this.taxonomy.active = true;
                 }
-            } else {
-                this.sliding = false;
-                this.taxonomy.active = true;
             }
+            // Here, active entry has been clicked
+            else {
+                // Here, parent has been clicked, must regress
+                if (this.type === 'parents') {
+                    this.sliding = false;
+                    this.taxonomy.active = true;
+                }
+                // Here, active child clicked, must grow
+                else if (this.type === 'children') {
+                    this.taxonomy.grow();
+                    this.taxonomy.grandchildren = new GrandChildren(this.taxonomy);
+
+                    this.taxonomy.app.params.taxonomy.parents = this.taxonomy.app.params.taxonomy.siblings;
+                    this.taxonomy.app.params.taxonomy.siblings = this.taxonomy.app.params.taxonomy.children;
+                    this.taxonomy.app.params.taxonomy.pindex = this.taxonomy.app.params.taxonomy.tindex;
+                    this.taxonomy.app.params.taxonomy.tindex = i2 - 1;
+
+                    let index = this.taxons[i2].taxon.id;
+                    this.taxonomy.app.updater.taxonomyUpdate(index);
+
+                    let start = new Date();
+                    ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
+                        this.taxonomy.params.taxonomy.children = r.children;
+                        let end = new Date();
+                        let elapsed = end - start;
+                        if (elapsed < transition) {
+                            wait(transition - elapsed, () => {
+                                this.taxonomy.children.update();
+                                this.sliding = false;
+                                this.taxonomy.active = true;
+                                wait(10, () => { this.taxonomy.children.reveal(); })
+                            })
+                        } else {
+                            this.taxonomy.children.update();
+                            this.sliding = false;
+                            this.taxonomy.active = true;
+                            wait(10, () => { this.children.reveal(); })
+                        }
+                    });
+                }
+                // Here, only clicked on already active taxon
+                else {
+                    this.sliding = false;
+                    this.taxonomy.active = true;
+                }               
+            }
+            
         }        
     }
 
+    clear() {
+        if (this.container.children.length > 0) { removeChildren(this.container); }
+    }
+
     destroy() {
-        if (this.container !== undefined) { this.container.remove(); }
+        this.container.remove();
     }
 
     activate() {
@@ -327,6 +391,15 @@ class GrandParents extends Level {
     constructor(taxonomy) {
         super(taxonomy);
         this.type = 'grandparents';
+        addClass(this.container, 'smooshed');
+    }
+
+    grow() {
+        this.destroy();
+    }
+
+    regress() {
+
     }
 }
 
@@ -335,12 +408,27 @@ class Parents extends Level{
         super(taxonomy);
         this.type = 'parents';
     }
+
+    grow() {
+        this.taxonomy.grandparents = this;
+        this.type = 'grandparents';
+        this.smoosh();
+        wait(this.taxonomy.params.interface.transition, () => {
+            this.clear();
+        })
+    }
 }
 
 class Siblings extends Level {
     constructor(taxonomy) {
         super(taxonomy);
         this.type = 'siblings';
+    }
+
+    grow() {
+        this.taxonomy.parents = this;
+        this.type = 'parents';
+        this.deactivate();
     }
 }
 
@@ -349,12 +437,25 @@ class Children extends Level {
         super(taxonomy);
         this.type = 'children';
     }
+
+    grow() {
+        this.taxonomy.siblings = this;
+        this.type = 'siblings';
+        this.activate();
+    }
 }
 
 class GrandChildren extends Level {
     constructor(taxonomy) {
         super(taxonomy);
         this.type = 'grandchildren';
+        addClass(this.container, 'smooshed');
+    }
+
+    grow() {
+        this.taxonomy.children = this;
+        this.type = 'children';
+        this.expand();
     }
 }
 
@@ -402,13 +503,6 @@ class Taxon {
             let mask = makeDiv(null, 'taxonomy-entry-mask');
             this.container.append(mask, image, label);
             this.container.setAttribute('taxon', this.taxon.id);
-
-            let self = this;
-            this.container.addEventListener('click', (e) => {
-                if (self.level.type === 'children' && self.active) {
-                    console.log('yo')
-                }
-            });
         }
     }
 

@@ -26,24 +26,15 @@ class Updater {
     }
 
     taxonomyUpdate(index) {
-        let siblings = this.app.params.taxonomy.siblings;
-        let j = -1;
-        for (let i = 0; i < (siblings.length); ++i) {
-            if (siblings[i].id === index) { j = i; break; }
-        }
-        
-        if (j > -1) {
-            this.app.params.taxonomy.tindex = j;
-            this.range(index);
-            this.app.information.loading();
-            this.app.photography.loading();
-            this.app.photography.update();
+        this.range(index);
+        this.app.information.loading();
+        this.app.photography.loading();
+        this.app.photography.update();
 
-            ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-                this.app.params.taxonomy.description = r.values;
-                this.app.information.update();
-            });
-        }
+        ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
+            this.app.params.taxonomy.description = r.values;
+            this.app.information.update();
+        });
     }
 
     range(index) {
