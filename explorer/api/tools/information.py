@@ -23,7 +23,7 @@ RANKS = {
     'supertribe': { 'en': 'Supertribe', 'fr': 'Super-tribu' },
     'tribe': { 'en': 'Tribe', 'fr': 'Tribu' },
     'subtribe': { 'en': 'Subtribe', 'fr': 'Sous-tribu' },
-    'genus': { 'en': 'genus', 'fr': 'Genre' },
+    'genus': { 'en': 'Genus', 'fr': 'Genre' },
     'genushybrid': { 'en': 'Genushybrid', 'fr': 'Genre hybride' },
     'subgenus': { 'en': 'Subgenus', 'fr': 'Sous-genre' },
     'section': { 'en': 'Section', 'fr': 'Section' },

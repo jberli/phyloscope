@@ -14,7 +14,14 @@
     transition: all .2s ease-in-out;
     display: flex;
     flex-direction: column;
+
     overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .description-content {

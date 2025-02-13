@@ -78,6 +78,8 @@ html, body {
 }
 
 #information {
+    flex: 2;
+
     font-family: 'Cantarell';
     color: $interface-foreground;
 
@@ -86,15 +88,23 @@ html, body {
     overflow: hidden;
 }
 
-#footer {
-    background-color: $interface-background;
-}
-
 #photography {
+    flex: 2;
     display: flex;
 }
 
+#footer {
+    flex: 1;
+    max-height: 8rem;
+    background-color: $interface-background;
+}
+
 #cartography {
+
+}
+
+#statistics {
+    background-color: $interface-background;
 }
 
 

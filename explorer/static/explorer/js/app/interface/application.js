@@ -10,6 +10,7 @@ import Information from "./information.js";
 import Footer from "./footer.js";
 import Header from "./header.js";
 import Photography from "./photography.js";
+import Statistics from "./statistics.js";
 import Taxonomy from "./taxonomy.js";
 import Updater from "./updater.js";
 
@@ -33,15 +34,16 @@ class Application {
             // Append the panels to the application container
             this.container.append(this.first, this.second, this.third);
 
-            // Create the information and footer widgets in the first panel
+            // Create the information, photography and footer widgets in the first panel
             this.information = new Information(this, this.params);
-            this.photography = new Photography(this, this.params);            
+            this.photography = new Photography(this, this.params);
+            this.footer = new Footer(this, this.params);
 
             this.header = new Header(this);
             this.taxonomy = new Taxonomy(this, this.params);
 
             this.cartography = new Cartography(this, this.params);
-            this.footer = new Footer(this);
+            this.statistics = new Statistics(this, this.params);
 
             // Create the updater object to update the widgets on demand
             this.updater = new Updater(this, this.params);

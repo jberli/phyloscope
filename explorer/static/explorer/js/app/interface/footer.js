@@ -10,7 +10,7 @@ class Footer {
     constructor(app) {
         this.app = app;
         this.container = makeDiv('footer', 'sub-panel');
-        this.app.third.append(this.container);
+        this.app.first.append(this.container);
     }
 }
 
