@@ -127,7 +127,7 @@ def get_parents(language, index):
     Get the parents from a given taxon index.
     """
     result = {}
-    taxon = Taxon.objects.get(tid=id)
+    taxon = Taxon.objects.get(tid=index)
     parent = taxon.parent
     if parent is not None:
         grandparent = parent.parent
