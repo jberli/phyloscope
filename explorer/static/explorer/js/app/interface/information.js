@@ -274,24 +274,9 @@ class Description {
         let v = infos.vernaculars.slice(0)
         // Storage for the title of the description
         let t;
-        // If the wikipedia page exists 
-        if (wikipedia !== null) {
-            // If the wikipedia title is the scientific name
-            if (compare(wikipedia.title, infos.scientific, true, [['_', ' ']])) {
-                // If vernaculars exists, set the title as the first vernacular
-                if (v.length > 0) { t = v.shift(); }
-                // If not, set the title as the wikipedia title
-                else { t = wikipedia.title }
-            }
-            // If the wikipedia title is different from the scientific name, set it as title
-            else { t = wikipedia.title; }
-        }
-        // No wikipedia page exists        
-        else {
-            // Set first vernacular if exists, else the scientifc name
-            if (v.length > 0) { t = v.shift(); }
-            else { t = infos.scientific }
-        }
+
+        if (v.length > 0) { t = v.shift(); }
+        else { t = infos.scientific }
 
         // Create DOM Elements
         this.content = makeDiv(null, 'description-content hidden');

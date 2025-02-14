@@ -1,0 +1,15 @@
+.statistics-chart {
+    height: calc(100% - 4rem);
+    width: calc(100% - 4rem);
+    margin: 2rem;
+
+    display: flex;
+    justify-content: center;
+
+    transform: scale(1, 1);
+    transition: transform .2s ease-in-out;
+
+    &.collapse {
+        transform: scale(0, 0);
+    }
+}

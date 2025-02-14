@@ -36,7 +36,9 @@
 .description-title {
     font-weight: bold;
     font-size: 26px;
-    text-transform: capitalize;
+    &:first-letter {
+        text-transform: uppercase;
+    }
 }
 
 .description-scientific {

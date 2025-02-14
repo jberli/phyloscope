@@ -3,7 +3,6 @@
  * Define the cartography widget.
  */
 
-import { animateOpacity } from "../generic/map.js";
 import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
 
 /**

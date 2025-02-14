@@ -22,7 +22,7 @@ texts:
     en: 'Other names:'
     fr: 'Autres noms :'
 taxonomy:
-  current: 3000
+  current: 18485
 typesorting:
   - 'stateofmatter'
   - 'kingdom'

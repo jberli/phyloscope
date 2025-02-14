@@ -39,9 +39,11 @@ class Application {
             this.photography = new Photography(this, this.params);
             this.footer = new Footer(this, this.params);
 
+            // Create header and taxonomy widgets in the second panel
             this.header = new Header(this);
             this.taxonomy = new Taxonomy(this, this.params);
 
+            // Create the cartography and statistics panel in the third panel
             this.cartography = new Cartography(this, this.params);
             this.statistics = new Statistics(this, this.params);
 

@@ -22,6 +22,7 @@ class Updater {
             this.app.information.update();
             this.app.photography.update();
             this.app.taxonomy.update();
+            this.app.statistics.update();
         });
     }
 
@@ -57,6 +58,10 @@ class Updater {
                 } else { display(r); }
             });
         })
+    }
+
+    name() {
+        
     }
 }
 

@@ -8,6 +8,7 @@
 @import '_taxonomy.scss';
 @import '_information.scss';
 @import '_cartography.scss';
+@import '_statistics.scss';
 @import '_photography.scss';
 @import '_footer.scss';
 
@@ -274,3 +275,40 @@ html, body {
     background-color: $form; 
     outline-color: $form;
 }
+
+
+svg.stateofmatter { color: $stateofmatter; }
+svg.kingdom { color: $kingdom; }
+svg.phylum { color: $phylum; }
+svg.subphylum { color: $subphylum;  }
+svg.superclass { color: $superclass; }
+svg.class { color: $class; }
+svg.subclass {  color: $subclass; }
+svg.infraclass { color: $infraclass; }
+svg.subterclass { color: $subterclass; }
+svg.superorder { color: $superorder; }
+svg.order { color: $order; }
+svg.suborder { color: $suborder; }
+svg.infraorder { color: $infraorder; }
+svg.parvorder { color: $parvorder; }
+svg.zoosection { color: $zoosection; }
+svg.zoosubsection { color: $zoosubsection; }
+svg.superfamily { color: $superfamily; }
+svg.epifamily { color: $epifamily; }
+svg.family { color: $family; }
+svg.subfamily { color: $subfamily; }
+svg.supertribe { color: $supertribe; }
+svg.tribe { color: $tribe; }
+svg.subtribe { color: $subtribe; }
+svg.genus { color: $genus; }
+svg.genushybrid { color: $genushybrid; }
+svg.subgenus { color: $subgenus; }
+svg.section { color: $section; }
+svg.subsection { color: $subsection; }
+svg.complex { color: $complex; }
+svg.species { color: $species; }
+svg.hybrid { color: $hybrid; }
+svg.subspecies { color: $subspecies; }
+svg.infrahybrid { color: $infrahybrid; }
+svg.variety { color: $variety; }
+svg.form { color: $form; }
