@@ -19,6 +19,6 @@ class Command(BaseCommand):
         else:
             doit = prompt('''You are about to add entries to the database.This operation might take some time. Continue? ''')
         if (doit):
-            update(False)
+            update(False, limit=50000)
         else:
             print('Nothing was done')

@@ -5,6 +5,8 @@ import shutil
 import zipfile
 import csv
 import logging
+import pandas as pd
+import numpy as np
 
 from progress.bar import IncrementalBar, Bar
 from django.db.models import Max
@@ -12,6 +14,7 @@ from django.db.models import Max
 from explorer.api.tools.models import wipe_database, display_database_information
 from explorer.api.tools.files import get_row_number, read_csv, read_entry, download
 from explorer.api.tools.fetch import fetch_api
+from explorer.api.configuration import get_configuration
 
 # Import models to access the database
 from explorer.models import Taxon, Names, Photo 
@@ -97,17 +100,18 @@ def insert_data(taxons, tmp):
     bar = IncrementalBar('...1/7 taxon               ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
-        tid = int(entry['id'])
-        taxon = Taxon(
-            tid = tid,
-            level = float(entry['rank_level']),
-            rank = entry['rank'],
-            name = entry['name'],
-            status = entry['status'],
-            wikipedia = entry['wikipedia'],
-        )
+        if entry['id'] != '':
+            tid = int(entry['id'])
+            taxon = Taxon(
+                tid = tid,
+                level = float(entry['rank_level']),
+                rank = entry['rank'],
+                name = entry['name'],
+                status = entry['status'],
+                wikipedia = entry['wikipedia'],
+            )
+            taxon.save()
 
-        taxon.save()
         bar.next()
     bar.next()
     after = datetime.datetime.now()
@@ -121,18 +125,19 @@ def insert_data(taxons, tmp):
     bar = IncrementalBar('...2/7 photo               ', max=pnb, suffix='%(percent)d%%') 
     for row in preader:
         entry = read_entry(row, pfields, pindexes)
-        tid = int(entry['taxon'])
-        if tid in taxons:
-            photo = Photo(
-                pid = int(entry['id']),
-                taxon_id = Taxon.objects.get(tid=tid),
-                default = entry['default'],
-                license = entry['license'],
-                extension = entry['extension'] if len(entry['extension']) < 5 else None,
-                height = int(entry['height']) if len(entry['height']) > 0 else None,
-                width = int(entry['width']) if len(entry['width']) > 0 else None,
-            )
-            photo.save()
+        if entry['taxon'] != '':
+            tid = int(entry['taxon'])
+            if tid in taxons:
+                photo = Photo(
+                    pid = int(entry['id']),
+                    taxon_id = Taxon.objects.get(tid=tid),
+                    default = entry['default'],
+                    license = entry['license'],
+                    extension = entry['extension'] if len(entry['extension']) < 5 else None,
+                    height = int(entry['height']) if len(entry['height']) > 0 else None,
+                    width = int(entry['width']) if len(entry['width']) > 0 else None,
+                )
+                photo.save()
         bar.next()
     bar.next()
     after = datetime.datetime.now()
@@ -146,15 +151,16 @@ def insert_data(taxons, tmp):
     bar = IncrementalBar('...3/7 english vernacular  ', max=nenb, suffix='%(percent)d%%')
     for row in nereader:
         entry = read_entry(row, nefields, neindexes)
-        tid = int(entry['id'])
-        if tid in taxons:
-            name = Names(
-                taxon = Taxon.objects.get(tid=tid),
-                name = entry['vernacularName'],
-                language = entry['language'],
-                country = entry['countryCode'],
-            )
-            name.save()
+        if entry['id'] != '':
+            tid = int(entry['id'])
+            if tid in taxons:
+                name = Names(
+                    taxon = Taxon.objects.get(tid=tid),
+                    name = entry['vernacularName'],
+                    language = entry['language'],
+                    country = entry['countryCode'],
+                )
+                name.save()
         bar.next()
     bar.next()
     after = datetime.datetime.now()
@@ -168,15 +174,16 @@ def insert_data(taxons, tmp):
     bar = IncrementalBar('...4/7 french vernacular   ', max=nfnb, suffix='%(percent)d%%')
     for row in nfreader:
         entry = read_entry(row, nffields, nfindexes)
-        tid = int(entry['id'])
-        if tid in taxons:
-            name = Names(
-                taxon = Taxon.objects.get(tid=tid),
-                name = entry['vernacularName'],
-                language = entry['language'],
-                country = entry['countryCode'],
-            )
-            name.save()
+        if entry['id'] != '':
+            tid = int(entry['id'])
+            if tid in taxons:
+                name = Names(
+                    taxon = Taxon.objects.get(tid=tid),
+                    name = entry['vernacularName'],
+                    language = entry['language'],
+                    country = entry['countryCode'],
+                )
+                name.save()
         
         bar.next()
     bar.next()
@@ -198,14 +205,15 @@ def insert_data(taxons, tmp):
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
         tid = int(entry['id'])
-        parent_id = int(entry['parent'])
-        if tid in taxons:
-            if len(Taxon.objects.filter(tid=tid)) > 0:
-                taxon = Taxon.objects.get(tid=tid)
-                if len(Taxon.objects.filter(tid=parent_id)) > 0:
-                    parent = Taxon.objects.get(tid=parent_id)
-                    taxon.parent = parent
-                    taxon.save()
+        if entry['parent'] != '':
+            parent_id = int(entry['parent'])
+            if tid in taxons:
+                if len(Taxon.objects.filter(tid=tid)) > 0:
+                    taxon = Taxon.objects.get(tid=tid)
+                    if len(Taxon.objects.filter(tid=parent_id)) > 0:
+                        parent = Taxon.objects.get(tid=parent_id)
+                        taxon.parent = parent
+                        taxon.save()
         bar.next()
     bar.next()
     after = datetime.datetime.now()
@@ -257,7 +265,7 @@ def insert_data(taxons, tmp):
     print(f' in {str(after - before)}')
     bar.finish()
 
-def update(initialize=False, batch=30, maximum=10000, limit=20000):
+def update(initialize=False, limit=None, batch=30, maximum=10000):
     """
     Update the database.
     """
@@ -301,26 +309,33 @@ def update(initialize=False, batch=30, maximum=10000, limit=20000):
         with zipfile.ZipFile(pathzip, 'r') as z:
             z.extractall(pathtmp)
 
+        typesorting = get_configuration()['typesorting']
+
+        mapper = {}
+        for typesort, entry in typesorting.items():
+            mapper[typesort] = entry['level']
+
         # Retrieve the list of taxon index already present in database
         taxons = [ x['tid'] for x in list(Taxon.objects.order_by('tid').values('tid').distinct()) ]
 
-        # Get the number of rows and retrieve the file reader
-        nb = get_row_number(f'{pathtmp}/taxa.csv')
-        tfields = [ 'id', 'scientificName', 'taxonRank' ]
-        r, reader, indexes = read_csv(f'{pathtmp}/taxa.csv', tfields, ',')
+        tokeep = [ 'id', 'scientificName', 'taxonRank' ]
 
-        # Counter for missing taxon indexes
-        tnb = 0
-        new_taxons = []
-        for row in reader:
-            tid = int(row[indexes[0]])
-            if tid not in taxons:
-                new_taxons.append(tid)
+        df = pd.read_csv(f'{pathtmp}/taxa.csv', sep=',')
+        df = df.drop(df.columns.difference(tokeep), axis=1)
+        df['level'] = df['taxonRank'].map(mapper)
+    
+        df = df.sort_values(by=['level'], ascending=False)
+        df['id'] = pd.to_numeric(df['id'])
+        df['level'] = pd.to_numeric(df['level'])
 
-                tnb += 1
-                if limit is not None:
-                    if tnb >= limit:
-                        break
+        if not initialize:
+            mask = df['id'].isin(taxons)
+            df = df[-mask]
+
+        if limit is not None:
+            df = df.head(limit)
+
+        new_taxons = df['id'].to_list()
 
         print()
         # If missing taxons were found

@@ -25,7 +25,7 @@ class Application {
         // Retrieve the configuration parameters
         ajaxGet('configuration/', (params) => {
             this.params = params;
-            this.params.colors = getColorsByClassNames(...this.params.typesorting);
+            this.params.colors = getColorsByClassNames(...Object.keys(this.params.typesorting));
 
             // Create the first, second and third column panel
             this.first = makeDiv('first-panel', 'panel');

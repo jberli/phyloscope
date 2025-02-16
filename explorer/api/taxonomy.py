@@ -67,6 +67,7 @@ def get_taxon_description(language, taxon):
         return {
             'title': page.title,
             'summary': page.summary,
+            'url': page.fullurl
         }
     else:
         return None

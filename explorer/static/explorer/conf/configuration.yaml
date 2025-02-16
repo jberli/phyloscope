@@ -22,40 +22,176 @@ texts:
     en: 'Other names:'
     fr: 'Autres noms :'
 taxonomy:
-  current: 18485
+  current: 4
 typesorting:
-  - 'stateofmatter'
-  - 'kingdom'
-  - 'phylum'
-  - 'subphylum'
-  - 'superclass'
-  - 'class'
-  - 'subclass'
-  - 'infraclass'
-  - 'subterclass'
-  - 'superorder'
-  - 'order'
-  - 'suborder'
-  - 'infraorder'
-  - 'parvorder'
-  - 'zoosection'
-  - 'zoosubsection'
-  - 'superfamily'
-  - 'epifamily'
-  - 'family'
-  - 'subfamily'
-  - 'supertribe'
-  - 'tribe'
-  - 'subtribe'
-  - 'genus'
-  - 'genushybrid'
-  - 'subgenus'
-  - 'section'
-  - 'subsection'
-  - 'complex'
-  - 'species'
-  - 'hybrid'
-  - 'subspecies'
-  - 'infrahybrid'
-  - 'variety'
-  - 'form'
+  stateofmatter:
+    level: 100
+    en: State of matter
+    fr: État de la matière
+  kingdom:
+    level: 90
+    en: Kingdom
+    fr: Règne
+  phylum:
+    level: 80
+    en: Phylum
+    fr: Phylum
+  subphylum:
+    level: 78
+    en: Subphylum
+    fr: Sous-phylum
+  superclass:
+    level: 75
+    en: Superclass
+    fr: Super-classe
+  class:
+    level: 70
+    en: Class
+    fr: Classe
+  subclass:
+    level: 68
+    en: Subclass
+    fr: Sous-classe
+  infraclass:
+    level: 65
+    en: Infraclass
+    fr: Classe interne
+  subterclass:
+    level: 64
+    en: Subterclass
+    fr: Sous-classe interne
+  superorder:
+    level: 62
+    en: Superorder
+    fr: Super-ordre
+  order:
+    level: 60
+    en: Order
+    fr: Ordre
+  suborder:
+    level: 58
+    en: Suborder
+    fr: Sous-ordre
+  infraorder:
+    level: 57
+    en: Infraorder
+    fr: Infra-ordre
+  parvorder:
+    level: 56
+    en: Parvorder
+    fr: Micro-ordre
+  zoosection:
+    level: 50
+    en: Zoosection
+    fr: Section animale
+  zoosubsection:
+    level: 48
+    en: Zoosubsection
+    fr: Sous-section animale
+  superfamily:
+    level: 44
+    en: Superfamily
+    fr: Super-famille
+  epifamily:
+    level: 42
+    en: Epifamily
+    fr: Épifamille
+  family:
+    level: 40
+    en: Family
+    fr: Famille
+  subfamily:
+    level: 36
+    en: Subfamily
+    fr: Sous-famille
+  supertribe:
+    level: 34
+    en: Supertribe
+    fr: Super-tribu
+  tribe:
+    level: 30
+    en: Tribe
+    fr: Tribu
+  subtribe:
+    level: 25
+    en: Subtribe
+    fr: Sous-tribu
+  genus:
+    level: 20
+    en: Genus
+    fr: Genre
+  genushybrid:
+    level: 18
+    en: Genushybrid
+    fr: Genre hybride
+  subgenus:
+    level: 17
+    en: Subgenus
+    fr: Sous-genre
+  section:
+    level: 15
+    en: Section
+    fr: Section
+  subsection:
+    level: 14
+    en: Subsection
+    fr: Sous-section
+  complex:
+    level: 12
+    en: Complex
+    fr: Complexe
+  species:
+    level: 10
+    en: Species
+    fr: Espèce
+  hybrid:
+    level: 8
+    en: Hybrid
+    fr: Hybride
+  subspecies:
+    level: 7
+    en: Subspecies
+    fr: Sous-espèce
+  variety:
+    level: 5
+    en: Variety
+    fr: Variété
+  form:
+    level: 4
+    en: Form
+    fr: Forme
+  infrahybrid:
+    level: 2
+    en: Infrahybrid
+    fr: Infra-hybride
+iucn:
+  EX:
+    en: Extinct
+    fr: Éteinte
+  EW:
+    en: Extinct in the wild
+    fr: Éteinte à l'état sauvage
+  CR:
+    en: Critically endangered
+    fr: En danger critique d'extinction
+  EN:
+    en: Endangered
+    fr: En danger
+  VU:
+    en: Vulnerable
+    fr: Vulnérable
+  NT:
+    en: Near threatened
+    fr: Quasi menacée
+  CD:
+    en: Conservation dependent
+    fr: Dépendente de la conservation
+  LC:
+    en: Least concern
+    fr: Préoccupation mineure
+  DD:
+    en: Data deficient
+    fr: Données insuffisantes
+  NE:
+    en: Not evaluated
+    fr: Non-évaluée

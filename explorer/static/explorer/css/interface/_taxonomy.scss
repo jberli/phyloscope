@@ -33,10 +33,6 @@ $taxonomy-margin: 2rem;
     flex: 5;
 }
 
-.taxonomy-type {
-    
-}
-
 .taxonomy-level {
     flex: 4;
 
@@ -51,7 +47,11 @@ $taxonomy-margin: 2rem;
     transition: all .2s ease-in-out;
 
     &.active {
-        margin: $taxonomy-margin 0;
+        padding: $taxonomy-margin 0;
+
+        & > .taxonomy-entry-container > .taxonomy-entry.active {
+            outline: .4rem solid $taxonomy-entry-background;
+        }
     }
 
     &.smooshed {
@@ -65,6 +65,7 @@ $taxonomy-margin: 2rem;
         transform: scale(0, 0);
         transition: all .2s ease-in-out;
     }
+
 }
 
 .taxonomy-type-container {
@@ -126,7 +127,7 @@ $taxonomy-margin: 2rem;
     box-shadow: 0 0 3px $interface-shadows-dark;
 
     transform-origin: 50% 50%;
-    transition: flex .1s linear, box-shadow .2s ease-in-out, transform .2s ease-in-out;
+    transition: flex .1s linear, box-shadow .2s ease-in-out, transform .2s ease-in-out, outline .2s ease-in-out;
 
     -webkit-user-select: none;  
     -moz-user-select: none;    

@@ -10,6 +10,11 @@
     color: $font-color-dark;
 }
 
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
 .no-scrollbar {
     overflow: auto;
     -ms-overflow-style: none;

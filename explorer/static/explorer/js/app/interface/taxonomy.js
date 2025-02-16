@@ -256,7 +256,6 @@ class Level {
             this.taxonomy.active = false;
             let transition = this.taxonomy.params.interface.transition;
             this.sliding = true;
-
             let active = false;
 
             let visible = []
@@ -308,7 +307,7 @@ class Level {
                     let currentype = this.taxons[this.current].taxon.typesorting;
                     let newtype = this.taxons[current].taxon.typesorting;
                     
-                    if (newtype === currentype) {
+                    if (newtype !== currentype) {
                         removeClass(this.typecontainer, currentype);
                         addClass(this.typecontainer, newtype);
                         this.typelabel.innerHTML = this.taxons[current].taxon.type;

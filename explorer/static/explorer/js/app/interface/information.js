@@ -281,8 +281,36 @@ class Description {
         // Create DOM Elements
         this.content = makeDiv(null, 'description-content hidden');
         this.container.append(this.content);
+
+        let linkcontainer = makeDiv(null, 'description-links');
+
+        let inaturalist = makeDiv(null, 'description-link');
+        addSVG(inaturalist, new URL('/static/explorer/img/inaturalist.svg', import.meta.url))
+
+        let ainat = document.createElement('a');
+        ainat.href = 'https://www.inaturalist.org/taxa/' + infos.id;
+        ainat.setAttribute('target', '_blank');
+        ainat.append(inaturalist);
+
+        linkcontainer.append(ainat);
+
+        if (wikipedia !== null) {
+            let wiki = makeDiv(null, 'description-link');
+            addSVG(wiki, new URL('/static/explorer/img/wikipedia.svg', import.meta.url));
+
+            let awiki = document.createElement('a');
+            awiki.href = wikipedia.url;
+            awiki.setAttribute('target', '_blank');
+            awiki.append(wiki);
+            
+            linkcontainer.append(awiki);
+        }
+
+        this.content.append(linkcontainer);
+        
         let title = makeDiv(null, 'description-title', t);
         let scientific = makeDiv(null, 'description-scientific', infos.scientific);
+
         this.content.append(title, scientific);
 
         // If there are other vernacular names

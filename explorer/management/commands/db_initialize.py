@@ -19,6 +19,6 @@ class Command(BaseCommand):
         else:
             doit = prompt('''You are about to remove all entries from the database and rebuild it from scratch. Continue? ''')
         if (doit):
-            update(True)
+            update(True, limit=50000)
         else:
             print('Nothing was done')

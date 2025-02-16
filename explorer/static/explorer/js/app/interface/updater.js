@@ -17,6 +17,8 @@ class Updater {
         this.app.information.loading();
         this.app.photography.loading();
         this.app.taxonomy.loading();
+        this.app.statistics.loading();
+        
         ajaxGet('taxon/' + this.app.params.languages.current + '/' + index + '/', (r) => {
             this.app.params.taxonomy = r;
             this.app.information.update();

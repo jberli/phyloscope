@@ -3,7 +3,7 @@
  * Define the statistics widget.
  */
 
-import { addClass, makeDiv, removeClass } from "../generic/dom.js";
+import { addClass, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
 
 class Statistics {
     constructor(app, params) {
@@ -11,11 +11,20 @@ class Statistics {
         this.params = params;
         this.container = makeDiv('statistics', 'sub-panel');
         this.app.third.append(this.container);
+        this.chart;
+
+        // Mask and loader
+        this.mask = makeDiv(null, 'statistics-mask mask');
+        this.loader = makeDiv(null, 'statistics-loader loader');
+        this.mask.append(this.loader)
+        this.container.append(this.mask);
+
+        this.chart = makeDiv(null, 'statistics-chart collapse');
+        this.container.append(this.chart);
     }
 
     update() {
-        this.chart = makeDiv(null, 'statistics-chart collapse');
-        this.container.append(this.chart);
+        removeChildren(this.chart);
 
         let taxonomy = this.app.params.taxonomy;
         let children = taxonomy.children;
@@ -60,7 +69,7 @@ class Statistics {
         
         // Create the root partition
         const root = d3.partition()
-            // Set the size of the parition depending on the depth of the data.
+            // Set the size of the partition depending on the depth of the data.
             .size([2 * Math.PI, hierarchy.height + 1])
             (hierarchy);
         // Set up the layout for each element.
@@ -152,6 +161,10 @@ class Statistics {
         this.chart.append(svg.node());
         this.reveal();
 
+        wait(this.params.interface.transition, () => {
+            this.loaded();
+        });
+
         path.on('mouseenter', (e) => {
 
         })
@@ -217,6 +230,22 @@ class Statistics {
 
     reveal() {
         removeClass(this.chart, 'collapse');
+    }
+
+    /**
+     * Display the loader on the widget and block interractions.
+     */
+    loading() {
+        removeClass(this.mask, 'loaded');
+        this.collapse();
+    }
+
+    /**
+     * Hide the loader and allow interractions.
+     */
+    loaded() {
+        addClass(this.mask, 'loaded');
+        this.reveal();
     }
 }
 
