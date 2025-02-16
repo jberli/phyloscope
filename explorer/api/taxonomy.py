@@ -19,12 +19,13 @@ def get_taxon_information(obj, lang):
             for p in photographs:
                 default = True if p.default else False
                 extension = p.extension
-                if len(extension) > 0:
-                    photo = { "id": p.pid, "default": default, "extension": extension }
-                    if default:
-                        photos.insert(0, photo)
-                    else:
-                        photos.append(photo)
+                if extension is not None:
+                    if len(extension) > 0:
+                        photo = { "id": p.pid, "default": default, "extension": extension }
+                        if default:
+                            photos.insert(0, photo)
+                        else:
+                            photos.append(photo)
         parent = True
         if obj.parent is None:
             parent = False
