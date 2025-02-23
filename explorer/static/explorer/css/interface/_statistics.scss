@@ -12,6 +12,10 @@
     &.collapse {
         transform: scale(0, 0);
     }
+
+    & > svg {
+        color: $main-color-mediumlight;
+    }
 }
 
 .statistics-mask {

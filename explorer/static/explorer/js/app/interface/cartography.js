@@ -286,8 +286,6 @@ class Range {
      */
     hide(callback) {
         this.opacity(0, callback);
-        // this.layer.setOpacity(0);
-        // callback();
     }
 
     /**

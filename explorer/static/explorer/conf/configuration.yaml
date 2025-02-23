@@ -22,7 +22,7 @@ texts:
     en: 'Other names:'
     fr: 'Autres noms :'
 taxonomy:
-  current: 4
+  current: 1
 typesorting:
   stateofmatter:
     level: 100

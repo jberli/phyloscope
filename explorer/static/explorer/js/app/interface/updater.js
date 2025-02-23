@@ -61,10 +61,6 @@ class Updater {
             });
         })
     }
-
-    name() {
-        
-    }
 }
 
 export default Updater;
