@@ -4,19 +4,20 @@
  */
 
 import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
+import Widget from "./widget.js";
 
 /**
  * Create the cartography widget to display
  * geographical information about the current taxon.
  */
-class Cartography {
+class Cartography extends Widget {
     /**
      * @param {Application} app - Application object.
      * @param {Object} params - Parameters of the application.
      */
     constructor(app, params) {
-        this.app = app;
-        this.params = params;
+        super(app, params);
+        this.type = 'cartography';
 
         // Boolean to flag if the map view is the same as the starting one
         this.origin = true;
@@ -77,7 +78,7 @@ class Cartography {
      * Update the range on the map.
      */
     update(callback) {
-        this.range.set(this.params.range, () => {
+        this.range.set(this.app.updater.getRange(), () => {
             this.loaded();
             callback();
         });
@@ -177,10 +178,6 @@ class Range {
             updateWhileInteracting: true,
         });
         this.cartography.map.addLayer(this.layer);
-
-        // this.layer.on('propertychange', (e) => {
-        //     console.log(e)
-        // })
     }
 
     /**

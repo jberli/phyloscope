@@ -117,8 +117,10 @@ def get_taxon(language, index):
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
         result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+        result['cindex'] = 0
     else:
         result['children'] = None
+        result['cindex'] = None
 
     result['description'] = get_taxon_description(language, taxon)
 
@@ -145,6 +147,7 @@ def get_parents(language, index):
             result['pindex'] = 0
     else:
         result['parents'] = None
+        result['pindex'] = None
     return result
 
 def get_children(language, index):
@@ -157,6 +160,8 @@ def get_children(language, index):
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
         result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+    else:
+        result['children'] = None
     return result
 
 def get_description(language, index):

@@ -7,12 +7,12 @@ import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { addClass, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { calculateTextWidth, calculateWidthFromClass, uppercaseFirstLetter } from "../generic/parsing.js";
 import { round } from "../generic/math.js";
+import Widget from "./widget.js";
 
-class Taxonomy {
+class Taxonomy extends Widget {
     constructor(app, params) {
-        this.app = app;
-        this.params = params;
-        this.active = true;
+        super(app, params);
+        this.type = 'taxonomy';
 
         // Create DOM elements
         this.container = makeDiv('taxonomy', 'sub-panel');
@@ -36,8 +36,9 @@ class Taxonomy {
         this.grandchildren = new GrandChildren(this);
     }
 
-    update() {
+    update(callback) {
         this.loading();
+        this.collapse();
         wait(this.params.interface.transition, () => {
             this.clear();
             this.grandparents.update();
@@ -46,13 +47,18 @@ class Taxonomy {
             this.children.update();
             this.grandchildren.update();
             this.loaded();
+            wait(10, () => { this.reveal(); })
+            callback();
         })
     }
 
     updateChildren() {
         this.children.clear();
         this.children.update();
-        wait(10, () => { this.children.reveal(); })
+        wait(10, () => {
+            this.loaded();
+            this.children.reveal();
+        });
     }
 
     grow() {
@@ -68,8 +74,10 @@ class Taxonomy {
         });
 
         // Set siblings as new parents
-        this.app.params.taxonomy.parents = this.app.params.taxonomy.siblings;
-        this.app.params.taxonomy.pindex = this.app.params.taxonomy.tindex;
+        this.app.updater.taxonomy.parents = this.app.updater.taxonomy.siblings;
+        this.app.updater.taxonomy.pindex = this.app.updater.taxonomy.tindex;
+        this.app.updater.taxonomy.parents = this.app.updater.taxonomy.siblings;
+        this.app.updater.taxonomy.pindex = this.app.updater.taxonomy.tindex;
         this.parents = this.siblings;
         this.parents.type = 'parents';
         this.parents.deactivate();
@@ -79,8 +87,8 @@ class Taxonomy {
         }
 
         // Set children as new siblings
-        this.app.params.taxonomy.siblings = this.app.params.taxonomy.children;
-        this.app.params.taxonomy.tindex = this.children.current - 1;
+        this.app.updater.taxonomy.siblings = this.app.updater.taxonomy.children;
+        this.app.updater.taxonomy.tindex = this.children.current - 1;
         this.siblings = this.children;
         this.siblings.type = 'siblings';
         this.siblings.activate();
@@ -107,14 +115,14 @@ class Taxonomy {
         })
 
         // Set new children as siblings
-        this.app.params.taxonomy.children = this.app.params.taxonomy.siblings;
+        this.app.updater.taxonomy.children = this.app.updater.taxonomy.siblings;
         this.children = this.siblings;
         this.children.type = 'children';
         this.children.deactivate();
 
         // Set new siblings as parents
-        this.app.params.taxonomy.siblings = this.app.params.taxonomy.parents;
-        this.app.params.taxonomy.tindex = this.parents.current - 1;
+        this.app.updater.taxonomy.siblings = this.app.updater.taxonomy.parents;
+        this.app.updater.taxonomy.tindex = this.parents.current - 1;
         this.siblings = this.parents;
         this.siblings.type = 'siblings';
         this.siblings.activate();
@@ -134,12 +142,10 @@ class Taxonomy {
 
     loading() {
         removeClass(this.mask, 'loaded');
-        this.collapse();
     }
 
     loaded() {
         addClass(this.mask, 'loaded');
-        wait(10, () => { this.reveal(); })
     }
 
     collapse() {
@@ -159,13 +165,17 @@ class Taxonomy {
         this.siblings.clear();
         this.children.clear();
     }
+
+    click(level, index) {
+        if (level === 'children') { this.children.taxons[index].click(); }
+        else if (level === 'parent') {  }
+    }
 }
 
 class Level {
     constructor(taxonomy) {
         this.taxonomy = taxonomy;
 
-        this.sliding = false;
         this.active = false;
         this.smooshed = false;
 
@@ -188,11 +198,11 @@ class Level {
         this.taxons = [];
 
         // Get the whole list of taxons in the level
-        this.taxonlevel = this.taxonomy.params.taxonomy[this.type];
+        this.taxonlevel = this.taxonomy.app.updater.getLevel(this.type);
 
         // If parents or siblings, retrieve the parent or current taxon index in the list
-        if (this.type === 'parents') { this.index = this.taxonomy.params.taxonomy.pindex; }
-        else if (this.type === 'siblings') { this.index = this.taxonomy.params.taxonomy.tindex; }
+        if (this.type === 'parents') { this.index = this.taxonomy.app.updater.taxonomy.pindex; }
+        else if (this.type === 'siblings') { this.index = this.taxonomy.app.updater.taxonomy.tindex; }
 
         // Make sure the level is not null
         if (this.taxonlevel) {
@@ -205,7 +215,7 @@ class Level {
 
             let typesorting = taxon.typesorting;
             this.typecontainer = makeDiv(null, 'taxonomy-type-container collapse ' + typesorting);
-            this.typelabel = makeDiv(null, 'taxonomy-type-label ' + typesorting, taxon.type);
+            this.typelabel = makeDiv(null, 'taxonomy-type-label', taxon.type);
             this.typecontainer.append(this.typelabel);
 
             this.entrycontainer = makeDiv(null, 'taxonomy-entry-container');
@@ -252,10 +262,9 @@ class Level {
     }
 
     slide(e) {
-        if (!this.sliding && this.taxonomy.active) {
-            this.taxonomy.active = false;
+        if (!this.taxonomy.freezed) {
             let transition = this.taxonomy.params.interface.transition;
-            this.sliding = true;
+            this.taxonomy.freeze();
             let active = false;
 
             let visible = []
@@ -306,7 +315,7 @@ class Level {
         
                     let currentype = this.taxons[this.current].taxon.typesorting;
                     let newtype = this.taxons[current].taxon.typesorting;
-                    
+
                     if (newtype !== currentype) {
                         removeClass(this.typecontainer, currentype);
                         addClass(this.typecontainer, newtype);
@@ -318,34 +327,52 @@ class Level {
                     this.current = current;
     
                     if (this.type === 'siblings') {
+                        this.taxonomy.loading();
                         let index = this.taxons[current].taxon.id;
-                        this.taxonomy.app.params.taxonomy.tindex = current - 1;
-                        this.taxonomy.app.updater.taxonomyUpdate(index);
+                        this.taxonomy.app.updater.taxonomy.tindex = current - 1;
                         this.taxonomy.children.collapse();
+
                         let start = new Date();
-        
-                        ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                            this.taxonomy.params.taxonomy.children = r.children;
-                            this.taxonomy.app.params.taxonomy.tindex = current - 1;
+                        this.taxonomy.app.updater.updateChildren(index, () => {
+                            this.taxonomy.app.updater.taxonomy.tindex = current - 1;
                             let end = new Date();
                             let elapsed = end - start;
                             if (elapsed < transition) {
                                 wait(transition - elapsed, () => {
                                     this.taxonomy.updateChildren();
-                                    wait(110, () => { this.sliding = false; })
+                                    this.taxonomy.unfreeze();
                                 })
                             } else {
                                 this.taxonomy.updateChildren();
-                                wait(110, () => { this.sliding = false; })
+                                this.taxonomy.unfreeze();
                             }
                         });
+
+
+
+                        // this.taxonomy.app.updater.update(index, this.taxonomy.type);
+                        
+                        // let start = new Date();
+                        // ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
+                        //     this.taxonomy.app.updater.taxonomy.children = r.children;
+                        //     this.taxonomy.app.updater.taxonomy.tindex = current - 1;
+                        //     let end = new Date();
+                        //     let elapsed = end - start;
+                        //     if (elapsed < transition) {
+                        //         wait(transition - elapsed, () => {
+                        //             this.taxonomy.updateChildren();
+                        //             wait(110, () => { this.taxonomy.unfreeze(); })
+                        //         })
+                        //     } else {
+                        //         this.taxonomy.updateChildren();
+                        //         wait(110, () => { this.taxonomy.unfreeze(); })
+                        //     }
+                        // });
                     } else {
-                        this.sliding = false;
-                        this.taxonomy.active = true;
+                        this.taxonomy.unfreeze();
                     }
                 } else {
-                    this.sliding = false;
-                    this.taxonomy.active = true;
+                    this.taxonomy.unfreeze();
                 }
             }
             // Here, active entry has been clicked
@@ -360,8 +387,8 @@ class Level {
 
                     let start = new Date();
                     ajaxGet('/parents/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        this.taxonomy.params.taxonomy.parents = r.parents;
-                        this.taxonomy.params.taxonomy.pindex = r.pindex;
+                        this.taxonomy.app.updater.taxonomy.parents = r.parents;
+                        this.taxonomy.app.updater.taxonomy.pindex = r.pindex;
                         let end = new Date();
                         let elapsed = end - start;
                         if (elapsed < transition) {
@@ -369,16 +396,14 @@ class Level {
                                 this.taxonomy.parents.update();
                                 wait(10, () => {
                                     this.taxonomy.parents.reveal();
-                                    this.sliding = false;
-                                    this.taxonomy.active = true;
+                                    this.taxonomy.unfreeze();
                                 })
                             })
                         } else {
                             this.taxonomy.parents.update();
                             wait(10, () => {
                                 this.parents.reveal();
-                                this.sliding = false;
-                                this.taxonomy.active = true;
+                                this.taxonomy.unfreeze();
                             })
                         }
                     });
@@ -393,7 +418,7 @@ class Level {
 
                     let start = new Date();
                     ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        this.taxonomy.params.taxonomy.children = r.children;
+                        this.taxonomy.app.updater.taxonomy.children = r.children;
                         let end = new Date();
                         let elapsed = end - start;
                         if (elapsed < transition) {
@@ -401,24 +426,21 @@ class Level {
                                 this.taxonomy.children.update();
                                 wait(10, () => {
                                     this.taxonomy.children.reveal();
-                                    this.sliding = false;
-                                    this.taxonomy.active = true;
+                                    this.taxonomy.unfreeze();
                                 })
                             })
                         } else {
                             this.taxonomy.children.update();
                             wait(10, () => {
                                 this.children.reveal();
-                                this.sliding = false;
-                                this.taxonomy.active = true;
+                                this.taxonomy.unfreeze();
                             })
                         }
                     });
                 }
                 // Here, only clicked on already active taxon
                 else {
-                    this.sliding = false;
-                    this.taxonomy.active = true;
+                    this.taxonomy.unfreeze();
                 }               
             }
         }
@@ -536,7 +558,7 @@ class Taxon {
         this.level.entrycontainer.append(this.container);
 
         if (!placeholder) {
-            let url = 'https://inaturalist-open-data.s3.amazonaws.com/photos/';
+            let url = this.level.taxonomy.params.photography.url;
             let image = makeDiv(null, 'taxonomy-image-container');
     
             let infos = this.taxon.photographs[0];

@@ -5,19 +5,20 @@
 
 import { loadImage } from "../generic/ajax.js";
 import { makeDiv, makeImage, addClass, removeClass, wait } from "../generic/dom.js";
+import Widget from "./widget.js";
 
 /**
  * Create the photography widget to display
  * photographs about the current taxon.
  */
-class Photography {
+class Photography extends Widget {
     /**
      * @param {Application} app - Application object.
      * @param {Object} params - Parameters of the application.
      */
     constructor(app, params) {
-        this.app = app;
-        this.params = params;
+        super(app, params);
+        this.type = 'photography';
 
         // Store photographs and the index of the default
         this.photographs = [];
@@ -41,12 +42,12 @@ class Photography {
     /**
      * Update the widget to display a new taxon.
      */
-    update() {
+    update(callback) {
+        callback = callback || function () {};
         // Activate loading
         this.loading();
 
-        let taxonomy = this.params.taxonomy;
-        let taxon = taxonomy.siblings[taxonomy.tindex];
+        let taxon = this.app.updater.getTaxon();
         this.photographs = taxon.photographs;
         this.photoid = 0;
 
@@ -59,6 +60,7 @@ class Photography {
 
         // Activate the sliding of the photographs
         this.slide();
+        callback();
     }
 
     /**

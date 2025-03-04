@@ -6,11 +6,12 @@
 import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, makeDiv, makeImage, makeInput, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { boldSubstring, compare, removeTrailing, uppercaseFirstLetter } from "../generic/parsing.js";
+import Widget from "./widget.js";
 
-class Information {
+class Information extends Widget {
     constructor(app, params) {
-        this.app = app;
-        this.params = params;
+        super(app, params);
+        this.type = 'information';
 
         // Create DOM Elements
         this.container = makeDiv('information', 'sub-panel');
@@ -27,9 +28,10 @@ class Information {
         this.description = new Description(this);
     }
 
-    update() {
+    update(callback) {
+        callback = callback || function () {};
         this.description.clear();
-        this.description.update();
+        this.description.update(callback);
     }
 
     loading() {
@@ -132,6 +134,7 @@ class Search {
     }
 
     deactivate(callback) {
+        callback = callback || function () {};
         // Collapse the search bar
         addClass(this.container, 'collapse');
         // Deactivate seach button and input field
@@ -220,12 +223,14 @@ class Search {
 
                         // Activate the taxon on click
                         function activateTaxon(e) {
-                            result.removeEventListener('click', activateTaxon);
-                            self.information.description.clear();
-                            // Deactivate search mode
-                            self.deactivate(() => {});
-                            // Update the application widgets
-                            self.information.app.updater.fullUpdate(e.target.getAttribute('taxon'));
+                            if (!self.information.freezed) {
+                                result.removeEventListener('click', activateTaxon);
+                                self.information.description.clear();
+                                // Deactivate search mode
+                                self.deactivate();
+                                // Update the application widgets
+                                self.information.app.updater.update(e.target.getAttribute('taxon'), this.type);
+                            }
                         }
                         result.addEventListener('click', activateTaxon);
 
@@ -263,12 +268,13 @@ class Description {
         this.information.container.append(this.container);
     }
 
-    update() {
+    update(callback) {
+        callback = callback || function () {};
         // Retrieve infos on the taxon from the database
-        let taxonomy = this.information.params.taxonomy;
-        let infos = taxonomy.siblings[taxonomy.tindex];
+        let updater = this.information.app.updater;
+        let infos = updater.getTaxon();
         // Retrieve wikipedia information
-        let wikipedia = taxonomy.description;
+        let wikipedia = updater.getDescription();
 
         // Get the first vernacular name
         let v = infos.vernaculars.slice(0)
@@ -346,6 +352,7 @@ class Description {
         wait(10, () => {
             removeClass(this.content, 'hidden');
             this.information.loaded();
+            callback();
         })
     }
 

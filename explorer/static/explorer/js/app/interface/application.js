@@ -47,9 +47,13 @@ class Application {
             this.cartography = new Cartography(this, this.params);
             this.statistics = new Statistics(this, this.params);
 
-            // Create the updater object to update the widgets on demand
+            // Set up the updater interface object
             this.updater = new Updater(this, this.params);
-            this.updater.fullUpdate(this.params.taxonomy.current);
+            this.updater.update(this.params.taxonomy.current, 'application', () => {
+                console.log('updated');
+            });
+
+            this.widgets = 5;
 
             // Reveal the interface
             this.loaded();
@@ -62,6 +66,18 @@ class Application {
 
     loaded() {
         addClass(this.mask, 'loaded');
+    }
+
+    freeze() {
+        this.information.freeze();
+        this.photography.freeze();
+        this.taxonomy.freeze();
+    }
+
+    unfreeze() {
+        this.information.unfreeze();
+        this.photography.unfreeze();
+        this.taxonomy.unfreeze();
     }
 }
 
