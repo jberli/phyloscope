@@ -36,6 +36,14 @@ class Statistics extends Widget {
         callback();
     }
 
+    grow() {
+
+    }
+
+    regress() {
+
+    }
+    
     createChart() {
         // Initialize the chart dimensions
         const width = this.container.offsetWidth;
@@ -82,9 +90,7 @@ class Statistics extends Widget {
             .attr("value", current.value)
             .style("cursor", "pointer")
             .on("click", (event, d) => {
-                getParent(d, () => {
-
-                });
+                getParent(d, (parent) => { current = parent; });
             });
 
         path.enter()
@@ -115,7 +121,7 @@ class Statistics extends Widget {
                     if (parent.vernaculars.length > 0) { name = parent.vernaculars[0]; }
                     else { name = parent.scientific; }
                     let current = { name: name, taxon: parent.id, value: parent.count, typesorting: parent.typesorting }
-                    callback();
+                    callback(current);
                 }
             });
         }

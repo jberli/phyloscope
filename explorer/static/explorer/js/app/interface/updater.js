@@ -46,8 +46,6 @@ class Updater {
         return this.taxonomy.description;
     }
 
-    
-
     /**
      * This function is used to update the whole application.
      * @param {Integer} index - The taxon index. 
@@ -60,75 +58,173 @@ class Updater {
         this.done = [];
         let widgets = 5;
 
-        this.updateRange(index, () => {
-            this.return(widgets, callback);
-        });
+        console.log(widgets);
+        console.log(type);
 
         this.app.information.loading();
         this.app.photography.loading();
         this.app.statistics.loading();
         this.app.taxonomy.loading();
 
-        this.fetchTaxon(index, (r) => {
-            this.app.information.update(() => { this.done.push('information'); this.return(widgets, callback); });
-            this.app.photography.update(() => { this.done.push('photography'); this.return(widgets, callback); });
-            this.app.statistics.update(() => { this.done.push('statistics'); this.return(widgets, callback); });
-            this.app.taxonomy.update(() => { this.done.push('taxonomy'); this.return(widgets, callback); });
+        this.updateRange(index, () => { this.return(widgets, callback); });
+
+        ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy = r;
+            this.updateInformation(null, () => { this.return(widgets, callback); });
+            this.updatePhotography(() => { this.return(widgets, callback); });
+            this.updateTaxonomy(() => { this.return(widgets, callback); });
+            this.updateStatistics(() => { this.return(widgets, callback); });
         });
     }
 
-    /**
-     * This function is used to update the whole application when clicking on a children.
-     * @param {Integer} index - The taxon index. 
-     * @param {Function} callback - Callback function.
-     */
-    updateSiblings(index, callback) {
+    updateFromTaxonomy(index, type, newIndex, callback) {
         callback = callback || function () {};
         this.app.freeze();
         this.done = [];
-        let widgets = 3;
+        let widgets = 4;
 
         this.app.information.loading();
         this.app.photography.loading();
         this.app.cartography.loading();
+        this.app.statistics.loading();
 
-        this.app.photography.update(() => { this.done.push('photography'); this.return(widgets, callback); });
+        let transition = this.app.params.interface.transition;
+        if (type === 'siblings') {
+            this.taxonomy.tindex = newIndex;
 
-        this.updateRange(index, () => { this.return(widgets, callback); });
+            this.updateRange(index, () => { this.return(widgets, callback); });
+            this.updateInformation(index, () => { this.return(widgets, callback); });
+            this.updatePhotography(() => { this.return(widgets, callback); });
 
-        this.fetchChildren(index, () => {
-            this.return(widgets, callback);
-        });
+            this.app.statistics.collapse();
+            let start = new Date();
+            ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
+                this.taxonomy.children = r.children;
+                this.taxonomy.cindex = 0;
+                wait(transition - (new Date() - start), () => {
+                    this.app.taxonomy.updateChildren();
+                    this.app.taxonomy.unfreeze();
+                    this.updateStatistics(() => { this.return(widgets, callback); });
+                })
+            });
+        }
+        else if (type === 'parents') {
+            this.taxonomy.children = this.taxonomy.siblings;
+            this.taxonomy.siblings = this.taxonomy.parents;
+            this.taxonomy.tindex = this.taxonomy.pindex;
 
-        this.fetchDescription(index, () => {
-            this.app.information.update(() => { this.done.push('information'); this.return(widgets, callback); });
-        });
+            this.updateRange(index, () => { this.return(widgets, callback); });
+            this.updateInformation(index, () => { this.return(widgets, callback); });
+            this.updatePhotography(() => { this.return(widgets, callback); });
+
+            this.app.taxonomy.regress();
+            let start = new Date();
+            ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
+                this.taxonomy.parents = r.parents;
+                this.taxonomy.pindex = r.pindex;
+                wait(transition - (new Date() - start), () => {
+                    this.app.taxonomy.parents.update();
+                    wait(10, () => {
+                        this.app.taxonomy.parents.reveal();
+                        this.app.taxonomy.unfreeze();
+                    });
+                });
+            });
+        }
+        else if (type === 'children') {
+            this.taxonomy.parents = this.taxonomy.siblings;
+            this.taxonomy.pindex = this.taxonomy.tindex;
+            this.taxonomy.siblings = this.taxonomy.children;
+            this.taxonomy.tindex = this.taxonomy.cindex;
+
+            this.updateRange(index, () => { this.return(widgets, callback); });
+            this.updateInformation(index, () => { this.return(widgets, callback); });
+            this.updatePhotography(() => { this.return(widgets, callback); });
+
+            this.app.taxonomy.grow();
+            let start = new Date();
+            ajaxGet('/children/' + this.params.languages.current + '/' + index, (r) => {
+                this.taxonomy.children = r.children;
+                this.taxonomy.cindex = 0;
+                wait(transition - (new Date() - start), () => {
+                    this.app.taxonomy.children.update();
+                    wait(10, () => {
+                        this.app.taxonomy.children.reveal();
+                        this.app.taxonomy.unfreeze();
+                    })
+                })
+            });
+        }
     }
 
-    updateParents(index, callback) {
+    updateFromStatistics(index, type, callback) {
+
+    }
+
+
+
+
+    updateInformation(index, callback) {
         callback = callback || function () {};
+        let self = this;
+
+        function update(callback) {
+            self.app.information.update(() => {
+                self.done.push('information');
+                callback();
+            });
+        }
+
+        if (index !== null) {
+            ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
+                this.taxonomy.description = r.values;
+                update(callback);
+            });
+        } else {
+            update(callback);
+        }
+    }
+
+    updatePhotography(callback) {
+        callback = callback || function () {};
+        this.app.photography.update(() => {
+            this.done.push('photography');
+            callback();
+        });
     }
 
     updateRange(index, callback) {
         callback = callback || function () {};
         let transition = this.params.interface.cartography.range.transition.display;
         let start = new Date();
-        let self = this;
-        this.fetchRange(index, (r) => {
-            function display() {
-                self.app.cartography.update(() => {
-                    self.done.push('cartography');
+        ajaxGet('range/' + index + '/', (r) => {
+            this.range = r;
+            wait(transition - (new Date() - start), () => {
+                this.app.cartography.update(() => {
+                    this.done.push('cartography');
                     callback();
                 });
-            }
-
-            let end = new Date();
-            let elapsed = end - start;
-            if (elapsed < transition) {
-                wait(transition - elapsed, () => { display() })
-            } else { display(); }
+            })
         });
     }
+
+    updateStatistics(callback) {
+        callback = callback || function () {};
+        this.app.statistics.update(() => {
+            this.done.push('statistics');
+            callback();
+        });
+    }
+
+    updateTaxonomy(callback) {
+        this.app.taxonomy.update(() => {
+            this.done.push('taxonomy');
+            callback();
+        });
+    }
+
+
+
 
     return(w, callback) {
         callback = callback || function () {};
@@ -172,13 +268,6 @@ class Updater {
         });
     }
 
-    fetchRange(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('range/' + index + '/', (r) => {
-            this.range = r;
-            callback(r);
-        });
-    }
 
     
 

@@ -229,7 +229,7 @@ class Search {
                                 // Deactivate search mode
                                 self.deactivate();
                                 // Update the application widgets
-                                self.information.app.updater.update(e.target.getAttribute('taxon'), this.type);
+                                self.information.app.updater.update(e.target.getAttribute('taxon'), self.information.type);
                             }
                         }
                         result.addEventListener('click', activateTaxon);

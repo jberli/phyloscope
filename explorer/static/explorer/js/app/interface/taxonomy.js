@@ -74,10 +74,6 @@ class Taxonomy extends Widget {
         });
 
         // Set siblings as new parents
-        this.app.updater.taxonomy.parents = this.app.updater.taxonomy.siblings;
-        this.app.updater.taxonomy.pindex = this.app.updater.taxonomy.tindex;
-        this.app.updater.taxonomy.parents = this.app.updater.taxonomy.siblings;
-        this.app.updater.taxonomy.pindex = this.app.updater.taxonomy.tindex;
         this.parents = this.siblings;
         this.parents.type = 'parents';
         this.parents.deactivate();
@@ -87,8 +83,6 @@ class Taxonomy extends Widget {
         }
 
         // Set children as new siblings
-        this.app.updater.taxonomy.siblings = this.app.updater.taxonomy.children;
-        this.app.updater.taxonomy.tindex = this.children.current - 1;
         this.siblings = this.children;
         this.siblings.type = 'siblings';
         this.siblings.activate();
@@ -115,14 +109,11 @@ class Taxonomy extends Widget {
         })
 
         // Set new children as siblings
-        this.app.updater.taxonomy.children = this.app.updater.taxonomy.siblings;
         this.children = this.siblings;
         this.children.type = 'children';
         this.children.deactivate();
 
         // Set new siblings as parents
-        this.app.updater.taxonomy.siblings = this.app.updater.taxonomy.parents;
-        this.app.updater.taxonomy.tindex = this.parents.current - 1;
         this.siblings = this.parents;
         this.siblings.type = 'siblings';
         this.siblings.activate();
@@ -329,46 +320,10 @@ class Level {
                     if (this.type === 'siblings') {
                         this.taxonomy.loading();
                         let index = this.taxons[current].taxon.id;
-                        this.taxonomy.app.updater.taxonomy.tindex = current - 1;
                         this.taxonomy.children.collapse();
-
-                        let start = new Date();
-                        this.taxonomy.app.updater.updateSiblings(index, () => {
-                            this.taxonomy.app.updater.taxonomy.tindex = current - 1;
-                            let end = new Date();
-                            let elapsed = end - start;
-                            if (elapsed < transition) {
-                                wait(transition - elapsed, () => {
-                                    this.taxonomy.updateChildren();
-                                    this.taxonomy.unfreeze();
-                                })
-                            } else {
-                                this.taxonomy.updateChildren();
-                                this.taxonomy.unfreeze();
-                            }
-                        });
-
-
-
-                        // this.taxonomy.app.updater.update(index, this.taxonomy.type);
-                        
-                        // let start = new Date();
-                        // ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        //     this.taxonomy.app.updater.taxonomy.children = r.children;
-                        //     this.taxonomy.app.updater.taxonomy.tindex = current - 1;
-                        //     let end = new Date();
-                        //     let elapsed = end - start;
-                        //     if (elapsed < transition) {
-                        //         wait(transition - elapsed, () => {
-                        //             this.taxonomy.updateChildren();
-                        //             wait(110, () => { this.taxonomy.unfreeze(); })
-                        //         })
-                        //     } else {
-                        //         this.taxonomy.updateChildren();
-                        //         wait(110, () => { this.taxonomy.unfreeze(); })
-                        //     }
-                        // });
+                        this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
                     } else {
+                        this.taxonomy.app.updater.taxonomy.cindex = this.current - 1;
                         this.taxonomy.unfreeze();
                     }
                 } else {
@@ -380,63 +335,14 @@ class Level {
                 // Here, parent has been clicked, must regress
                 if (this.type === 'parents') {
                     this.current = i2;
-                    this.taxonomy.regress();
-
                     let index = this.taxons[this.current].taxon.id;
-                    this.taxonomy.app.updater.taxonomyUpdate(index);
-
-                    let start = new Date();
-                    ajaxGet('/parents/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        this.taxonomy.app.updater.taxonomy.parents = r.parents;
-                        this.taxonomy.app.updater.taxonomy.pindex = r.pindex;
-                        let end = new Date();
-                        let elapsed = end - start;
-                        if (elapsed < transition) {
-                            wait(transition - elapsed, () => {
-                                this.taxonomy.parents.update();
-                                wait(10, () => {
-                                    this.taxonomy.parents.reveal();
-                                    this.taxonomy.unfreeze();
-                                })
-                            })
-                        } else {
-                            this.taxonomy.parents.update();
-                            wait(10, () => {
-                                this.parents.reveal();
-                                this.taxonomy.unfreeze();
-                            })
-                        }
-                    });
+                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
                 }
                 // Here, active child clicked, must grow
                 else if (this.type === 'children') {
                     this.current = i2;
-                    this.taxonomy.grow();
-
                     let index = this.taxons[this.current].taxon.id;
-                    this.taxonomy.app.updater.taxonomyUpdate(index);
-
-                    let start = new Date();
-                    ajaxGet('/children/' + this.taxonomy.params.languages.current + '/' + index, (r) => {
-                        this.taxonomy.app.updater.taxonomy.children = r.children;
-                        let end = new Date();
-                        let elapsed = end - start;
-                        if (elapsed < transition) {
-                            wait(transition - elapsed, () => {
-                                this.taxonomy.children.update();
-                                wait(10, () => {
-                                    this.taxonomy.children.reveal();
-                                    this.taxonomy.unfreeze();
-                                })
-                            })
-                        } else {
-                            this.taxonomy.children.update();
-                            wait(10, () => {
-                                this.children.reveal();
-                                this.taxonomy.unfreeze();
-                            })
-                        }
-                    });
+                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
                 }
                 // Here, only clicked on already active taxon
                 else {
