@@ -1,3 +1,4 @@
+import operator
 import wikipediaapi as wiki
 
 from explorer.models import Taxon, Photo
@@ -89,8 +90,9 @@ def get_taxon(language, index):
         if grandparent is not None:
             ancestry.insert(0, get_taxon_information(grandparent, language))
             parentsiblings = grandparent.children.filter(rank=parent.rank)
-            result['pindex'] = (*parentsiblings.all(),).index(parent)
-            result['parents'] = [ get_taxon_information(sibling, language) for sibling in parentsiblings.all() ]
+            result['parents'] = sorted([ get_taxon_information(sibling, language) for sibling in parentsiblings.all() ], key=lambda k: k['count'], reverse=True)
+            result['pindex'] = [ i for i, d in enumerate(result['parents']) if parent.tid == d['id'] ][0]
+
             elder = grandparent.parent
             while elder is not None:
                 ancestry.insert(0, get_taxon_information(elder, language))
@@ -100,7 +102,8 @@ def get_taxon(language, index):
             result['pindex'] = 0
 
         siblingslist = [ get_taxon_information(sibling, language) for sibling in siblings.all() ]
-        result['siblings'] = sorted(siblingslist, key=lambda k: k['level'], reverse=True)
+
+        result['siblings'] = sorted(siblingslist, key=lambda k: k['count'], reverse=True)
         result['tindex'] = 0
         for i, s in enumerate(result['siblings']):
             if s['id'] == taxon.tid:
@@ -116,7 +119,7 @@ def get_taxon(language, index):
 
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
-        result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+        result['children'] = sorted(childrenlist, key=lambda k: k['count'], reverse=True)
         result['cindex'] = 0
     else:
         result['children'] = None
@@ -138,10 +141,8 @@ def get_parents(language, index):
         if grandparent is not None:
             parentsiblings = grandparent.children
             parents = [ get_taxon_information(sibling, language) for sibling in parentsiblings.all() ]
-            result['parents'] = sorted(parents, key=lambda k: k['level'], reverse=True)
-            for i, s in enumerate(result['parents']):
-                if s['id'] == parent.tid:
-                    result['pindex'] = i
+            result['parents'] = sorted(parents, key=lambda k: k['count'], reverse=True)
+            result['pindex'] = [ i for i, d in enumerate(result['parents']) if parent.tid == d['id'] ][0]
         else:
             result['parents'] = [ get_taxon_information(parent, language) ]
             result['pindex'] = 0
@@ -159,7 +160,8 @@ def get_children(language, index):
     children = taxon.children.all()
     if len(children) > 0:
         childrenlist = [ get_taxon_information(child, language) for child in children.all() ]
-        result['children'] = sorted(childrenlist, key=lambda k: k['level'], reverse=True)
+        result['children'] = sorted(childrenlist, key=lambda k: k['count'], reverse=True)
+        result['cindex'] = 0
     else:
         result['children'] = None
     return result
