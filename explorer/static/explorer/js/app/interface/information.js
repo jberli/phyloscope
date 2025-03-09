@@ -344,7 +344,7 @@ class Description {
         // If there is a wikipedia page
         if (wikipedia !== null) {
             // Add the summary
-            let summary = makeDiv(null, 'description-summary', removeTrailing(wikipedia.summary.replace('== References ==', '').replace(',.', '.').replace(' .', '.')));
+            let summary = makeDiv(null, 'description-summary', this.summary(wikipedia.summary));
             this.content.append(summary);
         }
         
@@ -393,6 +393,20 @@ class Description {
     clear() {
         removeChildren(this.container);
         this.default();
+    }
+
+    summary(text) {
+        // Remove the trailing spaces
+        return removeTrailing(
+            // Remove the references of the wikipedia article.
+            text.replace('== References ==', '')
+                // Replace comma + point with a point
+                .replace(',.', '.')
+                // Replace space + point with a point
+                .replace(' .', '.')
+                // Replace the brackets and their content which are often comment on improvements
+                .replace(/\[.*?\]/, "")
+        )
     }
 }
 

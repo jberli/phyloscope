@@ -10,6 +10,7 @@ class Updater {
     constructor(app, params) {
         this.app = app;
         this.params = params;
+        this.updating = false;
 
         this.taxonomy;
         this.range;
@@ -45,46 +46,7 @@ class Updater {
         return this.taxonomy.description;
     }
 
-    fetchChildren(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.children = r.children;
-            this.taxonomy.cindex = r.index;
-            callback(r);
-        });
-    }
-
-    fetchParent(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('parents/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.parents = r.parents;
-            this.taxonomy.pindex = r.pindex;
-            callback(r);
-        });
-    }
-
-    fetchTaxon(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy = r;
-            callback(r);
-        });
-    }
-
-    fetchDescription(index, callback) {
-        ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.description = r.values;
-            callback(r);
-        });
-    }
-
-    fetchRange(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('range/' + index + '/', (r) => {
-            this.range = r;
-            callback(r);
-        });
-    }
+    
 
     /**
      * This function is used to update the whole application.
@@ -115,7 +77,12 @@ class Updater {
         });
     }
 
-    updateChildren(index, callback) {
+    /**
+     * This function is used to update the whole application when clicking on a children.
+     * @param {Integer} index - The taxon index. 
+     * @param {Function} callback - Callback function.
+     */
+    updateSiblings(index, callback) {
         callback = callback || function () {};
         this.app.freeze();
         this.done = [];
@@ -172,8 +139,45 @@ class Updater {
         }
     }
 
-    searchClose(index) {
+    fetchChildren(index, callback) {
+        callback = callback || function () {};
+        ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy.children = r.children;
+            this.taxonomy.cindex = r.index;
+            callback(r);
+        });
+    }
 
+    fetchParent(index, callback) {
+        callback = callback || function () {};
+        ajaxGet('parents/' + this.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy.parents = r.parents;
+            this.taxonomy.pindex = r.pindex;
+            callback(r);
+        });
+    }
+
+    fetchTaxon(index, callback) {
+        callback = callback || function () {};
+        ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy = r;
+            callback(r);
+        });
+    }
+
+    fetchDescription(index, callback) {
+        ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy.description = r.values;
+            callback(r);
+        });
+    }
+
+    fetchRange(index, callback) {
+        callback = callback || function () {};
+        ajaxGet('range/' + index + '/', (r) => {
+            this.range = r;
+            callback(r);
+        });
     }
 
     

@@ -333,7 +333,7 @@ class Level {
                         this.taxonomy.children.collapse();
 
                         let start = new Date();
-                        this.taxonomy.app.updater.updateChildren(index, () => {
+                        this.taxonomy.app.updater.updateSiblings(index, () => {
                             this.taxonomy.app.updater.taxonomy.tindex = current - 1;
                             let end = new Date();
                             let elapsed = end - start;
