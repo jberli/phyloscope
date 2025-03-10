@@ -38,15 +38,29 @@
     margin: .5rem;
     top: 0;
     right: 2.5rem;
+    z-index: 10;
 
     display: flex;
     justify-content: space-evenly;
     gap: .5rem;
 }
 
+.description-links-mask {
+    position: absolute;
+    z-index: 9;
+    top: 0;
+    right: 0;
+    background-color: $main-color-extradark;
+
+    width: 8rem;
+    height: 3rem;
+    border-bottom-left-radius: 1.5rem;
+}
+
 .description-title {
     font-weight: bold;
     font-size: 1.6rem;
+    max-width: calc(100% - 8rem);
     &:first-letter {
         text-transform: uppercase;
     }
@@ -88,6 +102,7 @@ $search-height: 3rem;
 .search-button {
     position: absolute;
     right: 0;
+    z-index: 10;
 
     height: 2rem;
     width: 2rem;

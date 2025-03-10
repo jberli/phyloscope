@@ -288,6 +288,8 @@ class Description {
         this.content = makeDiv(null, 'description-content hidden');
         this.container.append(this.content);
 
+        let linksmask = makeDiv(null, 'description-links-mask');
+
         let linkcontainer = makeDiv(null, 'description-links');
 
         let inaturalist = makeDiv(null, 'description-link');
@@ -312,7 +314,7 @@ class Description {
             linkcontainer.append(awiki);
         }
 
-        this.content.append(linkcontainer);
+        this.content.append(linksmask, linkcontainer);
         
         let title = makeDiv(null, 'description-title', t);
         let scientific = makeDiv(null, 'description-scientific', infos.scientific);

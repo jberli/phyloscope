@@ -5,6 +5,7 @@
 
 import { ajaxGet } from "../generic/ajax.js";
 import { addClass, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
+import { uppercaseFirstLetter } from "../generic/parsing.js";
 import Widget from "./widget.js";
 
 class Statistics extends Widget {
@@ -28,134 +29,136 @@ class Statistics extends Widget {
 
     update(callback) {
         removeChildren(this.chart);
-        this.createChart();
-        wait(this.params.interface.transition, () => {
+        if (this.app.updater.taxonomy.children) {
+            this.create();
+            wait(this.params.interface.transition, () => {
+                this.loaded();
+                this.reveal();
+                callback();
+            });
+        } else {
             this.loaded();
-            this.reveal();
-        });
-        callback();
+            callback();
+        }
     }
 
-    grow() {
-
-    }
-
-    regress() {
-
-    }
-    
-    createChart() {
+    create() {
         // Initialize the chart dimensions
         const width = this.container.offsetWidth;
         const height = width;
         const outer = height / 2;
         const inner = outer * .5;
+        this.radius = outer;
 
         let taxon = this.app.updater.getTaxon();
         let name;
         if (taxon.vernaculars.length > 0) { name = taxon.vernaculars[0]; }
         else { name = taxon.scientific; }
-        let current = { name: name, taxon: taxon.id, value: taxon.count, typesorting: taxon.typesorting }
+        this.current = { name: name, taxon: taxon.id, value: taxon.count, typesorting: taxon.typesorting }
 
-        var children = this.prepare(this.app.updater.getLevel('children'));
+        this.data = this.prepareData(this.app.updater.getLevel('children'));
 
-        // Set up a color interpolation from red to red.
-        const color1 = d3.color("hsl(0, 45%, 55%)");
-        const color2 = d3.color("hsl(360, 45%, 55%)");
-        const interpolation = d3.interpolateHslLong(color1, color2);
-        // Set up the color generator based on the parents dataset.
-        var color = d3.scaleOrdinal(d3.quantize(interpolation, children.length + 1));
+        let color = this.color(this.data.length)
 
-        // Sort the parents by descending value.
-        children.sort((a, b) => b.value - a.value);
         // Add a color parameter to the parents objects.
-        children.forEach((d, i) => d.color = color(i) );
+        this.data.forEach((d, i) => d.color = color(i) );
 
         // Create a responsive svg.
-        var svg = d3.create("svg").attr("viewBox", [-width/2, -height/2, width, height]);
+        this.svg = d3.create("svg").attr("viewBox", [-width/2, -height/2, width, height]);
         // Set up the arc generator.
-        var arc = d3.arc().innerRadius(inner).outerRadius(outer);
+        this.arc = d3.arc().innerRadius(inner).outerRadius(outer);
         // Set up the pie slice generator without sorting => important when children
         // will be inserted in place of their parent.
-        const pie = d3.pie().value(d => d.value).sort(null);
+        this.pie = d3.pie().value(d => d.value).sort(null);
 
         // Create the svg paths using the slice generator.
-        var path = svg.selectAll("path").data(pie(children), d => d.data.name);
+        var path = this.svg.selectAll("path").data(this.pie(this.data), d => d.data.name);
         let self = this;
 
         // Add the path using this helper function
-        var parent = svg.append('circle')
+        this.parent = this.svg.append('circle')
             .attr('r', inner)
-            .attr('fill', 'currentColor')
-            .attr("value", current.value)
+            .attr('fill', this.params.colors[this.current.typesorting])
+            .attr("value", this.current.value)
             .style("cursor", "pointer")
             .on("click", (event, d) => {
-                getParent(d, (parent) => { current = parent; });
+                self.app.updater.updateFromStatistics(null, 'regress');
             });
+
+        this.labelparent = this.svg.append('text')
+            .attr("text-anchor", "middle")
+            .attr("font-size", '1.8rem')
+            .attr("dy", ".2rem")
+            .attr("pointer-events", "none")
+            .style('fill', 'white')
+            .text(uppercaseFirstLetter(this.current.name))
 
         path.enter()
             .append("path")
             // Fill the slice with the data color parameter.
             .attr("fill", d => d.data.color)
-            .attr("d", arc)
+            .attr("d", this.arc)
             .attr("value", d => d.data.value)
             .style("cursor", "pointer")
             // Store the current slice value for the future transition animation.
             .each( function(d) { this._current = d })
             // Click event on the slice.
-            .on("click", (event, d) => { 
-                getchildren(d, () => { current = d.data; });
+            .on("click", (event, d) => {
+                self.app.updater.updateFromStatistics(d, 'grow');
             });
+        
+        this.labelslices = this.svg.selectAll().data(this.pie(this.data))
+            // .join("text")
+            // .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.1).append("tspan").text(d => uppercaseFirstLetter(d.data.name)))
+            .enter()
+            .append("text")
+            .text(function(d) {
+                if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
+            })
+            .attr("text-anchor", "middle")
+            .attr("font-size", '1.2rem')
+            .attr("transform", (d) => {
+                let [x, y] = this.arc.centroid(d)
+                let start = d.startAngle * 180 / Math.PI;
+                let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
+                let angle = start + half;
+                if (angle > 180) { angle -= 180 }
+                return `translate(${x}, ${y}) rotate(${angle - 90})`
+            })
+            .attr("dy", "0.2rem")
+            .attr("pointer-events", "none")
+            .style('fill', 'white');
 
-        this.chart.append(svg.node());
+        this.chart.append(this.svg.node());
+    }
 
-        function getParent(d, callback) {
-            removeClass(self.mask, 'loaded');
-            ajaxGet('/parents/' + self.params.languages.current + '/' + current.taxon, (r) => {
-                if (r.parents === null) {
-                    addClass(self.mask, 'loaded');
-                    callback();
-                } else {
-                    let parent = r.parents[r.pindex]
-                    let name;
-                    if (parent.vernaculars.length > 0) { name = parent.vernaculars[0]; }
-                    else { name = parent.scientific; }
-                    let current = { name: name, taxon: parent.id, value: parent.count, typesorting: parent.typesorting }
-                    callback(current);
-                }
+    animate(newData, callback) {
+        callback = callback || function () {};
+        removeClass(this.mask, 'loaded');
+        if (newData === null) {
+            callback();
+        } else {
+            let c = this.prepareData(newData);
+            // Sort the children by descending value.
+            c.sort((a, b) => b.value - a.value);
+            // Clone the array to retrieve values
+            let clone = structuredClone(c);
+            
+            let color = this.color(c.length);
+            c.forEach((d, i) => {
+                // Assign the right color to the upcoming siblings.
+                d.color = color(i);
+                // Set their value to zero
+                d.value = 0;
             });
-        }
+            
+            // Recreate the data.
+            let data = c.concat(this.data);
 
-        function getchildren(d, callback) {
-            removeClass(self.mask, 'loaded');
-            ajaxGet('/children/' + self.params.languages.current + '/' + d.data.taxon, (r) => {
-                if (r.children === null) {
-                    addClass(self.mask, 'loaded');
-                    callback();
-                } else {
-                    let c = self.prepare(r.children);
-                    // Sort the children by descending value.
-                    c.sort((a, b) => b.value - a.value);
-                    // Recalculate the color scale and assign the right value to the children.
-                    color = d3.scaleOrdinal(d3.quantize(interpolation, c.length + 1));
-                    c.forEach((d, i) => d.color = color(i) );
-                    
-                    // Recreate the data by inserting the children in place of the parent.
-                    var data = children.slice(0, d.index).concat(c).concat(children.slice(d.index + 1));
-                    children = data;
-                    // Launch the function to slice the parent in its children.
-                    subslice(children, d.index, d.index + c.length, callback);
-                }
-            });
-        }
-
-        /*
-        * This function regenerate the pie chart and slice the clicked parent
-        * into its children.
-        */
-        function subslice(data, start, end, callback) {
             // Regenerate the slices using the new data.
-            var sectors = svg.selectAll("path").data(pie(data), d => d.data.name)
+            var sectors = this.svg.selectAll("path").data(this.pie(data), d => d.data.name);
+            let self = this;
+
             sectors.enter()
                 .append("path")
                 // Color them according to their color parameter.
@@ -166,58 +169,119 @@ class Statistics extends Widget {
                 .each( function(d) { this._current = d })
                 // Click event on the slice.
                 .on("click", function (event, d) {
-                    getchildren(d, () => { current = d.data; });
+                    self.app.updater.updateFromStatistics(d, 'grow');
                 });
             
-                // Remove the parent that has been replaced.
+            // Remove the parent that has been replaced.
             sectors.exit().remove();
         
             // Change the value of all other parents to zero.
-            data.forEach((child, i) => { if (i < start || i >= end) { child.value = 0; } });
-            // Launch the animation
-            animate(data, callback);
-        }
+            data.forEach((e, i) => {
+                if (i < c.length) { e.value = clone[i].value; }
+                else { e.value = 0; }
+            });
 
-        /*
-        * This function animates the pie chart to squich the parents and expand the children.
-        */
-        function animate(data, callback) {
+            let labels = 0;
+            this.labelslices.transition().duration(250)
+                .style("opacity", 0)
+                .on("start", function() { labels++; })
+                .on("end", function(d) {
+                    if(--labels === 0) {
+                        self.labelslices.remove();
+                        self.labelslices = self.svg.selectAll().data(self.pie(data))
+                            // .join("text")
+                            // .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.1).append("tspan").text(d => uppercaseFirstLetter(d.data.name)))
+                            .enter()
+                            .append("text")
+                            .text(function(d) {
+                                if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
+                            })
+                            .attr("text-anchor", "middle")
+                            .attr("font-size", '1.2rem')
+                            .attr("transform", (d) => {
+                                let [x, y] = self.arc.centroid(d)
+                                let start = d.startAngle * 180 / Math.PI;
+                                let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
+                                let angle = start + half;
+                                if (angle > 180) { angle -= 180 }
+                                return `translate(${x}, ${y}) rotate(${angle - 90})`
+                            })
+                            .attr("dy", "0.2rem")
+                            .attr("pointer-events", "none")
+                            .style('fill', 'white')
+                            .style('opacity', 0)
+
+                        self.labelslices.transition().duration(250)
+                            .style('opacity', 1)
+                        
+                        self.labelslices.exit().remove();
+                    }
+                });
+
+            this.labelparent.transition()
+                .duration(250)
+                .style("opacity", 0)
+                .on("end", function(d) {
+                    self.parent
+                        .transition(250)
+                        .attr('fill', self.params.colors[self.current.typesorting])
+                        .attr("value", self.current.value)
+
+                    d3.select(this)
+                        .text(uppercaseFirstLetter(self.current.name))
+                        .transition(250)
+                        .style("opacity", 1)
+                });
+
             // Calculate the slices using the new data with zeroed parents.
-            var sectors = svg.selectAll("path").data(pie(data), d => d.data.name);
-            
+            sectors = this.svg.selectAll("path").data(this.pie(data), d => d.data.name);
+
+            let transitions = 0;
             // Launch the animation.
             sectors.transition()
                 .duration(500)
                 .ease(d3.easeQuadOut)
-                .attrTween("d", tween)
+                .attrTween("d", function(a) {
+                    const i = d3.interpolate(this._current, a);
+                    this._current = i(1);
+                    return (t) => self.arc(i(t));
+                })
+                .on("start", function() { transitions++; })
                 .on("end", function(d) {
-                    // Remove the squished parent at the end of the animation.
-                    if (d.data.value === 0) d3.select(this).remove();
-                    addClass(self.mask, 'loaded');
-                    callback();
-                });
-        }
-
-        /*
-        * The tween animation function.
-        */
-        function tween(a) { 
-            const i = d3.interpolate(this._current, a);
-            this._current = i(1);
-            return (t) => arc(i(t));
+                    // Checks if it's the last slice animation
+                    if(--transitions === 0) {
+                        // Remove the squished slices at the end of the animation.
+                        self.data = data.slice(0, c.length);
+                        self.svg.selectAll("path").data(self.pie(self.data), d => d.data.name).exit().remove()
+                        addClass(self.mask, 'loaded');
+                        callback();
+                    }
+                })
         }
     }
 
-    prepare(data) {
-        let children = [];
+    color(length) {
+        // Set up a color interpolation from red to red.
+        const color1 = d3.color("hsl(0, 45%, 55%)");
+        const color2 = d3.color("hsl(360, 45%, 55%)");
+        let interpolation = d3.interpolateHslLong(color1, color2);
+        // Set up the color generator based on the parents dataset.
+        return d3.scaleOrdinal(d3.quantize(interpolation, length + 1));
+    }
+
+    prepare(entry) {
+        let n;
+        if (entry.vernaculars.length > 0) { n = entry.vernaculars[0]; }
+        else { n = entry.scientific }
+        return { name: n, taxon: entry.id, value: entry.count, typesorting: entry.typesorting }
+    }
+
+    prepareData(data) {
+        let result = [];
         for (let i = 0; i < (data.length); ++i) {
-            let current = data[i];
-            let n;
-            if (current.vernaculars.length > 0) { n = current.vernaculars[0]; }
-            else { n = current.scientific }
-            children.push({ name: n, taxon: current.id, value: current.count, typesorting: current.typesorting })
+            result.push(this.prepare(data[i]));
         }
-        return children;
+        return result;
     }
 
     collapse() {

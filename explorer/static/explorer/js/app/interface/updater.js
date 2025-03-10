@@ -11,6 +11,7 @@ class Updater {
         this.app = app;
         this.params = params;
         this.updating = false;
+        this.widgets = 5;
 
         this.taxonomy;
         this.range;
@@ -56,24 +57,22 @@ class Updater {
         callback = callback || function () {};
         this.app.freeze();
         this.done = [];
-        let widgets = 5;
-
-        console.log(widgets);
-        console.log(type);
 
         this.app.information.loading();
         this.app.photography.loading();
         this.app.statistics.loading();
+        this.app.statistics.collapse();
         this.app.taxonomy.loading();
+        this.app.taxonomy.collapse();
 
-        this.updateRange(index, () => { this.return(widgets, callback); });
+        this.updateRange(index, () => { this.return(); });
 
         ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
             this.taxonomy = r;
-            this.updateInformation(null, () => { this.return(widgets, callback); });
-            this.updatePhotography(() => { this.return(widgets, callback); });
-            this.updateTaxonomy(() => { this.return(widgets, callback); });
-            this.updateStatistics(() => { this.return(widgets, callback); });
+            this.updateInformation(null, () => { this.return(callback); });
+            this.updatePhotography(() => { this.return(callback); });
+            this.updateTaxonomy(() => { this.return(callback); });
+            this.updateStatistics(() => { this.return(callback); });
         });
     }
 
@@ -81,20 +80,20 @@ class Updater {
         callback = callback || function () {};
         this.app.freeze();
         this.done = [];
-        let widgets = 4;
 
         this.app.information.loading();
         this.app.photography.loading();
         this.app.cartography.loading();
         this.app.statistics.loading();
+        this.app.taxonomy.loading();
 
         let transition = this.app.params.interface.transition;
         if (type === 'siblings') {
             this.taxonomy.tindex = newIndex;
 
-            this.updateRange(index, () => { this.return(widgets, callback); });
-            this.updateInformation(index, () => { this.return(widgets, callback); });
-            this.updatePhotography(() => { this.return(widgets, callback); });
+            this.updateRange(index, () => { this.return(callback); });
+            this.updateInformation(index, () => { this.return(callback); });
+            this.updatePhotography(() => { this.return(callback); });
 
             this.app.statistics.collapse();
             let start = new Date();
@@ -104,65 +103,184 @@ class Updater {
                 wait(transition - (new Date() - start), () => {
                     this.app.taxonomy.updateChildren();
                     this.app.taxonomy.unfreeze();
-                    this.updateStatistics(() => { this.return(widgets, callback); });
+                    this.app.taxonomy.loaded();
+                    this.updateStatistics(() => { this.return(callback); });
+                    this.done.push('taxonomy');
+                    this.return(callback);
                 })
             });
         }
         else if (type === 'parents') {
             this.taxonomy.children = this.taxonomy.siblings;
+            this.taxonomy.cindex = this.taxonomy.tindex;
             this.taxonomy.siblings = this.taxonomy.parents;
             this.taxonomy.tindex = this.taxonomy.pindex;
 
-            this.updateRange(index, () => { this.return(widgets, callback); });
-            this.updateInformation(index, () => { this.return(widgets, callback); });
-            this.updatePhotography(() => { this.return(widgets, callback); });
+            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
+
+            this.updateRange(index, () => { this.return(callback); });
+            this.updateInformation(index, () => { this.return(callback); });
+            this.updatePhotography(() => { this.return(callback); });
 
             this.app.taxonomy.regress();
             let start = new Date();
             ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
                 this.taxonomy.parents = r.parents;
                 this.taxonomy.pindex = r.pindex;
+
+                this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                    this.done.push('statistics');
+                    this.return(callback);
+                });
+
                 wait(transition - (new Date() - start), () => {
                     this.app.taxonomy.parents.update();
                     wait(10, () => {
                         this.app.taxonomy.parents.reveal();
                         this.app.taxonomy.unfreeze();
+                        this.app.taxonomy.loaded();
+                        this.done.push('taxonomy');
+                        this.return(callback);
                     });
                 });
             });
         }
         else if (type === 'children') {
+            let child = this.taxonomy.cindex;
             this.taxonomy.parents = this.taxonomy.siblings;
             this.taxonomy.pindex = this.taxonomy.tindex;
             this.taxonomy.siblings = this.taxonomy.children;
             this.taxonomy.tindex = this.taxonomy.cindex;
 
-            this.updateRange(index, () => { this.return(widgets, callback); });
-            this.updateInformation(index, () => { this.return(widgets, callback); });
-            this.updatePhotography(() => { this.return(widgets, callback); });
+            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
+
+            this.updateRange(index, () => { this.return(callback); });
+            this.updateInformation(index, () => { this.return(callback); });
+            this.updatePhotography(() => { this.return(callback); });
 
             this.app.taxonomy.grow();
             let start = new Date();
             ajaxGet('/children/' + this.params.languages.current + '/' + index, (r) => {
                 this.taxonomy.children = r.children;
                 this.taxonomy.cindex = 0;
+
+                this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                    this.done.push('statistics');
+                    this.return(callback);
+                });
+
                 wait(transition - (new Date() - start), () => {
                     this.app.taxonomy.children.update();
                     wait(10, () => {
                         this.app.taxonomy.children.reveal();
                         this.app.taxonomy.unfreeze();
+                        this.app.taxonomy.loaded();
+                        this.done.push('taxonomy');
+                        this.return(callback);
                     })
                 })
             });
         }
     }
 
-    updateFromStatistics(index, type, callback) {
+    updateFromStatistics(d, type, callback) {
+        callback = callback || function () {};
 
+        if (type === 'regress' && this.taxonomy.parents === null) {
+            callback();
+        }
+        else {
+            this.app.freeze();
+            this.done = [];
+    
+            this.app.information.loading();
+            this.app.photography.loading();
+            this.app.cartography.loading();
+            this.app.taxonomy.loading();
+            this.app.statistics.loading();
+    
+            let transition = this.app.params.interface.transition;
+            if (type === 'grow') {
+                this.taxonomy.cindex = d.index;
+                let taxon = this.taxonomy.children[this.taxonomy.cindex];
+                let index = taxon.id;
+
+                this.app.statistics.current = this.app.statistics.prepare(taxon);
+    
+                this.taxonomy.parents = this.taxonomy.siblings;
+                this.taxonomy.pindex = this.taxonomy.tindex;
+                this.taxonomy.siblings = this.taxonomy.children;
+                this.taxonomy.tindex = this.taxonomy.cindex;
+    
+                this.updateRange(index, () => { this.return(callback); });
+                this.updateInformation(index, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+    
+                this.app.taxonomy.grow(this.taxonomy.cindex + 1);
+    
+                let start = new Date();
+                ajaxGet('/children/' + this.params.languages.current + '/' + index, (r) => {
+                    this.taxonomy.children = r.children;
+                    this.taxonomy.cindex = 0;
+    
+                    this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                        this.done.push('statistics');
+                        this.return(callback);
+                    });
+    
+                    wait(transition - (new Date() - start), () => {
+                        this.app.taxonomy.children.update();
+                        wait(10, () => {
+                            this.app.taxonomy.children.reveal();
+                            this.app.taxonomy.unfreeze();
+                            this.app.taxonomy.loaded();
+                            this.done.push('taxonomy');
+                            this.return(callback);
+                        })
+                    });
+                });
+            }
+            else if (type === 'regress') {
+                let taxon = this.taxonomy.parents[this.taxonomy.pindex];
+                let index = taxon.id;
+
+                this.app.statistics.current = this.app.statistics.prepare(taxon);
+    
+                this.taxonomy.children = this.taxonomy.siblings;
+                this.taxonomy.cindex = this.taxonomy.tindex;
+                this.taxonomy.siblings = this.taxonomy.parents;
+                this.taxonomy.tindex = this.taxonomy.pindex;
+                
+                this.updateRange(index, () => { this.return(callback); });
+                this.updateInformation(index, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+    
+                this.app.taxonomy.regress();
+    
+                let start = new Date();
+                ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
+                    this.taxonomy.parents = r.parents;
+                    this.taxonomy.pindex = 0;
+    
+                    this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                        this.done.push('statistics');
+                        this.return(callback);
+                    });
+    
+                    wait(transition - (new Date() - start), () => {
+                        this.app.taxonomy.parents.update();
+                        wait(10, () => {
+                            this.app.taxonomy.parents.reveal();
+                            this.app.taxonomy.unfreeze();
+                            this.app.taxonomy.loaded();
+                            this.done.push('taxonomy');
+                            this.return(callback);
+                        })
+                    });
+                });
+            }
+        }
     }
-
-
-
 
     updateInformation(index, callback) {
         callback = callback || function () {};
@@ -223,50 +341,15 @@ class Updater {
         });
     }
 
-
-
-
-    return(w, callback) {
+    return(callback) {
         callback = callback || function () {};
-        console.log(this.done);
-        if (this.done.length >= w) {
+        // console.log(this.done);
+        if (this.done.length >= this.widgets) {
             this.app.unfreeze();
             callback();
         }
     }
 
-    fetchChildren(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.children = r.children;
-            this.taxonomy.cindex = r.index;
-            callback(r);
-        });
-    }
-
-    fetchParent(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('parents/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.parents = r.parents;
-            this.taxonomy.pindex = r.pindex;
-            callback(r);
-        });
-    }
-
-    fetchTaxon(index, callback) {
-        callback = callback || function () {};
-        ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy = r;
-            callback(r);
-        });
-    }
-
-    fetchDescription(index, callback) {
-        ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-            this.taxonomy.description = r.values;
-            callback(r);
-        });
-    }
 
 
     

@@ -61,7 +61,14 @@ class Taxonomy extends Widget {
         });
     }
 
-    grow() {
+    grow(index) {
+        // If an index is provided, check if the wanted index is the active one.
+        if (index) {
+            if (this.children.getActive() !== index) {
+                this.children.slideTo(index);
+            }
+        }
+        
         // Destroy grand parents
         this.grandparents.destroy();
 
@@ -179,7 +186,6 @@ class Level {
 
         this.taxonlevel;
         this.taxons = [];
-        this.current;
     }
 
     update() {
@@ -194,15 +200,12 @@ class Level {
         // If parents or siblings, retrieve the parent or current taxon index in the list
         if (this.type === 'parents') { this.index = this.taxonomy.app.updater.taxonomy.pindex; }
         else if (this.type === 'siblings') { this.index = this.taxonomy.app.updater.taxonomy.tindex; }
+        else if (this.type === 'children') { this.index = this.taxonomy.app.updater.taxonomy.cindex; }
 
         // Make sure the level is not null
         if (this.taxonlevel) {
-            let i;
-            if (this.type === 'children') { i = 0; }
-            else { i = this.index; }
-
+            let i = this.index;
             let taxon = this.taxonlevel[i];
-            this.current = i + 1;
 
             let typesorting = taxon.typesorting;
             this.typecontainer = makeDiv(null, 'taxonomy-type-container collapse ' + typesorting);
@@ -213,36 +216,25 @@ class Level {
             this.container.append(this.typecontainer, this.entrycontainer);
     
             let smoosh = false;
-            if (this.type !== 'children') {
-                if (this.index > 0) { smoosh = true; }
-            }
+            if (this.index > 0) { smoosh = true; }
+            
             let first = new Taxon(this, null, smoosh, true);
             this.taxons.push(first);
 
-            let number = 0;
-            let visible;
-            if (this.type === 'children') { visible = [ 0, 1 ]; }
-            else { visible = [ this.index - 1, this.index, this.index + 1 ]; }
+            let visible = [ this.index - 1, this.index, this.index + 1 ];
             
             for (let i = 0; i < (this.taxonlevel.length); ++i) {
                 smoosh = true;
                 if (visible.includes(i)) { smoosh = false; }
                 let entry = new Taxon(this, this.taxonlevel[i], smoosh, false);
                 entry.container.addEventListener('click', (e) => { this.slide(e); });
-
-                if (this.type === 'children') { if (i === 0) { entry.activate(); } }
                 if (i === this.index) { entry.activate(); }
-
                 this.taxons.push(entry);
-                ++number;
             }
 
             smoosh = false;
-            if (this.type !== 'children') {
-                if (this.index < this.taxonlevel.length - 1) { smoosh = true; }
-            } else {
-                if (number > 1) { smoosh = true; }
-            }
+            if (this.index < this.taxonlevel.length - 1) { smoosh = true; }
+           
             let last = new Taxon(this, null, smoosh, true);
             this.taxons.push(last);
 
@@ -254,7 +246,6 @@ class Level {
 
     slide(e) {
         if (!this.taxonomy.freezed) {
-            let transition = this.taxonomy.params.interface.transition;
             this.taxonomy.freeze();
             let active = false;
 
@@ -299,32 +290,39 @@ class Level {
             // Check if active entry is clicked
             if (!active) {
                 // Here the taxonomy level is sliding
-                if (hide !== undefined && this.type !== 'parents') {
-                    // Smoosh and expand the right taxon
-                    this.taxons[hide].smoosh();
-                    this.taxons[reveal].expand();
-        
-                    let currentype = this.taxons[this.current].taxon.typesorting;
-                    let newtype = this.taxons[current].taxon.typesorting;
-
-                    if (newtype !== currentype) {
-                        removeClass(this.typecontainer, currentype);
-                        addClass(this.typecontainer, newtype);
-                        this.typelabel.innerHTML = this.taxons[current].taxon.type;
-                    }
-        
-                    this.taxons[this.current].deactivate();
-                    this.taxons[current].activate();
-                    this.current = current;
-    
-                    if (this.type === 'siblings') {
-                        this.taxonomy.loading();
-                        let index = this.taxons[current].taxon.id;
-                        this.taxonomy.children.collapse();
-                        this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
-                    } else {
-                        this.taxonomy.app.updater.taxonomy.cindex = this.current - 1;
+                if (hide !== undefined) {
+                    if (this.type === 'parents') {
                         this.taxonomy.unfreeze();
+                    } else {
+                        // Smoosh and expand the right taxon
+                        this.taxons[hide].smoosh();
+                        this.taxons[reveal].expand();
+
+                        let previous;
+                        if (this.type === 'siblings') { previous = this.taxonomy.app.updater.taxonomy.tindex + 1 }
+                        else { previous = this.taxonomy.app.updater.taxonomy.cindex + 1 }
+
+                        let previoustype = this.taxons[previous].taxon.typesorting;
+                        let newtype = this.taxons[current].taxon.typesorting;
+
+                        if (newtype !== previoustype) {
+                            removeClass(this.typecontainer, previoustype);
+                            addClass(this.typecontainer, newtype);
+                            this.typelabel.innerHTML = this.taxons[current].taxon.type;
+                        }
+
+                        this.taxons[previous].deactivate();
+                        this.taxons[current].activate();
+
+                        if (this.type === 'siblings') {
+                            this.taxonomy.loading();
+                            let index = this.taxons[current].taxon.id;
+                            this.taxonomy.children.collapse();
+                            this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, current - 1);
+                        } else {
+                            this.taxonomy.app.updater.taxonomy.cindex = current - 1;
+                            this.taxonomy.unfreeze();
+                        }
                     }
                 } else {
                     this.taxonomy.unfreeze();
@@ -334,21 +332,32 @@ class Level {
             else {
                 // Here, parent has been clicked, must regress
                 if (this.type === 'parents') {
-                    this.current = i2;
-                    let index = this.taxons[this.current].taxon.id;
-                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
+                    let pindex = this.taxonomy.app.updater.taxonomy.pindex;
+                    let index = this.taxons[pindex + 1].taxon.id;
+                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, pindex);
                 }
                 // Here, active child clicked, must grow
                 else if (this.type === 'children') {
-                    this.current = i2;
-                    let index = this.taxons[this.current].taxon.id;
-                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, this.current - 1);
+                    let cindex = this.taxonomy.app.updater.taxonomy.cindex;
+                    let index = this.taxons[cindex + 1].taxon.id;
+                    this.taxonomy.app.updater.updateFromTaxonomy(index, this.type, cindex);
                 }
                 // Here, only clicked on already active taxon
                 else {
                     this.taxonomy.unfreeze();
                 }               
             }
+        }
+    }
+
+    slideTo(index) {
+        let visible = [ index - 1, index, index + 1 ];
+        for (let i = 0; i < this.taxons.length; ++i) {
+            let taxon = this.taxons[i];
+            if (visible.includes(i)) { taxon.expand(); }
+            else { taxon.smoosh(); }
+            if (i === index) { taxon.activate(); }
+            else { taxon.deactivate(); }
         }
     }
 
@@ -394,6 +403,12 @@ class Level {
             else {
                 if (this.taxons[i].active) { this.taxons[i].reveal(); }
             }
+        }
+    }
+
+    getActive() {
+        for (let i = 0; i < (this.taxons.length); ++i) {
+            if(this.taxons[i].isActive()) { return i; }
         }
     }
 }
@@ -486,9 +501,9 @@ class Taxon {
                 html = '<i>' + uppercaseFirstLetter(this.taxon.scientific) + '</i>';
             }
     
-            let label = makeDiv(null, 'taxonomy-entry-label', html);        
+            this.label = makeDiv(null, 'taxonomy-entry-label', html);        
             let mask = makeDiv(null, 'taxonomy-entry-mask');
-            this.container.append(mask, image, label);
+            this.container.append(mask, image, this.label);
             this.container.setAttribute('taxon', this.taxon.id);
         }
     }
@@ -498,13 +513,20 @@ class Taxon {
         else { return true; }
     }
 
+    isActive() {
+        if (this.active) { return true; }
+        else { return false; }
+    }
+
     activate() {
         addClass(this.container, 'active');
+        addClass(this.label, this.taxon.typesorting);
         this.active = true;
     }
 
     deactivate() {
         removeClass(this.container, 'active');
+        if (this.taxon) { removeClass(this.label, this.taxon.typesorting); }
         this.active = false;
     }
 
