@@ -3,7 +3,6 @@
  * Define the statistics widget.
  */
 
-import { ajaxGet } from "../generic/ajax.js";
 import { addClass, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { uppercaseFirstLetter } from "../generic/parsing.js";
 import Widget from "./widget.js";
@@ -72,11 +71,15 @@ class Statistics extends Widget {
         this.pie = d3.pie().value(d => d.value).sort(null);
 
         // Create the svg paths using the slice generator.
-        var path = this.svg.selectAll("path").data(this.pie(this.data), d => d.data.name);
+        this.slices = this.svg.append("g");
+        this.parent = this.svg.append("g");
+        this.labels = this.svg.append("g");
+
+        var origin = this.slices.selectAll("path").data(this.pie(this.data), d => d.data.name);
         let self = this;
 
         // Add the path using this helper function
-        this.parent = this.svg.append('circle')
+        this.parentcircle = this.parent.append('circle')
             .attr('r', inner)
             .attr('fill', this.params.colors[this.current.typesorting])
             .attr("value", this.current.value)
@@ -85,7 +88,7 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(null, 'regress');
             });
 
-        this.labelparent = this.svg.append('text')
+        this.parentlabel = this.parent.append('text')
             .attr("text-anchor", "middle")
             .attr("font-size", '1.8rem')
             .attr("dy", ".2rem")
@@ -93,7 +96,7 @@ class Statistics extends Widget {
             .style('fill', 'white')
             .text(uppercaseFirstLetter(this.current.name))
 
-        path.enter()
+        origin.enter()
             .append("path")
             // Fill the slice with the data color parameter.
             .attr("fill", d => d.data.color)
@@ -105,37 +108,44 @@ class Statistics extends Widget {
             // Click event on the slice.
             .on("click", (event, d) => {
                 self.app.updater.updateFromStatistics(d, 'grow');
-            });
-        
-        this.labelslices = this.svg.selectAll().data(this.pie(this.data))
-            // .join("text")
-            // .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.1).append("tspan").text(d => uppercaseFirstLetter(d.data.name)))
+            })
+            .on("mouseenter", (event, d) => {
+                self.parentlabel.text(uppercaseFirstLetter(d.data.name));
+                self.parentcircle.transition().duration(200).attr('fill', self.params.colors[d.data.typesorting])
+            })
+            .on("mouseleave", (event, d) => {
+                self.parentlabel.text(uppercaseFirstLetter(self.current.name));
+                self.parentcircle.transition().duration(200).attr('fill', self.params.colors[self.current.typesorting])
+            })
+
+        this.labels.selectAll()
+            .data(this.pie(this.data))
             .enter()
-            .append("text")
-            .text(function(d) {
-                if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
-            })
-            .attr("text-anchor", "middle")
-            .attr("font-size", '1.2rem')
-            .attr("transform", (d) => {
-                let [x, y] = this.arc.centroid(d)
-                let start = d.startAngle * 180 / Math.PI;
-                let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
-                let angle = start + half;
-                if (angle > 180) { angle -= 180 }
-                return `translate(${x}, ${y}) rotate(${angle - 90})`
-            })
-            .attr("dy", "0.2rem")
-            .attr("pointer-events", "none")
-            .style('fill', 'white');
+                .append("text")
+                .text(function(d) {
+                    if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
+                })
+                .attr("text-anchor", "middle")
+                .attr("font-size", '1.2rem')
+                .attr("transform", (d) => {
+                    let [x, y] = this.arc.centroid(d)
+                    let start = d.startAngle * 180 / Math.PI;
+                    let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
+                    let angle = start + half;
+                    if (angle > 180) { angle -= 180 }
+                    return `translate(${x}, ${y}) rotate(${angle - 90})`
+                })
+                .attr("dy", "0.2rem")
+                .attr("pointer-events", "none")
+                .style('fill', 'white');
 
         this.chart.append(this.svg.node());
     }
 
     animate(newData, callback) {
         callback = callback || function () {};
-        removeClass(this.mask, 'loaded');
         if (newData === null) {
+            this.loaded();
             callback();
         } else {
             let c = this.prepareData(newData);
@@ -156,10 +166,10 @@ class Statistics extends Widget {
             let data = c.concat(this.data);
 
             // Regenerate the slices using the new data.
-            var sectors = this.svg.selectAll("path").data(this.pie(data), d => d.data.name);
+            let final = this.slices.selectAll("path").data(this.pie(data), d => d.data.name);
             let self = this;
 
-            sectors.enter()
+            final.enter()
                 .append("path")
                 // Color them according to their color parameter.
                 .attr("fill", d => d.data.color)
@@ -170,10 +180,18 @@ class Statistics extends Widget {
                 // Click event on the slice.
                 .on("click", function (event, d) {
                     self.app.updater.updateFromStatistics(d, 'grow');
+                })
+                .on("mouseenter", (event, d) => {
+                    self.parentlabel.text(uppercaseFirstLetter(d.data.name));
+                    self.parentcircle.transition().duration(200).attr('fill', self.params.colors[d.data.typesorting])
+                })
+                .on("mouseleave", (event, d) => {
+                    self.parentlabel.text(uppercaseFirstLetter(self.current.name));
+                    self.parentcircle.transition().duration(200).attr('fill', self.params.colors[self.current.typesorting])
                 });
             
             // Remove the parent that has been replaced.
-            sectors.exit().remove();
+            this.slices.exit().remove();
         
             // Change the value of all other parents to zero.
             data.forEach((e, i) => {
@@ -182,48 +200,55 @@ class Statistics extends Widget {
             });
 
             let labels = 0;
-            this.labelslices.transition().duration(250)
+            this.labels.selectAll("text")
+                .transition()
+                .duration(250)
                 .style("opacity", 0)
                 .on("start", function() { labels++; })
                 .on("end", function(d) {
-                    if(--labels === 0) {
-                        self.labelslices.remove();
-                        self.labelslices = self.svg.selectAll().data(self.pie(data))
-                            // .join("text")
-                            // .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.1).append("tspan").text(d => uppercaseFirstLetter(d.data.name)))
-                            .enter()
-                            .append("text")
-                            .text(function(d) {
-                                if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
-                            })
-                            .attr("text-anchor", "middle")
-                            .attr("font-size", '1.2rem')
-                            .attr("transform", (d) => {
-                                let [x, y] = self.arc.centroid(d)
-                                let start = d.startAngle * 180 / Math.PI;
-                                let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
-                                let angle = start + half;
-                                if (angle > 180) { angle -= 180 }
-                                return `translate(${x}, ${y}) rotate(${angle - 90})`
-                            })
-                            .attr("dy", "0.2rem")
-                            .attr("pointer-events", "none")
-                            .style('fill', 'white')
-                            .style('opacity', 0)
+                    d3.select(this).remove();
 
-                        self.labelslices.transition().duration(250)
+                    if(--labels === 0) {
+                        // self.labels.exit().remove();
+
+                        self.labels.selectAll()
+                            .data(self.pie(data))
+                            .enter()
+                                .append("text")
+                                .text(function(d) {
+                                    if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
+                                })
+                                .attr("text-anchor", "middle")
+                                .attr("font-size", '1.2rem')
+                                .attr("transform", (d) => {
+                                    let [x, y] = self.arc.centroid(d)
+                                    let start = d.startAngle * 180 / Math.PI;
+                                    let half = (d.endAngle - d.startAngle) / 2 * 180 / Math.PI
+                                    let angle = start + half;
+                                    if (angle > 180) { angle -= 180 }
+                                    return `translate(${x}, ${y}) rotate(${angle - 90})`
+                                })
+                                .attr("dy", "0.2rem")
+                                .attr("pointer-events", "none")
+                                .style('fill', 'white')
+                                .style('opacity', 0);
+
+                        self.labels.selectAll("text")
+                            .transition()
+                            .duration(250)
                             .style('opacity', 1)
-                        
-                        self.labelslices.exit().remove();
+                            .on("end", function(d) {
+                                if (d.data.value === 0) d3.select(this).remove();
+                                self.labels.exit().remove();
+                            })
                     }
                 });
 
-            this.labelparent.transition()
+            this.parentlabel.transition()
                 .duration(250)
                 .style("opacity", 0)
                 .on("end", function(d) {
-                    self.parent
-                        .transition(250)
+                    self.parent.transition(250)
                         .attr('fill', self.params.colors[self.current.typesorting])
                         .attr("value", self.current.value)
 
@@ -234,11 +259,11 @@ class Statistics extends Widget {
                 });
 
             // Calculate the slices using the new data with zeroed parents.
-            sectors = this.svg.selectAll("path").data(this.pie(data), d => d.data.name);
+            final = this.slices.selectAll("path").data(this.pie(data), d => d.data.name);
 
             let transitions = 0;
             // Launch the animation.
-            sectors.transition()
+            final.transition()
                 .duration(500)
                 .ease(d3.easeQuadOut)
                 .attrTween("d", function(a) {
@@ -248,12 +273,14 @@ class Statistics extends Widget {
                 })
                 .on("start", function() { transitions++; })
                 .on("end", function(d) {
+                    if (d.data.value === 0) d3.select(this).remove();
                     // Checks if it's the last slice animation
                     if(--transitions === 0) {
                         // Remove the squished slices at the end of the animation.
                         self.data = data.slice(0, c.length);
-                        self.svg.selectAll("path").data(self.pie(self.data), d => d.data.name).exit().remove()
+                        self.slices.exit().remove();
                         addClass(self.mask, 'loaded');
+                        this.loaded();
                         callback();
                     }
                 })

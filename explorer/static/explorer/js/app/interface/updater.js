@@ -260,7 +260,7 @@ class Updater {
                 let start = new Date();
                 ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
                     this.taxonomy.parents = r.parents;
-                    this.taxonomy.pindex = 0;
+                    this.taxonomy.pindex = r.pindex;
     
                     this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
                         this.done.push('statistics');
