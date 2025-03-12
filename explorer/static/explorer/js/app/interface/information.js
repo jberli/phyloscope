@@ -9,13 +9,13 @@ import { boldSubstring, compare, removeTrailing, uppercaseFirstLetter } from "..
 import Widget from "./widget.js";
 
 class Information extends Widget {
-    constructor(app, params) {
-        super(app, params);
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.type = 'information';
 
         // Create DOM Elements
         this.container = makeDiv('information', 'sub-panel');
-        this.app.first.append(this.container);
+        this.parent.append(this.container);
 
         // Mask and loader
         this.mask = makeDiv(null, 'information-mask mask');
@@ -75,7 +75,7 @@ class Search {
         this.results = []
 
         // Add a button to activate the search
-        this.searchbutton = makeDiv(null, 'search-button');
+        this.searchbutton = makeDiv(null, 'search-button button');
         addSVG(this.searchbutton, new URL('/static/explorer/img/search.svg', import.meta.url));
         this.information.container.append(this.searchbutton);
 
@@ -288,11 +288,9 @@ class Description {
         this.content = makeDiv(null, 'description-content hidden');
         this.container.append(this.content);
 
-        let linksmask = makeDiv(null, 'description-links-mask');
-
         let linkcontainer = makeDiv(null, 'description-links');
 
-        let inaturalist = makeDiv(null, 'description-link');
+        let inaturalist = makeDiv(null, 'description-button button');
         addSVG(inaturalist, new URL('/static/explorer/img/inaturalist.svg', import.meta.url))
 
         let ainat = document.createElement('a');
@@ -302,18 +300,19 @@ class Description {
 
         linkcontainer.append(ainat);
 
+        let maskclass = 'description-links-mask';
         if (wikipedia !== null) {
-            let wiki = makeDiv(null, 'description-link');
+            let wiki = makeDiv(null, 'description-button button');
             addSVG(wiki, new URL('/static/explorer/img/wikipedia.svg', import.meta.url));
-
             let awiki = document.createElement('a');
             awiki.href = wikipedia.url;
             awiki.setAttribute('target', '_blank');
             awiki.append(wiki);
-            
             linkcontainer.append(awiki);
+            maskclass += ' large';
         }
 
+        let linksmask = makeDiv(null, maskclass);
         this.content.append(linksmask, linkcontainer);
         
         let title = makeDiv(null, 'description-title', t);

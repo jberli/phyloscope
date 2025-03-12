@@ -15,16 +15,17 @@ class Cartography extends Widget {
      * @param {Application} app - Application object.
      * @param {Object} params - Parameters of the application.
      */
-    constructor(app, params) {
-        super(app, params);
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.type = 'cartography';
+        this.large = false;
 
         // Boolean to flag if the map view is the same as the starting one
         this.origin = true;
 
         // Create DOM elements
         this.container = makeDiv('cartography', 'sub-panel');
-        this.app.third.append(this.container);
+        this.parent.append(this.container);
 
         // Mask and loader
         this.mask = makeDiv(null, 'cartography-mask mask');
@@ -42,8 +43,23 @@ class Cartography extends Widget {
         // Create the taxon range object
         this.range = new Range(this, this.params);
 
+        // Create the button to enlarge the map
+        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button button');
+        addSVG(this.enlargeButton, new URL('/static/explorer/img/expand.svg', import.meta.url));
+        this.container.append(this.enlargeButton);
+
+        // Activate the button to enlarge the map when clicked
+        this.enlargeButton.addEventListener('click', () => {
+            addClass(this.enlargeButton, 'collapse');
+            this.app.enlarge(this, () => {
+                if (this.large) { addSVG(this.enlargeButton, new URL('/static/explorer/img/compress.svg', import.meta.url)); }
+                else { addSVG(this.enlargeButton, new URL('/static/explorer/img/expand.svg', import.meta.url)); }
+                removeClass(this.enlargeButton, 'collapse');
+            });
+        });
+
         // Create the button to center the map
-        this.centerButton = makeDiv(null, 'cartography-center collapse');
+        this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse');
         addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
         this.container.append(this.centerButton);
 

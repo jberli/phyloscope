@@ -38,3 +38,35 @@
     
     transition: all .1s linear;
 }
+
+.button {
+    height: 2rem;
+    width: 2rem;
+
+    cursor: pointer;
+    
+    transform: scale(1, 1);
+    transition: transform .2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.1, 1.1);
+    }
+
+    &.collapse {
+        transform: scale(0, 0);
+    }
+
+    & > svg {
+        transition: color .2s ease-in-out;
+        color: $main-color-light;
+        height: 2rem;
+        width: 2rem;
+    }
+
+    &.active {
+        transform: scale(1.1, 1.1);
+        & > svg {
+            color: $main-color-extradark;
+        }
+    }
+}

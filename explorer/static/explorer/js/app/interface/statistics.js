@@ -8,12 +8,12 @@ import { formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
 import Widget from "./widget.js";
 
 class Statistics extends Widget {
-    constructor(app, params) {
-        super(app, params);
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.type = 'statistics';
         
         this.container = makeDiv('statistics', 'sub-panel');
-        this.app.third.append(this.container);
+        this.parent.append(this.container);
         this.chart;
 
         // Mask and loader
@@ -75,14 +75,14 @@ class Statistics extends Widget {
 
         // Create the svg paths using the slice generator.
         this.slices = this.svg.append("g");
-        this.parent = this.svg.append("g");
+        this.parentgroup = this.svg.append("g");
         this.labels = this.svg.append("g");
 
         var origin = this.slices.selectAll("path").data(this.pie(this.data), d => d.data.name);
         let self = this;
 
         // Add the path using this helper function
-        this.parentcircle = this.parent.append('circle')
+        this.parentcircle = this.parentgroup.append('circle')
             .attr('r', inner)
             .attr('fill', this.params.colors[this.current.typesorting])
             .attr("value", this.current.value)
@@ -91,7 +91,7 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(null, 'regress');
             });
 
-        this.parentlabel = this.parent.append("g");       
+        this.parentlabel = this.parentgroup.append("g");       
         this.wrapText(this.parentcircle, this.parentlabel, uppercaseFirstLetter(this.current.name));
 
         origin.enter()
@@ -108,13 +108,17 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(d, 'grow');
             })
             .on("mouseenter", (event, d) => {
-                let str = uppercaseFirstLetter(d.data.name)// + '<br>' + formatPercentage(d.data.percentage);
+                let str = uppercaseFirstLetter(d.data.name);
+                // + '<br>' + formatPercentage(d.data.percentage);
                 self.wrapText(self.parentcircle, self.parentlabel, str);
-                self.parentcircle.transition().duration(200).attr('fill', self.params.colors[d.data.typesorting])
+                self.parentcircle.transition().duration(200)
+                    .attr('fill', self.params.colors[d.data.typesorting])
             })
             .on("mouseleave", (event, d) => {
-                self.wrapText(self.parentcircle, self.parentlabel, uppercaseFirstLetter(self.current.name));
-                self.parentcircle.transition().duration(200).attr('fill', self.params.colors[self.current.typesorting])
+                let str = uppercaseFirstLetter(self.current.name);
+                self.wrapText(self.parentcircle, self.parentlabel, str);
+                self.parentcircle.transition().duration(200)
+                    .attr('fill', self.params.colors[self.current.typesorting])
             })
 
         this.labels.selectAll()
@@ -179,12 +183,17 @@ class Statistics extends Widget {
                     self.app.updater.updateFromStatistics(d, 'grow');
                 })
                 .on("mouseenter", (event, d) => {
-                    self.parentlabel.text(uppercaseFirstLetter(d.data.name));
-                    self.parentcircle.transition().duration(200).attr('fill', self.params.colors[d.data.typesorting])
-                })
+                    let str = uppercaseFirstLetter(d.data.name);
+                    // + '<br>' + formatPercentage(d.data.percentage);
+                    self.wrapText(self.parentcircle, self.parentlabel, str);
+                    self.parentcircle.transition().duration(200)
+                        .attr('fill', self.params.colors[d.data.typesorting])
+               })
                 .on("mouseleave", (event, d) => {
-                    self.parentlabel.text(uppercaseFirstLetter(self.current.name));
-                    self.parentcircle.transition().duration(200).attr('fill', self.params.colors[self.current.typesorting])
+                    let str = uppercaseFirstLetter(self.current.name);
+                    self.wrapText(self.parentcircle, self.parentlabel, str);
+                    self.parentcircle.transition().duration(200)
+                        .attr('fill', self.params.colors[self.current.typesorting])
                 });
             
             // Remove the parent that has been replaced.
@@ -242,15 +251,23 @@ class Statistics extends Widget {
                 .duration(250)
                 .style("opacity", 0)
                 .on("end", function(d) {
-                    self.parent.transition(250)
+                    self.parentgroup.transition(250)
                         .attr('fill', self.params.colors[self.current.typesorting])
                         .attr("value", self.current.value)
 
                     d3.select(this)
-                        .text(uppercaseFirstLetter(self.current.name))
+                        //.text(uppercaseFirstLetter(self.current.name))
                         .transition(250)
-                        .style("opacity", 1)
+                        .style("opacity", 1);
+
+                    self.wrapText(
+                        self.parentcircle,
+                        d3.select(this),
+                        uppercaseFirstLetter(self.current.name)
+                    );
                 });
+
+                
 
             // Calculate the slices using the new data with zeroed parents.
             final = this.slices.selectAll("path").data(this.pie(data), d => d.data.name);
@@ -288,6 +305,7 @@ class Statistics extends Widget {
         let words = text.split(/\s+/).reverse(),
             word,
             line = [],
+            wordNumber = words.length,
             lineNumber = 0,
             lineHeight = 1.8,
             dy = .2,
@@ -298,21 +316,23 @@ class Statistics extends Widget {
                 .attr("pointer-events", "none")
                 .attr('dy', dy + 'rem')
                 .style('fill', 'white');
-        
+
         while (word = words.pop()) {
             line.push(word);
             t.text(line.join(' '));
             if (t.node().getComputedTextLength() > bbox.width * ratio) {
-                line.pop();
-                t.text(line.join(' '));
-                line = [word];
-                t = label.append('text')
-                    .attr("text-anchor", "middle")
-                    .attr("font-size", '1.8rem')
-                    .attr("pointer-events", "none")
-                    .attr('dy', ++lineNumber * lineHeight + dy + 'rem')
-                    .style('fill', 'white')
-                    .text(word);
+                if (wordNumber !== 1) {
+                    line.pop();
+                    t.text(line.join(' '));
+                    line = [word];
+                    t = label.append('text')
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", '1.8rem')
+                        .attr("pointer-events", "none")
+                        .attr('dy', ++lineNumber * lineHeight + dy + 'rem')
+                        .style('fill', 'white')
+                        .text(word);
+                }
             }
         }
         

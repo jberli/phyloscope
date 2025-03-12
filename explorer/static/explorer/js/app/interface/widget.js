@@ -4,9 +4,10 @@
  */
 
 class Widget {
-    constructor(app, params) {
+    constructor(app, parent, params) {
         this.app = app;
         this.params = params;
+        this.parent = parent;
         this.freezed = false;
     }
 

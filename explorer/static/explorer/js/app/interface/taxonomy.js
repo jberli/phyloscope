@@ -10,13 +10,13 @@ import { round } from "../generic/math.js";
 import Widget from "./widget.js";
 
 class Taxonomy extends Widget {
-    constructor(app, params) {
-        super(app, params);
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.type = 'taxonomy';
 
         // Create DOM elements
         this.container = makeDiv('taxonomy', 'sub-panel');
-        this.app.second.append(this.container);
+        this.parent.append(this.container);
 
         // Mask and loader
         this.mask = makeDiv(null, 'taxonomy-mask mask');

@@ -4,12 +4,13 @@
  */
 
 import { makeDiv } from "../generic/dom.js";
+import Widget from "./widget.js";
 
-class Header {
-    constructor(app) {
-        this.app = app;
+class Header extends Widget {
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.container = makeDiv('header', 'sub-panel');
-        this.app.second.append(this.container);
+        this.parent.append(this.container);
 
         this.logo = new Logo(this);
         // this.search = new Search(this);

@@ -24,6 +24,12 @@ html, body {
 
     display: flex;
     gap: $interface-margin;
+
+    &.cartography {
+        & > #first-panel { flex: 3; }
+        & > #second-panel { flex: 2; }
+        & > .panel > #cartography { flex: 2; }
+    }
 }
 
 #application-mask {
@@ -35,6 +41,8 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: $interface-margin;
+
+    transition: all .2s ease-in-out;
 }
 
 #first-panel {
@@ -78,8 +86,6 @@ html, body {
 }
 
 #information {
-    flex: 2;
-
     font-family: 'Cantarell';
     color: $interface-foreground;
 
@@ -89,7 +95,7 @@ html, body {
 }
 
 #photography {
-    flex: 2;
+    flex: 3;
     display: flex;
 }
 
@@ -104,6 +110,7 @@ html, body {
 }
 
 #statistics {
+    flex: 4;
     background-color: $interface-background;
 }
 

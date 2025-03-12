@@ -3,14 +3,14 @@
  * Define the footer widget.
  */
 
-import { ajaxGet } from "../generic/ajax.js";
 import { makeDiv } from "../generic/dom.js";
+import Widget from "./widget.js";
 
-class Footer {
-    constructor(app) {
-        this.app = app;
+class Footer extends Widget {
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.container = makeDiv('footer', 'sub-panel');
-        this.app.first.append(this.container);
+        this.parent.append(this.container);
     }
 }
 

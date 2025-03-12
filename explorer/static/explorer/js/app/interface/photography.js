@@ -16,8 +16,8 @@ class Photography extends Widget {
      * @param {Application} app - Application object.
      * @param {Object} params - Parameters of the application.
      */
-    constructor(app, params) {
-        super(app, params);
+    constructor(app, parent, params) {
+        super(app, parent, params);
         this.type = 'photography';
 
         // Store photographs and the index of the default
@@ -26,7 +26,7 @@ class Photography extends Widget {
 
         // Create DOM elements
         this.container = makeDiv('photography', 'sub-panel');
-        this.app.first.append(this.container);
+        this.parent.append(this.container);
 
         // Create individual photo objects
         this.previous = new PhotoContainer(this, false, false);
