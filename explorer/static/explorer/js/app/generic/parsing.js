@@ -91,7 +91,7 @@ function calculateTextWidth(text, style, fontsize) {
     dummy.style.whiteSpace = 'nowrap';
     dummy.innerHTML = text;
     document.body.appendChild(dummy);
-    let width = Math.ceil(dummy.clientWidth);
+    let width = dummy.clientWidth;
     dummy.remove();
     return width;
 }

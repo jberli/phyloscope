@@ -5,7 +5,7 @@
 
 import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { addClass, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
-import { calculateTextWidth, calculateWidthFromClass, uppercaseFirstLetter } from "../generic/parsing.js";
+import { calculateTextWidth, calculateWidthFromClass, formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
 import { round } from "../generic/math.js";
 import Widget from "./widget.js";
 
@@ -491,7 +491,23 @@ class Taxon {
                 imageMask.appendChild(loader);
                 image.append(imageMask, i);
             }
+
+            let stats = this.taxon.count.toLocaleString();
+            stats += ' (' + formatPercentage(this.taxon.percentage) + ')';
+            let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
+            let swidth = calculateTextWidth(stats, getComputedStyle(statistics), .8);
     
+            statistics.style.width = '0';
+            statistics.style.height = '0';
+            this.container.addEventListener('mouseover', (e) => {
+                statistics.style.width = swidth + 'px';
+                statistics.style.height = '1.3rem';
+            });
+            this.container.addEventListener('mouseout', (e) => {
+                statistics.style.width = '0';
+                statistics.style.height = '0';
+            });
+
             let html, name;
             if (this.taxon.vernaculars.length > 0) {
                 name = uppercaseFirstLetter(this.taxon.vernaculars[0]);
@@ -503,7 +519,7 @@ class Taxon {
     
             this.label = makeDiv(null, 'taxonomy-entry-label', html);        
             let mask = makeDiv(null, 'taxonomy-entry-mask');
-            this.container.append(mask, image, this.label);
+            this.container.append(mask, image, statistics, this.label);
             this.container.setAttribute('taxon', this.taxon.id);
         }
     }
