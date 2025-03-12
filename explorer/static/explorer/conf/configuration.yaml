@@ -22,7 +22,7 @@ texts:
     en: 'Other names:'
     fr: 'Autres noms :'
 taxonomy:
-  current: 2
+  current: 3
 photography:
   url: https://inaturalist-open-data.s3.amazonaws.com/photos/
 typesorting:

@@ -4,6 +4,7 @@
  */
 
 import { makeDiv } from "./dom.js";
+import { round } from "./math.js";
 
 /**
  * Compare two strings.
@@ -75,13 +76,13 @@ function boldSubstring(str, substr) {
  * Calculate the width that would take a string of a given style in the DOM.
  * @param {string} text - String to test.
  * @param {ElementCSSInlineStyle} style - Style of the element.
- * @param {float} fontsize - Size of the font in px.
+ * @param {float} fontsize - Size of the font in rem.
  * @returns {float} width - Width in px of the text.
  */
 function calculateTextWidth(text, style, fontsize) {
     let dummy = document.createElement('div');
     dummy.style.fontFamily = style.fontFamily;
-    dummy.style.fontSize = fontsize;
+    dummy.style.fontSize = fontsize + 'rem';
     dummy.style.fontWeight = style.fontWeight;
     dummy.style.fontStyle = style.fontStyle;
     dummy.style.height = 'auto';
@@ -108,7 +109,30 @@ function calculateWidthFromClass(c) {
     return width;
 }
 
+/**
+ * Properly format a percentage to avoid having too many numbers.
+ * @param  {Float} c - Input percentage.
+ * @return {String} - Formated percentage.
+ */
+function formatPercentage(float) {
+    let perc = '';
+    if (round(float, 1) < 10) {
+        if (round(float, 1) < 0.1) {
+            if (round(float, 2) < 0.01) {
+                perc += round(float, 3).toFixed(3) + '%';
+            } else {
+                perc += round(float, 2).toFixed(2) + '%';
+            }
+        } else {
+            perc += round(float, 1).toFixed(1) + '%';
+        }
+    } else {
+        perc += Math.round(float) + '%';
+    }
+    return perc;
+}
+
 export {
     compare, removeTrailing, uppercaseFirstLetter, boldSubstring,
-    calculateTextWidth, calculateWidthFromClass
+    calculateTextWidth, calculateWidthFromClass, formatPercentage
 }

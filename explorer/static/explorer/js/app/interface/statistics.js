@@ -4,7 +4,7 @@
  */
 
 import { addClass, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
-import { uppercaseFirstLetter } from "../generic/parsing.js";
+import { formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
 import Widget from "./widget.js";
 
 class Statistics extends Widget {
@@ -64,6 +64,9 @@ class Statistics extends Widget {
 
         // Create a responsive svg.
         this.svg = d3.create("svg").attr("viewBox", [-width/2, -height/2, width, height]);
+        // Add the svg to the dom
+        this.chart.append(this.svg.node());
+
         // Set up the arc generator.
         this.arc = d3.arc().innerRadius(inner).outerRadius(outer);
         // Set up the pie slice generator without sorting => important when children
@@ -88,13 +91,8 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(null, 'regress');
             });
 
-        this.parentlabel = this.parent.append('text')
-            .attr("text-anchor", "middle")
-            .attr("font-size", '1.8rem')
-            .attr("dy", ".2rem")
-            .attr("pointer-events", "none")
-            .style('fill', 'white')
-            .text(uppercaseFirstLetter(this.current.name))
+        this.parentlabel = this.parent.append("g");       
+        this.wrapText(this.parentcircle, this.parentlabel, uppercaseFirstLetter(this.current.name));
 
         origin.enter()
             .append("path")
@@ -110,11 +108,12 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(d, 'grow');
             })
             .on("mouseenter", (event, d) => {
-                self.parentlabel.text(uppercaseFirstLetter(d.data.name));
+                let str = uppercaseFirstLetter(d.data.name)// + '<br>' + formatPercentage(d.data.percentage);
+                self.wrapText(self.parentcircle, self.parentlabel, str);
                 self.parentcircle.transition().duration(200).attr('fill', self.params.colors[d.data.typesorting])
             })
             .on("mouseleave", (event, d) => {
-                self.parentlabel.text(uppercaseFirstLetter(self.current.name));
+                self.wrapText(self.parentcircle, self.parentlabel, uppercaseFirstLetter(self.current.name));
                 self.parentcircle.transition().duration(200).attr('fill', self.params.colors[self.current.typesorting])
             })
 
@@ -138,8 +137,6 @@ class Statistics extends Widget {
                 .attr("dy", "0.2rem")
                 .attr("pointer-events", "none")
                 .style('fill', 'white');
-
-        this.chart.append(this.svg.node());
     }
 
     animate(newData, callback) {
@@ -207,10 +204,7 @@ class Statistics extends Widget {
                 .on("start", function() { labels++; })
                 .on("end", function(d) {
                     d3.select(this).remove();
-
                     if(--labels === 0) {
-                        // self.labels.exit().remove();
-
                         self.labels.selectAll()
                             .data(self.pie(data))
                             .enter()
@@ -280,10 +274,56 @@ class Statistics extends Widget {
                         self.data = data.slice(0, c.length);
                         self.slices.exit().remove();
                         addClass(self.mask, 'loaded');
-                        this.loaded();
+                        self.loaded();
                         callback();
                     }
                 })
+        }
+    }
+
+    wrapText(container, label, text) {
+        let ratio = 0.8;
+
+        let bbox = container.node().getBBox()
+        let words = text.split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.8,
+            dy = .2,
+            t = label.text(null)
+                .append('text')
+                .attr("text-anchor", "middle")
+                .attr("font-size", '1.8rem')
+                .attr("pointer-events", "none")
+                .attr('dy', dy + 'rem')
+                .style('fill', 'white');
+        
+        while (word = words.pop()) {
+            line.push(word);
+            t.text(line.join(' '));
+            if (t.node().getComputedTextLength() > bbox.width * ratio) {
+                line.pop();
+                t.text(line.join(' '));
+                line = [word];
+                t = label.append('text')
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", '1.8rem')
+                    .attr("pointer-events", "none")
+                    .attr('dy', ++lineNumber * lineHeight + dy + 'rem')
+                    .style('fill', 'white')
+                    .text(word);
+            }
+        }
+        
+        let labels = label.selectAll('text');
+        let size = labels.size();
+        if (size > 1) {
+            labels.attr('dy', function(i, d) {
+                let l = d3.select(this);
+                let dyl = parseFloat(l.attr('dy'));
+                return dyl - (size / 2) + 'rem';
+            })
         }
     }
 
@@ -300,7 +340,7 @@ class Statistics extends Widget {
         let n;
         if (entry.vernaculars.length > 0) { n = entry.vernaculars[0]; }
         else { n = entry.scientific }
-        return { name: n, taxon: entry.id, value: entry.count, typesorting: entry.typesorting }
+        return { name: n, taxon: entry.id, value: entry.count, percentage: entry.percentage, typesorting: entry.typesorting }
     }
 
     prepareData(data) {
