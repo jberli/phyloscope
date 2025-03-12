@@ -37,6 +37,19 @@ class Cartography extends Widget {
         this.mapdiv = makeDiv('map', 'ol-map');
         this.container.append(this.mapdiv);
 
+        // proj4.defs("ESRI:53078", "+proj=natearth2 +lon_0=0 +x_0=0 +y_0=0 +R=6371008.7714 +units=m +no_defs +type=crs");
+        // ol.proj.proj4.register(proj4);
+        // this.projection = new ol.proj.Projection({
+        //     code: 'ESRI:53078',
+        //     extent: [
+        //         -18019909.21177587, -9009954.605703328, 18019909.21177587,
+        //         9009954.605703328,
+        //     ],
+        //     worldExtent: [-179, -89.99, 179, 89.99],
+        // });
+
+        this.projection = ol.proj.get('EPSG:3857');
+
         // Create the basemap
         this.basemap();
 
@@ -121,8 +134,7 @@ class Cartography extends Widget {
      */
     basemap() {
         let tileDimension = 256;
-        let projection = ol.proj.get('EPSG:3857');
-        let projectionExtent = projection.getExtent();
+        let projectionExtent = this.projection.getExtent();
         let size = ol.extent.getWidth(projectionExtent) / tileDimension;
         let resolutions = new Array(19);
         let matrixIds = new Array(19);
@@ -137,7 +149,8 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137)*1.2, -pi * 6378137, (pi * 6378137)*1.2, pi * 6378137 ]
+            extent: [ (-pi * 6378137)*1.2, -pi * 6378137, (pi * 6378137)*1.2, pi * 6378137 ],
+            projection: this.projection
         })
 
         this.map = new ol.Map({

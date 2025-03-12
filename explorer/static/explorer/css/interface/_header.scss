@@ -1,11 +1,20 @@
+#header {
+    height: 6rem;
+    background-color: $interface-background;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex: unset;
+}
+
 #header-logo {
     font-family: 'Polsyh';
-    font-size: 64px;
+    font-size: 4rem;
     color: $main-color-extralight;
 
     user-select: none;
 }
 
 .header-module {
-    margin: auto 20px;
+    margin: auto 1rem;
 }

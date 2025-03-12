@@ -42,7 +42,7 @@ html, body {
     flex-direction: column;
     gap: $interface-margin;
 
-    transition: all .2s ease-in-out;
+    transition: all .2s ease-out;
 }
 
 #first-panel {
@@ -67,18 +67,7 @@ html, body {
     border-radius: $border-radius;
     overflow: auto;
 
-    transition: all .2s ease-in-out;
-}
-
-#header {
-    height: 6rem;
-
-    background-color: $interface-background;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    flex: unset;
+    transition: all .2s ease-out;
 }
 
 #taxonomy {

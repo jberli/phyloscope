@@ -493,7 +493,7 @@ class Taxon {
             }
 
             let stats = this.taxon.count.toLocaleString();
-            stats += ' (' + formatPercentage(this.taxon.percentage) + ')';
+            if (this.taxon.percentage) { stats += ' (' + formatPercentage(this.taxon.percentage) + ')'; }
             let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
             let swidth = calculateTextWidth(stats, getComputedStyle(statistics), .8);
     

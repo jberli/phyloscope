@@ -16,7 +16,7 @@ languages:
   available:
   - fr
   - en
-  current: fr
+  current: en
 texts:
   vernaculars:
     en: 'Other names:'
