@@ -1,6 +1,8 @@
 .cartography-button {
+    border-radius: 50%;
+
     & > svg {
-        color: $main-color-extradark;
+        color: $main-color-dark;
     }
 }
 
@@ -9,6 +11,10 @@
     bottom: 0;
     right: 0;
     margin: 1rem;
+
+    & > svg {
+        color: $main-color-dark;
+    }
 }
 
 .cartography-enlarge {
@@ -16,6 +22,32 @@
     top: 0;
     right: 0;
     margin: 1rem;
+}
+
+.cartography-basemap {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 1rem;
+    padding: .4rem;
+    border-radius: $border-radius;
+
+    background-color: $main-color-dark;
+    color: $main-color-light;
+
+    cursor: pointer;
+    user-select: none;
+    
+    transform: scale(1, 1);
+    transition: transform .2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.1, 1.1);
+    }
+
+    &.collapse {
+        transform: scale(0, 0);
+    }
 }
 
 .cartography-mask {

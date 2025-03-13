@@ -12,6 +12,8 @@
  * @param  {function} callback - Callback function.
  */
 function animateOpacity(layer, duration, fps, value, callback) {
+    callback = callback || function () {};
+    
     let opacity = layer.getOpacity();
     const step = (duration/1000)*fps;
     const delay = duration / step;

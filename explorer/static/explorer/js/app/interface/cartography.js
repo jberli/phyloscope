@@ -4,6 +4,7 @@
  */
 
 import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
+import { animateOpacity } from "../generic/map.js";
 import Widget from "./widget.js";
 
 /**
@@ -19,6 +20,8 @@ class Cartography extends Widget {
         super(app, parent, params);
         this.type = 'cartography';
         this.large = false;
+        this.baselayers = this.params.interface.cartography.baselayers;
+        this.baselayerindex = 0;
 
         // Boolean to flag if the map view is the same as the starting one
         this.origin = true;
@@ -36,17 +39,6 @@ class Cartography extends Widget {
         // Map DOM element
         this.mapdiv = makeDiv('map', 'ol-map');
         this.container.append(this.mapdiv);
-
-        // proj4.defs("ESRI:53078", "+proj=natearth2 +lon_0=0 +x_0=0 +y_0=0 +R=6371008.7714 +units=m +no_defs +type=crs");
-        // ol.proj.proj4.register(proj4);
-        // this.projection = new ol.proj.Projection({
-        //     code: 'ESRI:53078',
-        //     extent: [
-        //         -18019909.21177587, -9009954.605703328, 18019909.21177587,
-        //         9009954.605703328,
-        //     ],
-        //     worldExtent: [-179, -89.99, 179, 89.99],
-        // });
 
         this.projection = ol.proj.get('EPSG:3857');
 
@@ -70,6 +62,19 @@ class Cartography extends Widget {
                 removeClass(this.enlargeButton, 'collapse');
             });
         });
+        
+        // Create the button to change the base layer
+        this.baseLayerButton = makeDiv(null, 'cartography-basemap', this.baselayers[this.baselayerindex].name[this.params.languages.current]);
+        this.container.append(this.baseLayerButton);
+
+        this.swapping = false;
+        // Activate the button to center the map when clicked
+        this.baseLayerButton.addEventListener('click', () => {
+            if (!this.swapping) {
+                this.swapping = true;
+                this.cycleBaseLayer(() => { this.swapping = false; });
+            }
+        });
 
         // Create the button to center the map
         this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse');
@@ -83,7 +88,7 @@ class Cartography extends Widget {
                 this.range.listen = true;
             });
         });
-        
+
         // Display the button when moving the map
         this.listener = this.map.on('movestart', (e) => {
             if (this.range.listen) {
@@ -149,36 +154,52 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137)*1.2, -pi * 6378137, (pi * 6378137)*1.2, pi * 6378137 ],
+            extent: [ (-pi * 6378137) * 2, -pi * 6378137, (pi * 6378137) * 2, pi * 6378137 ],
             projection: this.projection
         })
 
+        this.baselayer = new ol.layer.Tile({
+            preload: Infinity,
+            source: new ol.source.XYZ({
+                url: 'http://localhost:8001/' + this.baselayers[this.baselayerindex].url + '/{z}/{x}/{y}.png',
+            }),
+            zIndex: 10
+        });
+
         this.map = new ol.Map({
             target: 'map',
-            layers: [ 
-                new ol.layer.Tile({
-                    preload: Infinity,
-                    source: new ol.source.WMTS({
-                        url: 'http://localhost:8080/geoserver/NE/gwc/service/wmts',
-                        layer: 'NE:basemap',
-                        matrixSet: 'WebMercatorQuad',
-                        format: 'image/jpeg',
-                        dimensions: [tileDimension, tileDimension],
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        wrapX: true,
-                    })
-                })
-            ],
+            layers: [ this.baselayer ],
             view: this.view,
             controls: ol.control.defaults.defaults({
                 zoom: false,
                 attribution: false,
                 rotate: false,
             })
+        });
+    }
+
+    cycleBaseLayer(callback) {
+        callback = callback || function () {};
+        this.baselayerindex += 1;
+        if (this.baselayerindex >= this.baselayers.length) { this.baselayerindex = 0; }
+        let baselayer = this.baselayers[this.baselayerindex];
+        this.baseLayerButton.innerHTML = baselayer.name[this.params.languages.current];
+
+        let newlayer = new ol.layer.Tile({
+            preload: Infinity,
+            source: new ol.source.XYZ({
+                url: 'http://localhost:8001/' + baselayer.url + '/{z}/{x}/{y}.png',
+            }),
+            zIndex: 9
+        });
+        this.map.addLayer(newlayer);
+
+        let transition = this.app.params.interface.transition;
+        animateOpacity(this.baselayer, transition, 60, 0, () => {
+            this.map.removeLayer(this.baselayer);
+            newlayer.setZIndex(10);
+            this.baselayer = newlayer;
+            callback();
         });
     }
 }
@@ -215,6 +236,8 @@ class Range {
      * @param {function} callback - Callback fired when the range is displayed on the map. 
      */
     set(r, callback) {
+        callback = callback || function () {};
+
         this.listen = false;
         addClass(this.cartography.centerButton, 'collapse');
 

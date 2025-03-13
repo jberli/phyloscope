@@ -65,7 +65,7 @@ html, body {
     flex: 1;
 
     border-radius: $border-radius;
-    overflow: auto;
+    overflow: hidden;
 
     transition: all .2s ease-out;
 }
@@ -95,7 +95,7 @@ html, body {
 }
 
 #cartography {
-
+    background-color: $main-color-light;
 }
 
 #statistics {

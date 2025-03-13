@@ -10,13 +10,30 @@ interface:
       transition:
         center: 500
         display: 200
+    baselayers:
+      - name:
+          en: Natural Earth 1
+          fr: Natural Earth 1
+        url: ne1
+      - name:
+          en: Natural Earth 2
+          fr: Natural Earth 2
+        url: ne2
+      - name:
+          en: Hypsometric Tints
+          fr: Teintes hypsométriques
+        url: hypso
+      - name:
+          en: Grayscale
+          fr: Niveau de gris
+        url: gray
   title: Phyloscope
   transition: 200
 languages:
   available:
   - fr
   - en
-  current: en
+  current: fr
 texts:
   vernaculars:
     en: 'Other names:'
