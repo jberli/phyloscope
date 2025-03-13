@@ -21,7 +21,9 @@ class Cartography extends Widget {
         this.type = 'cartography';
         this.large = false;
         this.baselayers = this.params.interface.cartography.baselayers;
-        this.baselayerindex = 0;
+        this.baselayerindex = 3;
+        let baselayer = this.baselayers[this.baselayerindex];
+        let basestyle = baselayer.style;
 
         // Boolean to flag if the map view is the same as the starting one
         this.origin = true;
@@ -49,7 +51,7 @@ class Cartography extends Widget {
         this.range = new Range(this, this.params);
 
         // Create the button to enlarge the map
-        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button button');
+        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button button ' + basestyle);
         addSVG(this.enlargeButton, new URL('/static/explorer/img/expand.svg', import.meta.url));
         this.container.append(this.enlargeButton);
 
@@ -64,7 +66,7 @@ class Cartography extends Widget {
         });
         
         // Create the button to change the base layer
-        this.baseLayerButton = makeDiv(null, 'cartography-basemap', this.baselayers[this.baselayerindex].name[this.params.languages.current]);
+        this.baseLayerButton = makeDiv(null, 'cartography-basemap ' + basestyle, baselayer.name[this.params.languages.current]);
         this.container.append(this.baseLayerButton);
 
         this.swapping = false;
@@ -77,7 +79,7 @@ class Cartography extends Widget {
         });
 
         // Create the button to center the map
-        this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse');
+        this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse ' + basestyle);
         addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
         this.container.append(this.centerButton);
 
@@ -154,7 +156,7 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137) * 2, -pi * 6378137, (pi * 6378137) * 2, pi * 6378137 ],
+            extent: [ (-pi * 6378137) * 2, (-pi * 6378137) * 0.8, (pi * 6378137) * 2, (pi * 6378137) * 0.9 ],
             projection: this.projection
         })
 
@@ -180,10 +182,12 @@ class Cartography extends Widget {
 
     cycleBaseLayer(callback) {
         callback = callback || function () {};
+        let formerstyle = this.baselayers[this.baselayerindex].style;
         this.baselayerindex += 1;
         if (this.baselayerindex >= this.baselayers.length) { this.baselayerindex = 0; }
         let baselayer = this.baselayers[this.baselayerindex];
         this.baseLayerButton.innerHTML = baselayer.name[this.params.languages.current];
+        if (formerstyle !== baselayer.style) { this.changeButtonStyle(formerstyle, baselayer.style); }
 
         let newlayer = new ol.layer.Tile({
             preload: Infinity,
@@ -201,6 +205,14 @@ class Cartography extends Widget {
             this.baselayer = newlayer;
             callback();
         });
+    }
+
+    changeButtonStyle(previous, style) {
+        let buttons = [ this.enlargeButton, this.centerButton, this.baseLayerButton ];
+        for (let i = 0; i < buttons.length; ++i) {
+            removeClass(buttons[i], previous);
+            addClass(buttons[i], style);
+        }
     }
 }
 
@@ -343,35 +355,12 @@ class Range {
      */
     display(callback) {
         let opacity = this.cartography.params.interface.cartography.range.opacity;
-        // this.layer.setOpacity(opacity);
-        // callback();
         this.opacity(opacity, callback);
     }
 
     opacity(value, callback) {
-        let opacity = this.layer.getOpacity();
         let duration = this.params.interface.cartography.range.transition.display;
-        const step = (duration/1000)*60;
-        const delay = duration / step;
-        const increment = (value - opacity) / step;
-        self = this;
-
-        let pass = 0;
-        function animate(c) {
-            setTimeout(() => {
-                opacity += increment;
-                if (opacity < 0) { opacity = 0 }
-                self.layer.setOpacity(opacity);
-                pass += 1;
-                if (pass < step) {
-                    animate(c);
-                } else {
-                    self.layer.setOpacity(value);
-                    c();
-                }
-            }, delay)
-        }
-        animate(() => { callback(); });
+        animateOpacity(this.layer, duration, 60, value, () => { callback(); })
     }
 }
 

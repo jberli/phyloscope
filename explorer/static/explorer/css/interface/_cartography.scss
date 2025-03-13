@@ -1,8 +1,12 @@
 .cartography-button {
-    border-radius: 50%;
-
-    & > svg {
-        color: $main-color-dark;
+    border-radius: 50%;   
+    &.dark {
+        background-color: $main-color-dark;
+        & > svg { color: $main-color-light; }
+    }
+    &.light {
+        background-color: $main-color-light;
+        & > svg { color: $main-color-dark; }
     }
 }
 
@@ -32,14 +36,14 @@
     padding: .4rem;
     border-radius: $border-radius;
 
-    background-color: $main-color-dark;
-    color: $main-color-light;
+    background-color: $main-color-light;
+    color: $main-color-dark;
 
     cursor: pointer;
     user-select: none;
     
     transform: scale(1, 1);
-    transition: transform .2s ease-in-out;
+    transition: all .2s ease-in-out;
 
     &:hover {
         transform: scale(1.1, 1.1);
@@ -47,6 +51,15 @@
 
     &.collapse {
         transform: scale(0, 0);
+    }
+
+    &.dark {
+        background-color: $main-color-dark;
+        color: $main-color-light;
+    }
+    &.light {
+        background-color: $main-color-light;
+        color: $main-color-dark;
     }
 }
 
