@@ -45,9 +45,9 @@ class Statistics extends Widget {
         // Initialize the chart dimensions
         const width = this.container.offsetWidth;
         const height = width;
-        const outer = height / 2;
-        const inner = outer * .5;
-        this.radius = outer;
+        this.outer = height / 2;
+        this.inner = this.outer * .5;
+        this.radius = this.outer;
 
         let taxon = this.app.updater.getTaxon();
         let name;
@@ -68,7 +68,7 @@ class Statistics extends Widget {
         this.chart.append(this.svg.node());
 
         // Set up the arc generator.
-        this.arc = d3.arc().innerRadius(inner).outerRadius(outer);
+        this.arc = d3.arc().innerRadius(this.inner).outerRadius(this.outer);
         // Set up the pie slice generator without sorting => important when children
         // will be inserted in place of their parent.
         this.pie = d3.pie().value(d => d.value).sort(null);
@@ -78,12 +78,12 @@ class Statistics extends Widget {
         this.parentgroup = this.svg.append("g");
         this.labels = this.svg.append("g");
 
-        var origin = this.slices.selectAll("path").data(this.pie(this.data), d => d.data.name);
+        origin = this.slices.selectAll("path").data(this.pie(this.data), d => d.data.name);
         let self = this;
 
         // Add the path using this helper function
         this.parentcircle = this.parentgroup.append('circle')
-            .attr('r', inner)
+            .attr('r', this.inner)
             .attr('fill', this.params.colors[this.current.typesorting])
             .attr("value", this.current.value)
             .style("cursor", "pointer")
@@ -92,14 +92,14 @@ class Statistics extends Widget {
             });
 
         this.parentlabel = this.parentgroup.append("g");       
-        this.wrapText(this.parentcircle, this.parentlabel, uppercaseFirstLetter(this.current.name));
+        this.wrapText(this.parentcircle, this.parentlabel, this.current.name);
 
         origin.enter()
             .append("path")
             // Fill the slice with the data color parameter.
             .attr("fill", d => d.data.color)
             .attr("d", this.arc)
-            .attr("value", d => d.data.value)
+            .attr("value", (d) => d.data.value)
             .style("cursor", "pointer")
             // Store the current slice value for the future transition animation.
             .each( function(d) { this._current = d })
@@ -108,15 +108,13 @@ class Statistics extends Widget {
                 self.app.updater.updateFromStatistics(d, 'grow');
             })
             .on("mouseenter", (event, d) => {
-                let str = uppercaseFirstLetter(d.data.name);
                 // + '<br>' + formatPercentage(d.data.percentage);
-                self.wrapText(self.parentcircle, self.parentlabel, str);
+                self.wrapText(self.parentcircle, self.parentlabel, d.data.name);
                 self.parentcircle.transition().duration(200)
                     .attr('fill', self.params.colors[d.data.typesorting])
             })
             .on("mouseleave", (event, d) => {
-                let str = uppercaseFirstLetter(self.current.name);
-                self.wrapText(self.parentcircle, self.parentlabel, str);
+                self.wrapText(self.parentcircle, self.parentlabel, self.current.name);
                 self.parentcircle.transition().duration(200)
                     .attr('fill', self.params.colors[self.current.typesorting])
             })
@@ -125,11 +123,10 @@ class Statistics extends Widget {
             .data(this.pie(this.data))
             .enter()
                 .append("text")
-                .text(function(d) {
-                    if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
-                })
+                .text(function(d) { if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }})
+                .attr("class", "slicelabels")
                 .attr("text-anchor", "middle")
-                .attr("font-size", '1.2rem')
+                .attr("font-size", '1.1rem')
                 .attr("transform", (d) => {
                     let [x, y] = this.arc.centroid(d)
                     let start = d.startAngle * 180 / Math.PI;
@@ -138,18 +135,29 @@ class Statistics extends Widget {
                     if (angle > 180) { angle -= 180 }
                     return `translate(${x}, ${y}) rotate(${angle - 90})`
                 })
-                .attr("dy", "0.2rem")
+                .attr("dy", "0.3rem")
                 .attr("pointer-events", "none")
                 .style('fill', 'white');
+
+        d3.selectAll("svg .slicelabels").each(function(d, i) {
+            let node = d3.select(this);
+            let name = node.text();
+            let length = node.node().getComputedTextLength();
+            while (length > (self.outer - self.inner) * 0.9) {
+                name = name.slice(0, name.length - 1);
+                node.text(name + '...');
+                length = node.node().getComputedTextLength();
+            }
+        });
     }
 
-    animate(newData, callback) {
+    animate(data, callback) {
         callback = callback || function () {};
-        if (newData === null) {
+        if (data === null) {
             this.loaded();
             callback();
         } else {
-            let c = this.prepareData(newData);
+            let c = this.prepareData(data);
             // Sort the children by descending value.
             c.sort((a, b) => b.value - a.value);
             // Clone the array to retrieve values
@@ -164,7 +172,7 @@ class Statistics extends Widget {
             });
             
             // Recreate the data.
-            let data = c.concat(this.data);
+            data = c.concat(this.data);
 
             // Regenerate the slices using the new data.
             let final = this.slices.selectAll("path").data(this.pie(data), d => d.data.name);
@@ -174,7 +182,7 @@ class Statistics extends Widget {
                 .append("path")
                 // Color them according to their color parameter.
                 .attr("fill", d => d.data.color)
-                .attr("value", d => d.data.value)
+                .attr("value", (d) => d.data.value)
                 .style("cursor", "pointer")
                 // Store the new current value after adding the children for the future transition.
                 .each( function(d) { this._current = d })
@@ -183,15 +191,13 @@ class Statistics extends Widget {
                     self.app.updater.updateFromStatistics(d, 'grow');
                 })
                 .on("mouseenter", (event, d) => {
-                    let str = uppercaseFirstLetter(d.data.name);
                     // + '<br>' + formatPercentage(d.data.percentage);
-                    self.wrapText(self.parentcircle, self.parentlabel, str);
+                    self.wrapText(self.parentcircle, self.parentlabel, d.data.name);
                     self.parentcircle.transition().duration(200)
                         .attr('fill', self.params.colors[d.data.typesorting])
                })
                 .on("mouseleave", (event, d) => {
-                    let str = uppercaseFirstLetter(self.current.name);
-                    self.wrapText(self.parentcircle, self.parentlabel, str);
+                    self.wrapText(self.parentcircle, self.parentlabel, self.current.name);
                     self.parentcircle.transition().duration(200)
                         .attr('fill', self.params.colors[self.current.typesorting])
                 });
@@ -221,8 +227,9 @@ class Statistics extends Widget {
                                 .text(function(d) {
                                     if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }
                                 })
+                                .attr("class", "slicelabels")
                                 .attr("text-anchor", "middle")
-                                .attr("font-size", '1.2rem')
+                                .attr("font-size", '1.1rem')
                                 .attr("transform", (d) => {
                                     let [x, y] = self.arc.centroid(d)
                                     let start = d.startAngle * 180 / Math.PI;
@@ -231,10 +238,21 @@ class Statistics extends Widget {
                                     if (angle > 180) { angle -= 180 }
                                     return `translate(${x}, ${y}) rotate(${angle - 90})`
                                 })
-                                .attr("dy", "0.2rem")
+                                .attr("dy", "0.3rem")
                                 .attr("pointer-events", "none")
                                 .style('fill', 'white')
                                 .style('opacity', 0);
+
+                        d3.selectAll("svg .slicelabels").each(function(d, i) {
+                            let node = d3.select(this);
+                            let name = node.text();
+                            let length = node.node().getComputedTextLength();
+                            while (length > (self.outer - self.inner) * 0.9) {
+                                name = name.slice(0, name.length - 1);
+                                node.text(name + '...');
+                                length = node.node().getComputedTextLength();
+                            }
+                        });
 
                         self.labels.selectAll("text")
                             .transition()
@@ -256,18 +274,11 @@ class Statistics extends Widget {
                         .attr("value", self.current.value)
 
                     d3.select(this)
-                        //.text(uppercaseFirstLetter(self.current.name))
                         .transition(250)
                         .style("opacity", 1);
 
-                    self.wrapText(
-                        self.parentcircle,
-                        d3.select(this),
-                        uppercaseFirstLetter(self.current.name)
-                    );
+                    self.wrapText(self.parentcircle, d3.select(this), self.current.name);
                 });
-
-                
 
             // Calculate the slices using the new data with zeroed parents.
             final = this.slices.selectAll("path").data(this.pie(data), d => d.data.name);
@@ -302,7 +313,7 @@ class Statistics extends Widget {
         let ratio = 0.8;
 
         let bbox = container.node().getBBox()
-        let words = text.split(/\s+/).reverse(),
+        let words = uppercaseFirstLetter(text).split(/\s+/).reverse(),
             word,
             line = [],
             wordNumber = words.length,

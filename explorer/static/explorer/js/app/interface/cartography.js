@@ -92,12 +92,16 @@ class Cartography extends Widget {
         });
 
         // Display the button when moving the map
-        this.listener = this.map.on('movestart', (e) => {
+        this.map.on('movestart', (e) => {
             if (this.range.listen) {
                 this.range.listen = false;
                 removeClass(this.centerButton, 'collapse');
             }            
         });
+
+        // this.map.on('moveend', (e) => {
+        //     console.log(this.view.getZoom());
+        // });
     }
 
     /**
