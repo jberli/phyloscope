@@ -10,8 +10,8 @@ class Updater {
     constructor(app, params) {
         this.app = app;
         this.params = params;
+
         this.updating = false;
-        this.widgets = 5;
 
         this.taxonomy;
         this.range;
@@ -47,25 +47,35 @@ class Updater {
         return this.taxonomy.description;
     }
 
+    loading() {
+        this.app.information.loading();
+        this.app.photography.loading();
+        this.app.statistics.loading();
+        this.app.taxonomy.loading();
+        this.app.cartography.loading();
+    }
+
+    loaded() {
+        this.app.information.loaded();
+        this.app.photography.loaded();
+        this.app.statistics.loaded();
+        this.app.taxonomy.loaded();
+        this.app.cartography.loaded();
+    }
+
     /**
      * This function is used to update the whole application.
      * @param {Integer} index - The taxon index. 
      * @param {String} type - The type of widget requesting the update.
      * @param {Function} callback - Callback function.
      */
-    update(index, type, callback) {
+    update(index, callback) {
         callback = callback || function () {};
         this.app.freeze();
+        this.loading();
         this.done = [];
 
-        this.app.information.loading();
-        this.app.photography.loading();
-        this.app.statistics.loading();
-        this.app.statistics.collapse();
-        this.app.taxonomy.loading();
-        this.app.taxonomy.collapse();
-
-        this.updateRange(index, () => { this.return(); });
+        this.updateRange(index, () => { this.return(callback); });
 
         ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
             this.taxonomy = r;
@@ -76,27 +86,139 @@ class Updater {
         });
     }
 
+    updateFromSearch(index, callback) {
+        callback = callback || function () {};
+        this.app.freeze();
+        this.loading();
+        this.done = [];
+        let transition = this.app.params.interface.transition;
+
+        if (this.getParent().id === index) {
+            this.taxonomy.children = this.taxonomy.siblings;
+            this.taxonomy.cindex = this.taxonomy.tindex;
+            this.taxonomy.siblings = this.taxonomy.parents;
+            this.taxonomy.tindex = this.taxonomy.pindex;
+
+            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+
+            this.updateRange(index, () => { this.return(callback); });
+            this.updateInformation(index, () => { this.return(callback); });
+            this.updatePhotography(() => { this.return(callback); });
+            this.app.taxonomy.regress();
+
+            let start = new Date();
+            ajaxGet('parents/' + this.params.languages.current + '/' + index, (r) => {
+                this.taxonomy.parents = r.parents;
+                this.taxonomy.pindex = r.pindex;
+
+                this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                    this.done.push('statistics');
+                    this.return(callback);
+                });
+
+                wait(transition - (new Date() - start), () => {
+                    this.app.taxonomy.parents.update();
+                    wait(10, () => {
+                        this.app.taxonomy.parents.reveal();
+                        this.app.taxonomy.loaded();
+                        this.done.push('taxonomy');
+                        this.return(callback);
+                    });
+                });
+            });
+        }
+
+        let displayed = this.inTaxonomy(index);
+
+        // Here, the wanted taxon is present in parents, siblings or children
+        if (displayed !== undefined) {
+            let [type, i] = displayed;
+            this.app.taxonomy[type].slideTo(i + 1);
+
+            if (type === 'children') {
+                this.taxonomy.cindex = i;
+                this.taxonomy.parents = this.taxonomy.siblings;
+                this.taxonomy.pindex = this.taxonomy.tindex;
+                this.taxonomy.siblings = this.taxonomy.children;
+                this.taxonomy.tindex = this.taxonomy.cindex;
+    
+                this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+    
+                this.updateRange(index, () => { this.return(callback); });
+                this.updateInformation(index, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+    
+                this.app.taxonomy.grow();
+                let start = new Date();
+                ajaxGet('children/' + this.params.languages.current + '/' + index, (r) => {
+                    this.taxonomy.children = r.children;
+                    this.taxonomy.cindex = 0;
+    
+                    this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                        this.done.push('statistics');
+                        this.return(callback);
+                    });
+    
+                    wait(transition - (new Date() - start), () => {
+                        this.app.taxonomy.children.update();
+                        wait(10, () => {
+                            this.app.taxonomy.children.reveal();
+                            this.app.taxonomy.loaded();
+                            this.done.push('taxonomy');
+                            this.return(callback);
+                        })
+                    })
+                });
+            }
+            else if (type === 'siblings') {
+                this.taxonomy.tindex = i;
+                this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+                this.updateRange(index, () => { this.return(callback); });
+                this.updateInformation(index, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+
+                let start = new Date();
+                ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
+                    this.taxonomy.children = r.children;
+                    this.taxonomy.cindex = 0;
+    
+                    this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                        this.done.push('statistics');
+                        this.return(callback);
+                    });
+    
+                    wait(transition - (new Date() - start), () => {
+                        this.app.taxonomy.updateChildren();
+                        this.app.taxonomy.loaded();
+                        this.done.push('taxonomy');
+                        this.return(callback);
+                    })
+                });
+            }
+        }
+        // Here, the wanted taxon is not present in parents, siblings or children
+        else {
+            this.app.taxonomy.collapse();
+            this.app.statistics.collapse();
+            this.update(index, callback);
+        }
+    }
+
     updateFromTaxonomy(index, type, newIndex, callback) {
         callback = callback || function () {};
         this.app.freeze();
+        this.loading();
         this.done = [];
-
-        this.app.information.loading();
-        this.app.photography.loading();
-        this.app.cartography.loading();
-        this.app.statistics.loading();
-        this.app.taxonomy.loading();
 
         let transition = this.app.params.interface.transition;
         if (type === 'siblings') {
             this.taxonomy.tindex = newIndex;
-            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
+            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
 
             this.updateRange(index, () => { this.return(callback); });
             this.updateInformation(index, () => { this.return(callback); });
             this.updatePhotography(() => { this.return(callback); });
 
-            // this.app.statistics.collapse();
             let start = new Date();
             ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
                 this.taxonomy.children = r.children;
@@ -121,7 +243,7 @@ class Updater {
             this.taxonomy.siblings = this.taxonomy.parents;
             this.taxonomy.tindex = this.taxonomy.pindex;
 
-            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
+            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
 
             this.updateRange(index, () => { this.return(callback); });
             this.updateInformation(index, () => { this.return(callback); });
@@ -129,7 +251,7 @@ class Updater {
 
             this.app.taxonomy.regress();
             let start = new Date();
-            ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
+            ajaxGet('parents/' + this.params.languages.current + '/' + index, (r) => {
                 this.taxonomy.parents = r.parents;
                 this.taxonomy.pindex = r.pindex;
 
@@ -150,13 +272,12 @@ class Updater {
             });
         }
         else if (type === 'children') {
-            let child = this.taxonomy.cindex;
             this.taxonomy.parents = this.taxonomy.siblings;
             this.taxonomy.pindex = this.taxonomy.tindex;
             this.taxonomy.siblings = this.taxonomy.children;
             this.taxonomy.tindex = this.taxonomy.cindex;
 
-            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
+            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
 
             this.updateRange(index, () => { this.return(callback); });
             this.updateInformation(index, () => { this.return(callback); });
@@ -164,7 +285,7 @@ class Updater {
 
             this.app.taxonomy.grow();
             let start = new Date();
-            ajaxGet('/children/' + this.params.languages.current + '/' + index, (r) => {
+            ajaxGet('children/' + this.params.languages.current + '/' + index, (r) => {
                 this.taxonomy.children = r.children;
                 this.taxonomy.cindex = 0;
 
@@ -194,18 +315,13 @@ class Updater {
         }
         else {
             this.app.freeze();
+            this.loading();
             this.done = [];
-    
-            this.app.information.loading();
-            this.app.photography.loading();
-            this.app.cartography.loading();
-            this.app.taxonomy.loading();
-            this.app.statistics.loading();
     
             let transition = this.app.params.interface.transition;
             if (type === 'grow') {
                 this.taxonomy.cindex = d.index;
-                let taxon = this.taxonomy.children[this.taxonomy.cindex];
+                let taxon = this.getChild();
                 let index = taxon.id;
 
                 this.app.statistics.current = this.app.statistics.prepare(taxon);
@@ -222,7 +338,7 @@ class Updater {
                 this.app.taxonomy.grow(this.taxonomy.cindex + 1);
     
                 let start = new Date();
-                ajaxGet('/children/' + this.params.languages.current + '/' + index, (r) => {
+                ajaxGet('children/' + this.params.languages.current + '/' + index, (r) => {
                     this.taxonomy.children = r.children;
                     this.taxonomy.cindex = 0;
     
@@ -243,7 +359,7 @@ class Updater {
                 });
             }
             else if (type === 'regress') {
-                let taxon = this.taxonomy.parents[this.taxonomy.pindex];
+                let taxon = this.getParent();
                 let index = taxon.id;
 
                 this.app.statistics.current = this.app.statistics.prepare(taxon);
@@ -260,7 +376,7 @@ class Updater {
                 this.app.taxonomy.regress();
     
                 let start = new Date();
-                ajaxGet('/parents/' + this.params.languages.current + '/' + index, (r) => {
+                ajaxGet('parents/' + this.params.languages.current + '/' + index, (r) => {
                     this.taxonomy.parents = r.parents;
                     this.taxonomy.pindex = r.pindex;
     
@@ -344,10 +460,21 @@ class Updater {
 
     return(callback) {
         callback = callback || function () {};
-        // console.log(this.done);
-        if (this.done.length >= this.widgets) {
+        if (this.done.length >= this.params.widgets) {
             this.app.unfreeze();
             callback();
+        }
+    }
+
+    inTaxonomy(index) {
+        // Checking if the taxon is present in the children, siblings or parents
+        for (let i = 0; i < this.taxonomy.children.length; ++i) {
+            let e = this.taxonomy.children[i];
+            if (index === e.id) { return ['children', i]; }
+        }
+        for (let i = 0; i < this.taxonomy.siblings.length; ++i) {
+            let e = this.taxonomy.siblings[i];
+            if (index === e.id) { return ['siblings', i]; }
         }
     }
 

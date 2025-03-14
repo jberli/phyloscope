@@ -43,6 +43,7 @@ class Information extends Widget {
     }
 
     searching(callback) {
+        callback = callback || function () {};
         // Hide the description
         this.description.hide();
         // Display the search bar and wait for the transition
@@ -54,6 +55,7 @@ class Information extends Widget {
     }
 
     describing(callback) {
+        callback = callback || function () {};
         // Empty the description widget
         this.description.clear();
         // Close the search bar
@@ -90,7 +92,7 @@ class Search {
         let self = this;
         this.searchbutton.addEventListener('click', (e) => {
             if (self.active) { this.information.describing(() => {}); }
-            else { this.information.searching(() => {}); }
+            else { this.information.searching(); }
         });
 
         this.input.addEventListener('input', (e) => {
@@ -108,7 +110,7 @@ class Search {
                     if (taxonList.length > 0) {
                         taxonList[0].click();
                     } else {
-                        this.information.describing(() => {});
+                        this.information.describing();
                     }
                 }
             }
@@ -225,11 +227,15 @@ class Search {
                         function activateTaxon(e) {
                             if (!self.information.freezed) {
                                 result.removeEventListener('click', activateTaxon);
-                                self.information.description.clear();
-                                // Deactivate search mode
-                                self.deactivate();
-                                // Update the application widgets
-                                self.information.app.updater.update(e.target.getAttribute('taxon'), self.information.type);
+                                let taxon = parseInt(e.target.getAttribute('taxon'));
+                                if (taxon !== self.information.app.updater.getTaxon().id) {
+                                    self.information.description.clear();
+                                    self.deactivate();
+                                    // Update the application widgets
+                                    self.information.app.updater.updateFromSearch(taxon);
+                                } else {
+                                    self.information.describing();
+                                }
                             }
                         }
                         result.addEventListener('click', activateTaxon);

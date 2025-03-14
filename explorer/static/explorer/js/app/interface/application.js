@@ -7,7 +7,6 @@ import { ajaxGet } from "../generic/ajax.js";
 import { addClass, removeClass, makeDiv, getColorsByClassNames, wait } from "../generic/dom.js";
 import Cartography from "./cartography.js";
 import Information from "./information.js";
-import Footer from "./footer.js";
 import Header from "./header.js";
 import Photography from "./photography.js";
 import Statistics from "./statistics.js";
@@ -26,6 +25,7 @@ class Application {
         // Retrieve the configuration parameters
         ajaxGet('configuration/', (params) => {
             this.params = params;
+            this.params.widgets = 5;
             this.params.colors = getColorsByClassNames(...Object.keys(this.params.typesorting));
 
             // Create the first, second and third column panel
@@ -50,11 +50,7 @@ class Application {
 
             // Set up the updater interface object
             this.updater = new Updater(this, this.params);
-            this.updater.update(this.params.taxonomy.current, 'application', () => {
-                console.log('updated');
-            });
-
-            this.widgets = 5;
+            this.updater.update(this.params.taxonomy.current);
 
             // Reveal the interface
             this.loaded();
