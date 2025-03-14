@@ -48,6 +48,7 @@ class Statistics extends Widget {
         this.outer = height / 2;
         this.inner = this.outer * .5;
         this.radius = this.outer;
+        this.minarc = 0.06;
 
         let taxon = this.app.updater.getTaxon();
         let name;
@@ -69,6 +70,7 @@ class Statistics extends Widget {
 
         // Set up the arc generator.
         this.arc = d3.arc().innerRadius(this.inner).outerRadius(this.outer);
+        this.pointarc = d3.arc().innerRadius(this.inner * 0.9);
         // Set up the pie slice generator without sorting => important when children
         // will be inserted in place of their parent.
         this.pie = d3.pie().value(d => d.value).sort(null);
@@ -78,13 +80,17 @@ class Statistics extends Widget {
         this.parentgroup = this.svg.append("g");
         this.labels = this.svg.append("g");
 
+        this.currentactive = 0;
+
         origin = this.slices.selectAll("path").data(this.pie(this.data), d => d.data.name);
         let self = this;
 
         // Add the path using this helper function
         this.parentcircle = this.parentgroup.append('circle')
             .attr('r', this.inner)
-            .attr('fill', this.params.colors[this.current.typesorting])
+            .attr('fill', 'currentColor')
+            .attr('class', 'statistics-parent')
+            // .attr('fill', this.params.colors[this.current.typesorting])
             .attr("value", this.current.value)
             .style("cursor", "pointer")
             .on("click", (event, d) => {
@@ -97,6 +103,7 @@ class Statistics extends Widget {
         origin.enter()
             .append("path")
             // Fill the slice with the data color parameter.
+            .attr("class", "pieslice")
             .attr("fill", d => d.data.color)
             .attr("d", this.arc)
             .attr("value", (d) => d.data.value)
@@ -107,23 +114,32 @@ class Statistics extends Widget {
             .on("click", (event, d) => {
                 self.app.updater.updateFromStatistics(d, 'grow');
             })
-            .on("mouseenter", (event, d) => {
+            .on("mouseenter", function(event, d) {
                 // + '<br>' + formatPercentage(d.data.percentage);
+                let obj = d3.select(this);
+                obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                 self.wrapText(self.parentcircle, self.parentlabel, d.data.name);
-                self.parentcircle.transition().duration(200)
-                    .attr('fill', self.params.colors[d.data.typesorting])
+                // self.parentcircle.transition().duration(200)
+                //     .attr('fill', self.params.colors[d.data.typesorting]);
+
+                self.currentactive = self.app.taxonomy.children.getActive();
+                self.app.taxonomy.children.slideTo(d.index + 1);
             })
-            .on("mouseleave", (event, d) => {
+            .on("mouseleave", function(event, d) {
+                let obj = d3.select(this)
+                obj.attr("fill", d3.color(obj.attr("fill")).brighter(.5));
                 self.wrapText(self.parentcircle, self.parentlabel, self.current.name);
-                self.parentcircle.transition().duration(200)
-                    .attr('fill', self.params.colors[self.current.typesorting])
+                // self.parentcircle.transition().duration(200)
+                //     .attr('fill', self.params.colors[self.current.typesorting]);
+
+                self.app.taxonomy.children.slideTo(self.currentactive);
             })
 
         this.labels.selectAll()
             .data(this.pie(this.data))
             .enter()
                 .append("text")
-                .text(function(d) { if ((d.endAngle - d.startAngle) > 0.1) { return uppercaseFirstLetter(d.data.name); }})
+                .text((d) => { if ((d.endAngle - d.startAngle) > this.minarc) { return uppercaseFirstLetter(d.data.name); }})
                 .attr("class", "slicelabels")
                 .attr("text-anchor", "middle")
                 .attr("font-size", '1.1rem')
@@ -149,6 +165,21 @@ class Statistics extends Widget {
                 length = node.node().getComputedTextLength();
             }
         });
+
+        // this.activechild = this.parentgroup.append('circle').attr('r', '.2rem').attr('fill', 'white');
+       
+        // d3.selectAll("svg .pieslice").each(function(slice, i) {
+        //     if (i === 0) {
+        //         self.activechild.attr("transform", (d) => {
+        //             let [x, y] = self.arc.centroid(slice);
+        //             let distance = Math.sqrt(x**2 + y**2);
+        //             let t = (self.inner * 0.9) / distance;
+        //             let x1 = t*x;
+        //             let y1 = t*y;
+        //             return `translate(${x1}, ${y1})`
+        //         })
+        //     }
+        // });
     }
 
     animate(data, callback) {
@@ -190,16 +221,24 @@ class Statistics extends Widget {
                 .on("click", function (event, d) {
                     self.app.updater.updateFromStatistics(d, 'grow');
                 })
-                .on("mouseenter", (event, d) => {
+                .on("mouseenter", function(event, d) {
                     // + '<br>' + formatPercentage(d.data.percentage);
+                    let obj = d3.select(this)
+                    obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                     self.wrapText(self.parentcircle, self.parentlabel, d.data.name);
-                    self.parentcircle.transition().duration(200)
-                        .attr('fill', self.params.colors[d.data.typesorting])
+                    // self.parentcircle.transition().duration(200)
+                    //     .attr('fill', self.params.colors[d.data.typesorting])
+                        
+                    self.currentactive = self.app.taxonomy.children.getActive();
+                    self.app.taxonomy.children.slideTo(d.index + 1);
                })
-                .on("mouseleave", (event, d) => {
+                .on("mouseleave", function(event, d) {
+                    let obj = d3.select(this)
+                    obj.attr("fill", d3.color(obj.attr("fill")).brighter(.5));
                     self.wrapText(self.parentcircle, self.parentlabel, self.current.name);
-                    self.parentcircle.transition().duration(200)
-                        .attr('fill', self.params.colors[self.current.typesorting])
+                    // self.parentcircle.transition().duration(200)
+                    //     .attr('fill', self.params.colors[self.current.typesorting])
+                    self.app.taxonomy.children.slideTo(self.currentactive);
                 });
             
             // Remove the parent that has been replaced.
@@ -269,9 +308,8 @@ class Statistics extends Widget {
                 .duration(250)
                 .style("opacity", 0)
                 .on("end", function(d) {
-                    self.parentgroup.transition(250)
-                        .attr('fill', self.params.colors[self.current.typesorting])
-                        .attr("value", self.current.value)
+                    // self.parentcircle.transition(250)
+                    //     .attr("value", self.current.value)
 
                     d3.select(this)
                         .transition(250)
@@ -311,7 +349,6 @@ class Statistics extends Widget {
 
     wrapText(container, label, text) {
         let ratio = 0.8;
-
         let bbox = container.node().getBBox()
         let words = uppercaseFirstLetter(text).split(/\s+/).reverse(),
             word,
@@ -322,11 +359,12 @@ class Statistics extends Widget {
             dy = .2,
             t = label.text(null)
                 .append('text')
+                .attr("class", "statistics-parent-label")
+                .attr('fill', 'currentColor')
                 .attr("text-anchor", "middle")
                 .attr("font-size", '1.8rem')
                 .attr("pointer-events", "none")
                 .attr('dy', dy + 'rem')
-                .style('fill', 'white');
 
         while (word = words.pop()) {
             line.push(word);
@@ -337,11 +375,12 @@ class Statistics extends Widget {
                     t.text(line.join(' '));
                     line = [word];
                     t = label.append('text')
+                        .attr("class", "statistics-parent-label")
+                        .attr('fill', 'currentColor')
                         .attr("text-anchor", "middle")
                         .attr("font-size", '1.8rem')
                         .attr("pointer-events", "none")
                         .attr('dy', ++lineNumber * lineHeight + dy + 'rem')
-                        .style('fill', 'white')
                         .text(word);
                 }
             }
@@ -356,6 +395,10 @@ class Statistics extends Widget {
                 return dyl - (size / 2) + 'rem';
             })
         }
+    }
+
+    activateChildren(children) {
+        console.log('change children');
     }
 
     color(length) {

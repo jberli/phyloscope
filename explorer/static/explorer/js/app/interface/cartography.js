@@ -21,7 +21,7 @@ class Cartography extends Widget {
         this.type = 'cartography';
         this.large = false;
         this.baselayers = this.params.interface.cartography.baselayers;
-        this.baselayerindex = 3;
+        this.baselayerindex = 0;
         let baselayer = this.baselayers[this.baselayerindex];
         let basestyle = baselayer.style;
 

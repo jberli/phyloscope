@@ -90,21 +90,26 @@ class Updater {
         let transition = this.app.params.interface.transition;
         if (type === 'siblings') {
             this.taxonomy.tindex = newIndex;
+            this.app.statistics.current = this.app.statistics.prepare(this.taxonomy.siblings[this.taxonomy.tindex]);
 
             this.updateRange(index, () => { this.return(callback); });
             this.updateInformation(index, () => { this.return(callback); });
             this.updatePhotography(() => { this.return(callback); });
 
-            this.app.statistics.collapse();
+            // this.app.statistics.collapse();
             let start = new Date();
             ajaxGet('children/' + this.params.languages.current + '/' + index + '/', (r) => {
                 this.taxonomy.children = r.children;
                 this.taxonomy.cindex = 0;
+
+                this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                    this.done.push('statistics');
+                    this.return(callback);
+                });
+
                 wait(transition - (new Date() - start), () => {
                     this.app.taxonomy.updateChildren();
-                    this.app.taxonomy.unfreeze();
                     this.app.taxonomy.loaded();
-                    this.updateStatistics(() => { this.return(callback); });
                     this.done.push('taxonomy');
                     this.return(callback);
                 })
@@ -137,7 +142,6 @@ class Updater {
                     this.app.taxonomy.parents.update();
                     wait(10, () => {
                         this.app.taxonomy.parents.reveal();
-                        this.app.taxonomy.unfreeze();
                         this.app.taxonomy.loaded();
                         this.done.push('taxonomy');
                         this.return(callback);
@@ -173,7 +177,6 @@ class Updater {
                     this.app.taxonomy.children.update();
                     wait(10, () => {
                         this.app.taxonomy.children.reveal();
-                        this.app.taxonomy.unfreeze();
                         this.app.taxonomy.loaded();
                         this.done.push('taxonomy');
                         this.return(callback);
@@ -232,7 +235,6 @@ class Updater {
                         this.app.taxonomy.children.update();
                         wait(10, () => {
                             this.app.taxonomy.children.reveal();
-                            this.app.taxonomy.unfreeze();
                             this.app.taxonomy.loaded();
                             this.done.push('taxonomy');
                             this.return(callback);
@@ -271,7 +273,6 @@ class Updater {
                         this.app.taxonomy.parents.update();
                         wait(10, () => {
                             this.app.taxonomy.parents.reveal();
-                            this.app.taxonomy.unfreeze();
                             this.app.taxonomy.loaded();
                             this.done.push('taxonomy');
                             this.return(callback);

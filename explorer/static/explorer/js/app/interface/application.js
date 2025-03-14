@@ -73,12 +73,14 @@ class Application {
         this.information.freeze();
         this.photography.freeze();
         this.taxonomy.freeze();
+        this.statistics.freeze();
     }
 
     unfreeze() {
         this.information.unfreeze();
         this.photography.unfreeze();
         this.taxonomy.unfreeze();
+        this.statistics.unfreeze();
     }
 
     enlarge(widget, callback) {

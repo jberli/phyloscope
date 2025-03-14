@@ -13,9 +13,9 @@
         transform: scale(0, 0);
     }
 
-    & > svg {
-        color: $main-color-mediumlight;
-    }
+    // & > svg {
+    //     color: $main-color-light;
+    // }
 }
 
 .statistics-mask {
@@ -27,6 +27,11 @@
     margin: 1rem;
 }
 
-.statistics-dummy {
-    
+svg .statistics-parent {
+    color: $main-color-dark;
+}
+
+svg .statistics-parent-label {
+    font-weight: bold;
+    color: $main-color-light;
 }
