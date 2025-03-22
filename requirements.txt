@@ -10,6 +10,5 @@ pyyaml
 pause
 pyinaturalist
 wikipedia-api
-lxml
-fastkml
+beautifulsoup4
 shapely

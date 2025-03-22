@@ -9,7 +9,7 @@ from explorer.api.taxonomy import get_taxon, get_children, get_parents, get_desc
 def initialization(request):
     return render(request, 'explorer/index.html', {
             'name': 'phyloscope',
-            'fullname': 'phyloscope',
+            'fullname': 'Phyloscope',
             'version': 1.0,
         })
 

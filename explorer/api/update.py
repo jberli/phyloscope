@@ -288,7 +288,7 @@ def update(initialize=False, limit=None, batch=30, maximum=10000):
     # Get the current date
     start = datetime.datetime.now()
     whistory.write(f'{utype}\t')
-    whistory.write(f'start:{start.strftime('%Y-%m-%d %H:%M:%S')}\t')
+    whistory.write(f'{start.strftime('%Y-%m-%d %H:%M:%S')}\t')
     whistory.close()
     # Set the file name with the current date
     filename = f'taxonomy'
@@ -363,9 +363,9 @@ def update(initialize=False, limit=None, batch=30, maximum=10000):
     finally:
         end = datetime.datetime.now()
         whistory = open(f'{directory}/history', 'a')
-        whistory.write(f'end:{end.strftime('%Y-%m-%d %H:%M:%S')}\t')
+        whistory.write(f'{end.strftime('%Y-%m-%d %H:%M:%S')}\t')
         elapsed = end - start
-        whistory.write(f'elapsed:{elapsed}\t')
+        whistory.write(f'{elapsed}\t')
         whistory.write(status)
         whistory.close()
 

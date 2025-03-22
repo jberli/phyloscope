@@ -2,7 +2,6 @@ import random
 import requests
 import yaml
 import wikipediaapi as wiki
-import xml.dom.minidom
 
 from explorer.models import Taxon
 from explorer.api.tools.models import clean_tables

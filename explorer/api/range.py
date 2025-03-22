@@ -2,6 +2,8 @@ import os
 import pause
 import requests
 import datetime
+import json
+
 import xml.dom.minidom
 from lxml.etree import XMLParser
 from concurrent.futures import ThreadPoolExecutor
@@ -10,10 +12,10 @@ from fastkml.utils import find_all
 from fastkml import kml, Placemark
 from progress.bar import IncrementalBar
 from django.contrib.gis.geos import GEOSGeometry
-from shapely import Polygon, MultiPolygon, make_valid, from_wkt, union, simplify, force_2d
+from shapely import Polygon, MultiPolygon, make_valid, from_wkt, union, simplify, force_2d, from_geojson
 
 from explorer.models import Taxon
-from explorer.api.tools.files import get_row_number
+from explorer.api.tools.files import get_row_number, download
 
 def get_range(index):
     """
@@ -30,6 +32,52 @@ def get_range(index):
         'range': r,
         'typesorting': t
     }
+
+def update_range():
+    """
+    Fetch taxon range and update the database.
+    """
+    urlmeta = 'https://inaturalist-open-data.s3.us-east-1.amazonaws.com/geomodel/geopackages/latest/metadata.json'
+    urlgpkg = 'https://inaturalist-open-data.s3.us-east-1.amazonaws.com/geomodel/geopackages/latest/iNaturalist_geomodel'
+
+    directory = '.update'
+    tmp = 'range'
+    pathtmp = f'{directory}/{tmp}'
+    if not os.path.exists(pathtmp):
+        os.makedirs(pathtmp)
+    
+    # Download the metadata file
+    r = requests.get(urlmeta)
+    # Parse to json
+    metadata = json.loads(r.content)
+
+    # Loop through each collection
+    for k, info in metadata['collections'].items():
+        if info['archives'] > 1:
+            for i in range(1, info['archives'] + 1):
+                download(f'{urlgpkg}_{k}_{i}.gpkg', f'{k}_{i}.gpkg')
+        else:
+            download(f'{urlgpkg}_{k}.gpkg', f'{k}.gpkg')
+
+    # rangeurl = 'https://inaturalist-open-data.s3.us-east-1.amazonaws.com/geomodel/geojsons/latest/'
+    # taxon = Taxon.objects.all()
+
+    # for t in taxon:
+    #     print(t.tid)
+        
+
+    # r = requests.get(f'{rangeurl}3048.geojson')
+    # geom = from_geojson(r.content)
+    # print(type(geom))
+
+
+
+
+
+
+
+
+
 
 def get_iucn_range(index):
     """
@@ -52,7 +100,7 @@ def get_iucn_range(index):
         finally:
             return string
 
-def update_range(all=False):
+def update_range1(all=False):
     """
     Fetch taxon range from iNaturalist and update the database.
     """
@@ -79,7 +127,7 @@ def update_range(all=False):
                     taxon.present = False
                     taxon.save()
                     continue
-                
+
                 p = list(find_all(k, of_type=Placemark))
                 if len(p) > 0:
                     geom = GEOSGeometry(p[0].geometry.wkt, srid=4326)
@@ -92,7 +140,7 @@ def update_range(all=False):
                         pass
                     else:
                         add = False
-                    
+
                     if add:
                         geom = GEOSGeometry(s.wkt, srid=3857)
                         taxon.range = geom
@@ -113,7 +161,7 @@ def update_range(all=False):
     after = datetime.datetime.now()
     print(f' in {str(after - before)}')
 
-def update_ancestry_range():
+def update_ancestry_range1():
     """
     Update the range of species ancestry.
     """
@@ -142,7 +190,7 @@ def update_ancestry_range():
                                     geometry = union(make_valid(geometry), make_valid(s))
                                 except:
                                     pass
-            
+
             if geometry is not None:
                 part = []
                 if geometry.geom_type == 'Polygon':
@@ -152,7 +200,7 @@ def update_ancestry_range():
                         if p.geom_type == 'Polygon':
                             interiors = []
                             for interior in p.interiors:
-                                poly = Polygon(interior)    
+                                poly = Polygon(interior)
                                 if poly.area > min_holes:
                                     interiors.append(interior)
                             temp_poly = Polygon(p.exterior.coords, holes=interiors)
