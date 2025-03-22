@@ -10,5 +10,5 @@ pyyaml
 pause
 pyinaturalist
 wikipedia-api
-beautifulsoup4
 shapely
+geopandas

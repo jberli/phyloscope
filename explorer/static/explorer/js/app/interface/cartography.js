@@ -133,6 +133,11 @@ class Cartography extends Widget {
         });
     }
 
+    hideRange(callback) {
+        callback = callback || function () {};
+        this.range.hide(callback);
+    }
+
     /**
      * Animate the view using the parameters.
      * @param {Array} center - Target coordinates center.
@@ -169,7 +174,7 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137) * 2, (-pi * 6378137) * 0.8, (pi * 6378137) * 2, (pi * 6378137) * 0.9 ],
+            extent: [ (-pi * 6378137) * 3, (-pi * 6378137) * 0.9, (pi * 6378137) * 3, (pi * 6378137) * 0.9 ],
             projection: this.projection
         })
 
@@ -259,6 +264,7 @@ class Range {
             }),
             updateWhileAnimating: true,
             updateWhileInteracting: true,
+            zIndex: 100
         });
         this.cartography.map.addLayer(this.layer);
     }
@@ -381,7 +387,7 @@ class Range {
 
     opacity(value, callback) {
         let duration = this.params.interface.cartography.range.transition.display;
-        animateOpacity(this.layer, duration, 60, value, () => { callback(); })
+        animateOpacity(this.layer, duration, 60, value, callback)
     }
 }
 

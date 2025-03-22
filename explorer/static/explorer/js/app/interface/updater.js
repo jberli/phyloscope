@@ -443,6 +443,7 @@ class Updater {
     updateRange(index, callback) {
         callback = callback || function () {};
         let transition = this.params.interface.cartography.range.transition.display;
+        this.app.cartography.hideRange();
         let start = new Date();
         ajaxGet('range/' + index + '/', (r) => {
             this.range = r;
@@ -488,9 +489,11 @@ class Updater {
 
     inTaxonomy(index) {
         // Checking if the taxon is present in the children, siblings or parents
-        for (let i = 0; i < this.taxonomy.children.length; ++i) {
-            let e = this.taxonomy.children[i];
-            if (index === e.id) { return ['children', i]; }
+        if (this.taxonomy.children !== null) {
+            for (let i = 0; i < this.taxonomy.children.length; ++i) {
+                let e = this.taxonomy.children[i];
+                if (index === e.id) { return ['children', i]; }
+            }
         }
         for (let i = 0; i < this.taxonomy.siblings.length; ++i) {
             let e = this.taxonomy.siblings[i];

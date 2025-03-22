@@ -67,7 +67,6 @@ class Statistics extends Widget {
         this.outer = height / 2;
         this.inner = this.outer * .5;
         this.radius = this.outer;
-
         this.children = true;
 
         this.minarc = 0.06;
@@ -78,7 +77,13 @@ class Statistics extends Widget {
         else { name = taxon.scientific; }
         this.current = { name: name, taxon: taxon.id, value: taxon.count, typesorting: taxon.typesorting }
 
-        this.data = this.prepareData(this.app.updater.getLevel('children'));
+        let children = this.app.updater.getLevel('children');
+        if (children === null) {
+            this.children = false;
+            this.data = [{name:'', taxon: 0, value: 1, percentage: 100, typesorting: null}]
+        } else {
+            this.data = this.prepareData(children);
+        }
 
         let color = this.color(this.data.length)
 
@@ -127,7 +132,10 @@ class Statistics extends Widget {
             .append("path")
             // Fill the slice with the data color parameter.
             .attr("class", "pieslice")
-            .attr("fill", d => d.data.color)
+            .attr("fill", (d) => {
+                if (this.children) { return d.data.color; }
+                else { return 'currentColor'; }
+            })
             .attr("d", this.arc)
             .attr("value", (d) => d.data.value)
             .style("cursor", "pointer")
