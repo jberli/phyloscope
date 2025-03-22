@@ -10,6 +10,39 @@
     }
 }
 
+.cartography-help-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 1rem;
+
+    &.dark {
+        & > .help {
+            background-color: $main-color-dark;
+            & > svg { color: $main-color-light; }
+        }
+        & > .loader-container {
+            & > .loader {
+                border: 1.4rem solid $main-color-dark;
+                border-color: $main-color-dark transparent $main-color-dark transparent;
+            }
+        }
+    }
+
+    &.light {
+        & > .help {
+            background-color: $main-color-light;
+            & > svg { color: $main-color-dark; }
+        }
+        & > .loader-container {
+            & > .loader {
+                border: 1.4rem solid $main-color-light;
+                border-color: $main-color-light transparent $main-color-light transparent;
+            }
+        }
+    }
+}
+
 .cartography-center {
     position: absolute;
     bottom: 0;
@@ -25,7 +58,19 @@
     position: absolute;
     top: 0;
     right: 0;
-    margin: 1rem;
+    height: 1.5rem;
+    width: 1.5rem;
+
+    border-radius: 0 $border-radius 0 0;
+    clip-path: polygon(0% 0%, 100% 0, 100% 100%);
+
+    cursor: pointer;
+    transition: background-color .1s ease-in-out, transform .1s ease-in-out;
+    transform: scale(1, 1);
+
+    &:hover {
+        transform: scale(1.1, 1.1);
+    }
 }
 
 .cartography-basemap {
@@ -43,7 +88,7 @@
     user-select: none;
     
     transform: scale(1, 1);
-    transition: all .2s ease-in-out;
+    transition: all .1s ease-in-out;
 
     &:hover {
         transform: scale(1.1, 1.1);

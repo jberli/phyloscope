@@ -50,7 +50,7 @@ class Application {
 
             // Set up the updater interface object
             this.updater = new Updater(this, this.params);
-            this.updater.update(this.params.taxonomy.current);
+            this.updater.initialize(this.params.taxonomy.current);
 
             // Reveal the interface
             this.loaded();

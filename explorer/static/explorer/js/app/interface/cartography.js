@@ -32,12 +32,6 @@ class Cartography extends Widget {
         this.container = makeDiv('cartography', 'sub-panel');
         this.parent.append(this.container);
 
-        // Mask and loader
-        this.mask = makeDiv(null, 'cartography-mask mask');
-        this.loader = makeDiv(null, 'cartography-loader loader');
-        this.mask.append(this.loader)
-        this.container.append(this.mask);
-
         // Map DOM element
         this.mapdiv = makeDiv('map', 'ol-map');
         this.container.append(this.mapdiv);
@@ -51,18 +45,13 @@ class Cartography extends Widget {
         this.range = new Range(this, this.params);
 
         // Create the button to enlarge the map
-        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button button ' + basestyle);
-        addSVG(this.enlargeButton, new URL('/static/explorer/img/expand.svg', import.meta.url));
+        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button ' + basestyle);
         this.container.append(this.enlargeButton);
 
         // Activate the button to enlarge the map when clicked
         this.enlargeButton.addEventListener('click', () => {
-            addClass(this.enlargeButton, 'collapse');
-            this.app.enlarge(this, () => {
-                if (this.large) { addSVG(this.enlargeButton, new URL('/static/explorer/img/compress.svg', import.meta.url)); }
-                else { addSVG(this.enlargeButton, new URL('/static/explorer/img/expand.svg', import.meta.url)); }
-                removeClass(this.enlargeButton, 'collapse');
-            });
+            addClass(this.app.taxonomy.ancestry.container, 'initialize');
+            this.app.enlarge(this, () => { removeClass(this.app.taxonomy.ancestry.container, 'initialize'); });
         });
         
         // Create the button to change the base layer
@@ -102,17 +91,37 @@ class Cartography extends Widget {
         // this.map.on('moveend', (e) => {
         //     console.log(this.view.getZoom());
         // });
+
+        // Mask and loader
+        this.mask = makeDiv(null, 'cartography-mask mask');
+        this.container.append(this.mask);
+
+        this.helpcontainer = makeDiv(null, 'cartography-help-container help-container '  + basestyle);
+        this.help = makeDiv(null, 'button help');
+        addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
+
+        this.loader = makeDiv(null, 'loader-container');
+        this.loadersymbol = makeDiv(null, 'loader');
+        this.loader.append(this.loadersymbol);
+        this.helpcontainer.append(this.help, this.loader);
+        this.container.append(this.helpcontainer);
     }
 
     /**
      * Display the loader on the widget and block interractions.
      */
-    loading() { removeClass(this.mask, 'loaded'); }
+    loading() {
+        removeClass(this.mask, 'loaded');
+        removeClass(this.loader, 'loaded');
+    }
 
     /**
      * Hide the loader and allow interractions.
      */
-    loaded() { addClass(this.mask, 'loaded'); }
+    loaded() {
+        addClass(this.mask, 'loaded');
+        addClass(this.loader, 'loaded');
+    }
 
     /**
      * Update the range on the map.
@@ -164,6 +173,14 @@ class Cartography extends Widget {
             projection: this.projection
         })
 
+        // this.physical = new ol.layer.Tile({
+        //     preload: Infinity,
+        //     source: new ol.source.XYZ({
+        //         url: 'http://localhost:8001/nefr/{z}/{x}/{y}.png',
+        //     }),
+        //     zIndex: 11
+        // });
+
         this.baselayer = new ol.layer.Tile({
             preload: Infinity,
             source: new ol.source.XYZ({
@@ -212,7 +229,7 @@ class Cartography extends Widget {
     }
 
     changeButtonStyle(previous, style) {
-        let buttons = [ this.enlargeButton, this.centerButton, this.baseLayerButton ];
+        let buttons = [ this.enlargeButton, this.centerButton, this.baseLayerButton, this.helpcontainer ];
         for (let i = 0; i < buttons.length; ++i) {
             removeClass(buttons[i], previous);
             addClass(buttons[i], style);

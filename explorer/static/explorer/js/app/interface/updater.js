@@ -64,12 +64,12 @@ class Updater {
     }
 
     /**
-     * This function is used to update the whole application.
+     * This function is used to initialize the whole application.
      * @param {Integer} index - The taxon index. 
      * @param {String} type - The type of widget requesting the update.
      * @param {Function} callback - Callback function.
      */
-    update(index, callback) {
+    initialize(index, callback) {
         callback = callback || function () {};
         this.app.freeze();
         this.loading();
@@ -82,7 +82,7 @@ class Updater {
             this.updateInformation(null, () => { this.return(callback); });
             this.updatePhotography(() => { this.return(callback); });
             this.updateTaxonomy(() => { this.return(callback); });
-            this.updateStatistics(() => { this.return(callback); });
+            this.initializeStatistics(() => { this.return(callback); });
         });
     }
 
@@ -198,9 +198,21 @@ class Updater {
         }
         // Here, the wanted taxon is not present in parents, siblings or children
         else {
+            this.app.freeze();
             this.app.taxonomy.collapse();
-            this.app.statistics.collapse();
-            this.update(index, callback);
+            this.loading();
+            this.done = [];
+
+            this.updateRange(index, () => { this.return(callback); });
+
+            ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
+                this.taxonomy = r;
+                this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+                this.updateInformation(null, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+                this.updateTaxonomy(() => { this.return(callback); });
+                this.updateStatistics(() => { this.return(callback); });
+            });
         }
     }
 
@@ -443,6 +455,14 @@ class Updater {
         });
     }
 
+    initializeStatistics(callback) {
+        callback = callback || function () {};
+        this.app.statistics.initialize(() => {
+            this.done.push('statistics');
+            callback();
+        });
+    }
+
     updateStatistics(callback) {
         callback = callback || function () {};
         this.app.statistics.update(() => {
@@ -477,65 +497,6 @@ class Updater {
             if (index === e.id) { return ['siblings', i]; }
         }
     }
-
-
-
-    
-
-
-
-
-    
-
-    fullUpdate(index) {
-        this.updateRange(index);
-        this.app.information.loading();
-        this.app.photography.loading();
-        this.app.taxonomy.loading();
-        this.app.statistics.loading();
-        
-        ajaxGet('taxon/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-            this.app.params.taxonomy = r;
-            this.app.information.update();
-            this.app.photography.update();
-            this.app.taxonomy.update();
-            this.app.statistics.update();
-        });
-    }
-
-    taxonomyUpdate(index) {
-        this.updateRange(index);
-        this.app.information.loading();
-        this.app.photography.loading();
-        this.app.photography.update();
-
-        ajaxGet('description/' + this.app.params.languages.current + '/' + index + '/', (r) => {
-            this.app.params.taxonomy.description = r.values;
-            this.app.information.update();
-        });
-    }
-
-    // updateRange(index) {
-    //     let self = this;
-    //     function display(r) {
-    //         self.app.params.range = r;
-    //         self.app.cartography.update(() => {
-    //             self.app.taxonomy.active = true;
-    //         });
-    //     }
-
-    //     let start = new Date();
-    //     this.app.cartography.range.remove(() => {
-    //         ajaxGet('range/' + index + '/', (r) => {
-    //             let end = new Date();
-    //             let elapsed = end - start;
-    //             let transition = this.params.interface.cartography.range.transition.display;
-    //             if (elapsed < transition) {
-    //                 wait(transition - elapsed, () => { display(r) })
-    //             } else { display(r); }
-    //         });
-    //     })
-    // }
 }
 
 export default Updater;

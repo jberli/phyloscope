@@ -1,3 +1,10 @@
+.statistics-help-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 1rem;
+}
+
 .statistics-chart {
     height: calc(100% - 4rem);
     width: calc(100% - 4rem);
@@ -12,10 +19,6 @@
     &.collapse {
         transform: scale(0, 0);
     }
-
-    // & > svg {
-    //     color: $main-color-light;
-    // }
 }
 
 .statistics-mask {

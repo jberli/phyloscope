@@ -1,9 +1,37 @@
-.loader {
-    width: .8rem;
-    height: .8rem;
+.help-container {
+    height: 2rem;
+    width: 2rem;
+}
+
+.help {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
     border-radius: 50%;
-    border: .4rem solid #fff;
-    border-color: #fff transparent #fff transparent;
+}
+
+.loader-container {
+    width: 2rem;
+    height: 2rem;
+    transform: scale(1, 1);
+    transition: all .5s ease-in-out;
+    &.loaded {
+        transform: scale(0, 0);
+    }
+}
+
+.loader {
+    position: absolute;
+    top: -.4rem;
+    left: -.4rem;
+    z-index: 1;
+
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    border: 1.4rem solid $main-color-light;
+    border-color: $main-color-light transparent $main-color-light transparent;
     animation: rotationcw 1.2s linear infinite;
 }
 
@@ -22,7 +50,8 @@
     align-items: center;
     pointer-events: all;
 
-    transition: opacity .2s;
+    transition: opacity .2s ease-in-out;
+
     &.loaded {
         opacity: 0;
         pointer-events: none;
@@ -47,7 +76,7 @@
     cursor: pointer;
     
     transform: scale(1, 1);
-    transition: all .2s ease-in-out;
+    transition: transform .1s ease-in-out, background-color .2s ease-in-out;
 
     background-color: $main-color-light;
 
@@ -60,7 +89,7 @@
     }
 
     & > svg {
-        transition: color .2s ease-in-out;
+        transition: color .1s ease-in-out;
         color: $main-color-dark;
         height: 2rem;
         width: 2rem;
@@ -72,5 +101,14 @@
         & > svg {
             color: $main-color-light;
         }
+    }
+
+    &.dark {
+        background-color: $main-color-dark;
+        & > svg { color: $main-color-light; }
+    }
+    &.light {
+        background-color: $main-color-light;
+        & > svg { color: $main-color-dark; }
     }
 }

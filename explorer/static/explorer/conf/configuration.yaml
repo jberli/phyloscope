@@ -1,4 +1,6 @@
 interface:
+  title: Phyloscope
+  transition: 200
   cartography:
     maxzoom: 6
     start:
@@ -31,19 +33,24 @@ interface:
           fr: Niveau de gris
         url: gray
         style: light
-  title: Phyloscope
-  transition: 200
 languages:
   available:
-  - fr
-  - en
+    fr:
+      locale: fr-FR
+      name: Français
+    en:
+      locale: en-GB
+      name: English
   current: fr
 texts:
   vernaculars:
     en: 'Other names:'
     fr: 'Autres noms :'
+  statistics:
+    en: ''
+    fr: ''
 taxonomy:
-  current: 3
+  current: 2715
 photography:
   url: https://inaturalist-open-data.s3.amazonaws.com/photos/
 typesorting:

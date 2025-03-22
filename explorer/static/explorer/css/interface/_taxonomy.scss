@@ -11,15 +11,6 @@ $taxonomy-margin: 2rem;
     align-items: start;
 }
 
-.taxonomy-loader {
-    margin: 1rem;
-}
-
-.taxonomy-ancestry {
-    height: 4rem;
-    width: 100%;
-}
-
 .taxonomy-levels {
     height: calc(100% - (4rem + 2 * #{$taxonomy-margin}));
     margin: $taxonomy-margin calc(#{$taxonomy-margin} - 1rem);
@@ -234,103 +225,94 @@ $taxonomy-margin: 2rem;
     transition: all .2s ease-in-out;
 }
 
+.taxonomy-ancestry-container {
+    height: 2rem;
+    margin: 1rem 1rem 0 1rem;
 
+    display: flex;
+    align-items: center;
+}
 
+.taxonomy-help-container {
+    position: relative;
+}
 
+.taxonomy-ancestry {
+    width: calc(100% - 3rem);
+    margin-right: 1rem;
+    display: flex;
+    justify-content: start;
+    flex-wrap: nowrap;
+    
+    transition: transform .1s ease-out;
+    user-select: none;
 
+    &.initialize > .taxonomy-ancestor {
+        & > .taxonomy-ancestor-label {
+            transition: none;
+        }
+    }
+}
 
+.taxonomy-ancestor {
+    position: relative;
+    color: $main-color-extralight;
 
-// $taxonomy-panel-background: $side-panel-background;
-// $taxonomy-entry-background: $interface-foreground;
+    margin-right: -5px;
+    transition: all .1s ease-out;
+    transform: scale(1, 1);
 
-// $taxonomy-font-dark: $font-color-dark;
-// $taxonomy-font-light: $font-color-light;
+    &:first-child > .taxonomy-ancestor-label {
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+        clip-path: polygon(calc(100% - .8rem) 0%, 100% 50%, calc(100% - .8rem) 100%, 0% 100%, 0% 0%);
+    }
 
-// #taxonomy-container {
-//     display: flex;
-//     flex-direction: column;
-//     margin: 20px;
-//     width: 530px;
-//     &.collapse {
-//         & > .taxonomy-ancestry-container {
-//             transform: translate(calc(-100% - 20px));
-//         }
-//         & > .taxonomy-levels-container {
-//             transform: translate(calc(100% + 20px));
-//         }
-//     }
-// }
+    &.small > .taxonomy-ancestor-label {
+        &:hover + .taxonomy-ancestor-tooltip {
+            transform: translate(-50%, 0) scale(1, 1);
+        }
+    }
 
-// .taxonomy-ancestry-container {
-//     display: flex;
-//     justify-content: start;
-//     flex-wrap: nowrap;
-//     width: fit-content;
-//     margin-bottom: 20px;
-//     font-size: 13px;
-//     height: 35px;
-//     transition: transform .1s ease-out;
+    &.collapse {
+        transform: scale(0, 0);
+    }
+}
 
-//     -webkit-user-select: none;
-//     -moz-user-select: none;
-//     -ms-user-select: none;
-//     user-select: none;
-// }
+.taxonomy-ancestor-label {
+    font-size: 1rem;
+    height: 2rem;
+    width: 0;
+    line-height: 2rem;
+    border-radius: $border-radius;
 
-// .taxonomy-ancestry {
-//     position: relative;
-//     color: $taxonomy-font-light;
-//     margin-right: -5px;
-//     transition: all .1s linear;
-//     transform: scale(1, 1);
-//     &:first-child > .taxonomy-ancestry-label {
-//         border-top-left-radius: 4px;
-//         border-bottom-left-radius: 4px;
-//         clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 0% 0%);
-//     }
-//     &.small > .taxonomy-ancestry-label {
-//         &:hover + .taxonomy-ancestry-tooltip {
-//             transform: translate(-50%, 0) scale(1, 1);
-//         }
-//     }
-// }
+    text-align: center;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    clip-path: polygon(calc(100% - .8rem) 0%, 100% 50%, calc(100% - .8rem) 100%, 0% 100%, .8rem 50%, 0% 0%);
+    cursor: pointer;
+    overflow: hidden;
+    
+    transition: all .2s ease-out;
+}
 
-// .taxonomy-ancestry-label {
-//     line-height: 35px;
-//     height: 35px;
-//     text-overflow: ellipsis;
-//     text-wrap: nowrap;
-//     clip-path: polygon(calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 0% 100%, 10px 50%, 0% 0%);
-//     cursor: pointer;
-//     border-radius: 4px;
-//     transition: transform .1s linear;
-//     overflow: hidden;
-//     text-align: center;
-// }
+.taxonomy-ancestor-tooltip {
+    position: absolute;
+    font-size: 1rem;
 
-// .taxonomy-ancestry-tooltip {
-//     position: absolute;
-//     top: -32px;
-//     z-index: 2;
-//     line-height: 20px;
-//     height: 20px;
-//     left: 50%;
-//     transform: translate(-50%, 0) scale(0, 0);
-//     white-space: nowrap;
-//     padding: 5px 20px;
-//     border-radius: 4px;
-//     overflow: hidden;
-//     transition: transform .1s linear;
-// }
+    top: 2.8rem;
+    z-index: 2;
 
+    line-height: 1.5rem;
+    padding: 0 .3rem;
+    left: 50%;
+    
+    white-space: nowrap;
+    border-radius: $border-radius;
 
+    overflow: hidden;
 
-// .taxonomy-levels-main {
-//     > .taxonomy-entry-container > .taxonomy-entry.active {
-//         outline-width: 5px;
-//         box-shadow: 0 0 3px 5px $interface-shadows-dark;
-//     }
-// }
-
-
-
+    transform-origin: 50%;
+    transform: translate(-50%, -50%) scale(0, 0);
+    transition: all .1s linear;
+}
