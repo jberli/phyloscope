@@ -198,6 +198,7 @@ class PhotoContainer {
      * @param {string} size - Size of the photograph (small, medium, large, original). 
      */
     setImage(photo, size) {
+        if (this.label !== undefined) { this.label.remove(); }
         this.license = makeDiv(null, 'photography-license', photo.license);
         this.link = makeDiv(null, 'photography-link');
         addSVG(this.link, new URL('/static/explorer/img/link.svg', import.meta.url));
