@@ -198,6 +198,14 @@ class PhotoContainer {
      * @param {string} size - Size of the photograph (small, medium, large, original). 
      */
     setImage(photo, size) {
+        this.license = makeDiv(null, 'photography-license', photo.license);
+        this.link = makeDiv(null, 'photography-link');
+        addSVG(this.link, new URL('/static/explorer/img/link.svg', import.meta.url));
+        this.label = document.createElement('a');
+        this.label.href = 'https://www.inaturalist.org/photos/' + photo.id;
+        this.label.setAttribute('target', '_blank');
+        this.label.append(this.license, this.link);
+
         // If an image has already been set, remove it
         if (this.image !== undefined) { this.image.remove(); }
 
@@ -206,7 +214,7 @@ class PhotoContainer {
         // Load the photograph from iNaturalist servers
         loadImage(this.image).then(() => { this.loaded(); });
 
-        this.container.append(this.image);
+        this.container.append(this.image, this.label);
         // Activate the adjustment interaction
         this.adjust();
     }
@@ -214,6 +222,7 @@ class PhotoContainer {
     setSVG(svg) {
         // If an image has already been set, remove it
         if (this.image !== undefined) { this.image.remove(); }
+        if (this.label !== undefined) { this.label.remove(); }
 
         this.image = makeDiv(null, 'photo-svg');
         addSVG(this.image, new URL('/static/explorer/img/iconic/' + svg + '.svg', import.meta.url), () => { this.loaded(); })

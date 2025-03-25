@@ -22,7 +22,7 @@ def get_taxon_information(obj, lang):
                 extension = p.extension
                 if extension is not None:
                     if len(extension) > 0:
-                        photo = { "id": p.pid, "default": default, "extension": extension }
+                        photo = { "id": p.pid, "default": default, "extension": extension, "license": p.license }
                         if default:
                             photos.insert(0, photo)
                         else:
