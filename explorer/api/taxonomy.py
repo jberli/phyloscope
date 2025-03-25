@@ -41,7 +41,8 @@ def get_taxon_information(obj, lang):
             'level': obj.level,
             'count': obj.count_species,
             'percentage': obj.percentage_parent,
-            'photographs': photos
+            'photographs': photos,
+            'iconic': obj.iconic,
         }
 
 def get_taxon_description(language, taxon):

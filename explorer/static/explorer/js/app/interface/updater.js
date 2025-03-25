@@ -24,7 +24,11 @@ class Updater {
     }
 
     getParent() {
-        return this.taxonomy.parents[this.taxonomy.pindex];
+        if (this.taxonomy.parents === null) {
+            return null
+        } else {
+            return this.taxonomy.parents[this.taxonomy.pindex];
+        }
     }
 
     getChild() {
@@ -92,42 +96,47 @@ class Updater {
         this.loading();
         this.done = [];
         let transition = this.app.params.interface.transition;
+        let parent = this.getParent();
 
-        if (this.getParent().id === index) {
-            this.taxonomy.children = this.taxonomy.siblings;
-            this.taxonomy.cindex = this.taxonomy.tindex;
-            this.taxonomy.siblings = this.taxonomy.parents;
-            this.taxonomy.tindex = this.taxonomy.pindex;
+        if (this.app.information.search.active) { this.app.information.describing(); }
 
-            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
-
-            this.updateRange(index, () => { this.return(callback); });
-            this.updateInformation(index, () => { this.return(callback); });
-            this.updatePhotography(() => { this.return(callback); });
-            this.app.taxonomy.regress();
-
-            let start = new Date();
-            ajaxGet('parents/' + this.params.languages.current + '/' + index, (r) => {
-                this.taxonomy.parents = r.parents;
-                this.taxonomy.pindex = r.pindex;
-
-                this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
-                    this.done.push('statistics');
-                    this.return(callback);
-                });
-
-                wait(transition - (new Date() - start), () => {
-                    this.app.taxonomy.parents.update();
-                    wait(10, () => {
-                        this.app.taxonomy.parents.reveal();
-                        this.app.taxonomy.loaded();
-                        this.done.push('taxonomy');
+        if (parent !== null) {
+            if (parent.id === index) {
+                this.taxonomy.children = this.taxonomy.siblings;
+                this.taxonomy.cindex = this.taxonomy.tindex;
+                this.taxonomy.siblings = this.taxonomy.parents;
+                this.taxonomy.tindex = this.taxonomy.pindex;
+    
+                this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+    
+                this.updateRange(index, () => { this.return(callback); });
+                this.updateInformation(index, () => { this.return(callback); });
+                this.updatePhotography(() => { this.return(callback); });
+                this.app.taxonomy.regress();
+    
+                let start = new Date();
+                ajaxGet('parents/' + this.params.languages.current + '/' + index, (r) => {
+                    this.taxonomy.parents = r.parents;
+                    this.taxonomy.pindex = r.pindex;
+    
+                    this.app.statistics.animate(this.app.updater.taxonomy.children, () => {
+                        this.done.push('statistics');
                         this.return(callback);
                     });
+    
+                    wait(transition - (new Date() - start), () => {
+                        this.app.taxonomy.parents.update();
+                        wait(10, () => {
+                            this.app.taxonomy.parents.reveal();
+                            this.app.taxonomy.loaded();
+                            this.done.push('taxonomy');
+                            this.return(callback);
+                        });
+                    });
                 });
-            });
+            }
         }
-
+        
         let displayed = this.inTaxonomy(index);
 
         // Here, the wanted taxon is present in parents, siblings or children
@@ -221,6 +230,8 @@ class Updater {
         this.app.freeze();
         this.loading();
         this.done = [];
+
+        if (this.app.information.search.active) { this.app.information.describing(); }
 
         let transition = this.app.params.interface.transition;
         if (type === 'siblings') {
@@ -321,6 +332,8 @@ class Updater {
 
     updateFromStatistics(d, type, callback) {
         callback = callback || function () {};
+
+        if (this.app.information.search.active) { this.app.information.describing(); }
 
         if (type === 'regress' && this.taxonomy.parents === null) {
             callback();

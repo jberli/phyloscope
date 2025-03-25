@@ -10,14 +10,86 @@
     }
 }
 
-.cartography-help-container {
+.cartography-button-display-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 1rem;
+
+    height: 2rem;
+    width: 3.4rem;
+    border-radius: 2rem;
+
+    display: flex;
+    justify-content: start;
+    align-items: center;
+
+    cursor: pointer;
+    transform: scale(1, 1);
+    transition: background .1s ease-in-out, transform .2s ease-in-out;
+
+    &.dark {
+        &:not(.active) {
+            background-color: $main-color-dark;
+        }
+        & > .cartography-button-display-slider {
+            background-color: $main-color-light;
+        }
+        &.deactivated {
+            background-color: $main-color-mediumdark;
+            cursor: default;
+            & > .cartography-button-display-slider {
+                background-color: $main-color-mediumlight;
+            }
+        }
+    }
+    &.light {
+        &:not(.active) {
+            background-color: $main-color-light;
+        }
+
+        & > .cartography-button-display-slider {
+            background-color: $main-color-dark;
+        }
+        &.deactivated {
+            background-color: $main-color-mediumlight;
+            cursor: default;
+            & > .cartography-button-display-slider {
+                background-color: $main-color-mediumdark;
+            }
+        }
+    }
+
+    &.active > .cartography-button-display-slider {
+        transform: translateX(100%);
+    }
+
+    &.collapse {
+        transform: scale(0, 0);
+    }
+}
+
+.cartography-button-display-slider {
+    height: 1.4rem;
+    width: 1.4rem;
+    border-radius: 1.4rem;
+    transition: transform .1s ease-in-out;
+    margin: .3rem;
+
+    & > svg {
+        height: 1.4rem;
+        width: 1.4rem;
+    }
+}
+
+.cartography-button-help-container {
     position: absolute;
     top: 0;
     left: 0;
     margin: 1rem;
 
     &.dark {
-        & > .help {
+        & > .button-help {
             background-color: $main-color-dark;
             & > svg { color: $main-color-light; }
         }
@@ -30,7 +102,7 @@
     }
 
     &.light {
-        & > .help {
+        & > .button-help {
             background-color: $main-color-light;
             & > svg { color: $main-color-dark; }
         }
@@ -45,7 +117,7 @@
 
 .cartography-center {
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
     margin: 1rem;
 
@@ -54,31 +126,14 @@
     }
 }
 
-.cartography-enlarge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 1.5rem;
-    width: 1.5rem;
-
-    border-radius: 0 $border-radius 0 0;
-    clip-path: polygon(0% 0%, 100% 0, 100% 100%);
-
-    cursor: pointer;
-    transition: background-color .1s ease-in-out, transform .1s ease-in-out;
-    transform: scale(1, 1);
-
-    &:hover {
-        transform: scale(1.1, 1.1);
-    }
-}
-
 .cartography-basemap {
     position: absolute;
     bottom: 0;
     left: 0;
     margin: 1rem;
-    padding: .4rem;
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 .4rem;
     border-radius: $border-radius;
 
     background-color: $main-color-light;

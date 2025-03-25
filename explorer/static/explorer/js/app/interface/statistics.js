@@ -26,8 +26,8 @@ class Statistics extends Widget {
         this.chart = makeDiv(null, 'statistics-chart collapse');
         this.container.append(this.chart);
 
-        this.helpcontainer = makeDiv(null, 'statistics-help-container help-container');
-        this.help = makeDiv(null, 'button help');
+        this.helpcontainer = makeDiv(null, 'statistics-button-help-container button-help-container');
+        this.help = makeDiv(null, 'button button-help');
         addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
 
         this.loader = makeDiv(null, 'loader-container');
@@ -49,15 +49,10 @@ class Statistics extends Widget {
     }
 
     update(callback) {
-        if (this.app.updater.taxonomy.children) {
-            this.animate(this.app.updater.getLevel('children'), () => {
-                this.loaded();
-                callback();
-            });
-        } else {
+        this.animate(this.app.updater.getLevel('children'), () => {
             this.loaded();
             callback();
-        }
+        });
     }
 
     create() {
@@ -220,6 +215,7 @@ class Statistics extends Widget {
             c = this.prepareData(data);
             // Sort the children by descending value.
             c.sort((a, b) => b.value - a.value);
+            this.currentactive = this.app.updater.taxonomy.cindex + 1;
         }
 
         // Clone the array to retrieve values

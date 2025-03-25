@@ -19,7 +19,7 @@ class Information extends Widget {
 
         // Mask and loader
         this.mask = makeDiv(null, 'information-mask mask');
-        this.loader = makeDiv(null, 'information-loader loader');
+        this.loader = makeDiv(null, 'information-loader loader-center');
         this.mask.append(this.loader)
         this.container.append(this.mask);
 

@@ -5,6 +5,7 @@ class Taxon(models.Model):
     parent = models.ForeignKey('self', models.DO_NOTHING, blank=True, null=True, related_name='children')
     level = models.FloatField(db_column='level', blank=False, null=False)
     rank = models.CharField(db_column='rank', max_length=50, blank=False, null=False)
+    iconic = models.CharField(db_column='iconic', max_length=50, blank=True, null=True)
     name = models.CharField(db_column='name', max_length=200, blank=False, null=False)
     status = models.CharField(db_column='iucn', max_length=2, blank=True, null=True)
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)

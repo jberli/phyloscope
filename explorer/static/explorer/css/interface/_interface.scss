@@ -9,7 +9,6 @@
 @import '_cartography.scss';
 @import '_statistics.scss';
 @import '_photography.scss';
-@import '_footer.scss';
 
 html, body {
     margin: 0;
@@ -23,98 +22,14 @@ html, body {
     width: 100%;
 
     display: flex;
+    background-color: $main-color-light;
     gap: $interface-margin;
-
-    &.cartography {
-        & > #first-panel { flex: 3; }
-        & > #second-panel { flex: 2; }
-        & > .panel > #cartography { flex: 2; }
-    }
 }
 
 #application-mask {
     background-color: $interface-background;
     z-index: 200;
 }
-
-.panel {
-    display: flex;
-    flex-direction: column;
-    gap: $interface-margin;
-
-    transition: all .2s ease-out;
-}
-
-#first-panel {
-    flex: 2;
-    margin: $interface-margin 0 $interface-margin $interface-margin;
-}
-
-#second-panel {
-    flex: 3;
-    margin: $interface-margin 0;
-}
-
-#third-panel {
-    flex: 2;
-    margin: $interface-margin $interface-margin $interface-margin 0;
-}
-
-.sub-panel {
-    position: relative;
-    flex: 1;
-
-    border-radius: $border-radius;
-    overflow: hidden;
-
-    transition: all .2s ease-out;
-}
-
-#taxonomy {
-    background-color: $interface-background;
-}
-
-#information {
-    font-family: 'Cantarell';
-    color: $interface-foreground;
-
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-#photography {
-    flex: 3;
-    display: flex;
-}
-
-#footer {
-    flex: 1;
-    max-height: 8rem;
-    background-color: $interface-background;
-}
-
-#cartography {
-    background-color: $main-color-light;
-}
-
-#statistics {
-    flex: 4;
-    background-color: $interface-background;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #content-container {
     height: 100%;
@@ -270,7 +185,6 @@ html, body {
     background-color: $form; 
     outline-color: $form;
 }
-
 
 svg.stateofmatter { color: $stateofmatter; }
 svg.kingdom { color: $kingdom; }

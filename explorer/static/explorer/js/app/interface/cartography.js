@@ -19,18 +19,51 @@ class Cartography extends Widget {
     constructor(app, parent, params) {
         super(app, parent, params);
         this.type = 'cartography';
-        this.large = false;
         this.baselayers = this.params.interface.cartography.baselayers;
         this.baselayerindex = 0;
         let baselayer = this.baselayers[this.baselayerindex];
-        let basestyle = baselayer.style;
-
-        // Boolean to flag if the map view is the same as the starting one
-        this.origin = true;
 
         // Create DOM elements
         this.container = makeDiv('cartography', 'sub-panel');
         this.parent.append(this.container);
+
+        this.resizercontainer = makeDiv(null, 'panel-resizer-container collapse');
+        this.resizer = makeDiv(null, 'panel-resizer');
+        this.resizercontainer.append(this.resizer);
+        this.container.append(this.resizercontainer);
+        wait(10, () => { removeClass(this.resizercontainer, 'collapse'); })
+
+        let self = this;
+        this.resizer.addEventListener('mousedown', () => {
+            function moving(f) {
+                addClass(self.app.taxonomy.ancestry.container, 'initialize');
+                addClass(self.app.information.container, 'resizing');
+
+                let height = self.app.container.offsetHeight;
+                let width = self.app.container.offsetWidth;
+                
+                let hperc = 100 * f.clientY / height;
+                if (hperc > 20 && hperc < 80) {
+                    self.app.information.container.style.flex = hperc + '%';
+                    self.container.style.flex = (100 - hperc) + '%';
+                }
+
+                let wperc = (100 * f.clientX / width);
+                if (wperc > 20 && wperc < 50) {
+                    self.app.first.style.flex = wperc + '%';
+                    self.app.second.style.flex = (70 - wperc) + '%';
+                }
+            }
+            function exit() {
+                document.removeEventListener('mousemove', moving);
+                document.removeEventListener('mouseup', exit);
+                removeClass(self.app.taxonomy.ancestry.container, 'initialize');
+                removeClass(self.app.information.container, 'resizing');
+            }
+            document.addEventListener('mousemove', moving);
+            document.addEventListener('mouseup', exit);
+        })
+
 
         // Map DOM element
         this.mapdiv = makeDiv('map', 'ol-map');
@@ -43,19 +76,9 @@ class Cartography extends Widget {
 
         // Create the taxon range object
         this.range = new Range(this, this.params);
-
-        // Create the button to enlarge the map
-        this.enlargeButton = makeDiv(null, 'cartography-enlarge cartography-button ' + basestyle);
-        this.container.append(this.enlargeButton);
-
-        // Activate the button to enlarge the map when clicked
-        this.enlargeButton.addEventListener('click', () => {
-            addClass(this.app.taxonomy.ancestry.container, 'initialize');
-            this.app.enlarge(this, () => { removeClass(this.app.taxonomy.ancestry.container, 'initialize'); });
-        });
         
         // Create the button to change the base layer
-        this.baseLayerButton = makeDiv(null, 'cartography-basemap ' + basestyle, baselayer.name[this.params.languages.current]);
+        this.baseLayerButton = makeDiv(null, 'cartography-basemap ' + this.getBaseStyle(), baselayer.name[this.params.languages.current]);
         this.container.append(this.baseLayerButton);
 
         this.swapping = false;
@@ -67,37 +90,12 @@ class Cartography extends Widget {
             }
         });
 
-        // Create the button to center the map
-        this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse ' + basestyle);
-        addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
-        this.container.append(this.centerButton);
-
-        // Activate the button to center the map when clicked
-        this.centerButton.addEventListener('click', () => {
-            addClass(this.centerButton, 'collapse');
-            this.range.center(() => {
-                this.range.listen = true;
-            });
-        });
-
-        // Display the button when moving the map
-        this.map.on('movestart', (e) => {
-            if (this.range.listen) {
-                this.range.listen = false;
-                removeClass(this.centerButton, 'collapse');
-            }            
-        });
-
-        // this.map.on('moveend', (e) => {
-        //     console.log(this.view.getZoom());
-        // });
-
         // Mask and loader
         this.mask = makeDiv(null, 'cartography-mask mask');
         this.container.append(this.mask);
 
-        this.helpcontainer = makeDiv(null, 'cartography-help-container help-container '  + basestyle);
-        this.help = makeDiv(null, 'button help');
+        this.helpcontainer = makeDiv(null, 'cartography-button-help-container button-help-container '  + this.getBaseStyle());
+        this.help = makeDiv(null, 'button button-help');
         addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
 
         this.loader = makeDiv(null, 'loader-container');
@@ -234,11 +232,15 @@ class Cartography extends Widget {
     }
 
     changeButtonStyle(previous, style) {
-        let buttons = [ this.enlargeButton, this.centerButton, this.baseLayerButton, this.helpcontainer ];
+        let buttons = [ this.centerButton, this.baseLayerButton, this.helpcontainer, this.displayButton ];
         for (let i = 0; i < buttons.length; ++i) {
             removeClass(buttons[i], previous);
             addClass(buttons[i], style);
         }
+    }
+
+    getBaseStyle() {
+        return this.baselayers[this.baselayerindex].style;
     }
 }
 
@@ -253,9 +255,21 @@ class Range {
     constructor(cartography, params) {
         this.cartography = cartography;
         this.params = params;
+        this.typesorting;
         
-        // Flag to see if the centering button should be displayed
-        this.listen = false;
+        // Flag to see if the range is currently activated
+        this.active = true;
+        // Flag to see if the map should listen to map changes
+        this.listening = false;
+        // Flag to see if the map has been moved since recentering
+        this.moved = false;
+        // Flag to see if the map is currently in the default view
+        this.default = true;
+        // Flag to see if the geometry of the range exists
+        this.geometry = false;
+
+        // Flag to avoid double activation of the range
+        this.transition = false;
 
         // Create and add the layer
         this.layer = new ol.layer.Vector({
@@ -267,34 +281,75 @@ class Range {
             zIndex: 100
         });
         this.cartography.map.addLayer(this.layer);
+
+        let basestyle = this.cartography.getBaseStyle();
+
+        // Create the button to center the map
+        this.centerButton = makeDiv(null, 'cartography-center cartography-button button collapse ' + basestyle);
+        addSVG(this.centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
+
+        // Create the button to activate the range
+        this.activateButton = makeDiv(null, 'cartography-button-display-container active ' + basestyle);
+        this.activateButtonSlider = makeDiv(null, 'cartography-button-display-slider');
+        this.activateButton.append(this.activateButtonSlider);
+
+        // Activate the button to center the map when clicked
+        this.centerButton.addEventListener('click', () => {
+            addClass(this.centerButton, 'collapse');
+            this.listening = false;
+            this.center(() => {
+                this.moved = false;
+                this.listening = true;
+            });
+        });
+
+        // Activate of deactivate the range on click
+        this.activateButton.addEventListener('click', () => {
+            if (this.active) { this.deactivate(); }
+            else { this.activate(); }
+        });
+
+        // Display the centering button when moving the map
+        this.cartography.map.on('movestart', (e) => {
+            this.default = false;
+            this.moved = true;
+            if (this.listening) {
+                this.listening = false;
+                removeClass(this.centerButton, 'collapse');
+            }
+        });
+
+        this.cartography.container.append(this.centerButton, this.activateButton);
     }
 
     /**
      * 
-     * @param {Object} r - The range to display on the map as a KML file along with its typesorting.
+     * @param {Object} r - The range to display on the map as a WKT geometry along with its typesorting.
      * @param {function} callback - Callback fired when the range is displayed on the map. 
      */
     set(r, callback) {
         callback = callback || function () {};
 
-        this.listen = false;
-        addClass(this.cartography.centerButton, 'collapse');
+        this.listening = false;
+        addClass(this.centerButton, 'collapse');
+        removeClass(this.activateButton, this.typesorting);
 
         let range = r.range;
-        let typesorting = r.typesorting;
+        this.typesorting = r.typesorting;
+        addClass(this.activateButton, this.typesorting);
 
         // Check if range is not null
         if (range !== '') {
+            this.geometry = true;
+            removeClass(this.activateButton, 'deactivated');
+
             // Create a new feature using the provided WKT
-            let feature = new ol.format.WKT().readFeature(range, {
-                dataProjection: 'EPSG:3857',
-                featureProjection: 'EPSG:3857'
-            })
+            let feature = new ol.format.WKT().readFeature(range);
             
             // Set the fill color to represent the typesorting
             let style = new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: this.params.colors[typesorting]
+                    color: this.params.colors[this.typesorting]
                 })
             })
 
@@ -307,28 +362,35 @@ class Range {
             // Set opacity to 0 for later reveal
             this.layer.setOpacity(0);
 
-            // Center the map on the layer
-            this.center(() => {
-                // Activate the centering button
-                this.cartography.origin = false;
-                this.listen = true;
-                // Now display the range
-                this.display(callback);
-            });
+            if (this.active) {
+                // Center the map on the layer
+                this.center(() => {
+                    // Activate the centering button
+                    this.default = false;
+                    this.moved = false;
+                    this.listening = true;
+                    // Now display the range
+                    this.display(callback);
+                });
+            } else {
+                callback();
+            }
         }
         // If range is null
         else {
+            this.geometry = false;
+            this.deactivated = true;
+            addClass(this.activateButton, 'deactivated');
+            
             this.layer.getSource().clear();
             let carto = this.params.interface.cartography;
             let center = carto.start.center;
             let zoom = carto.start.zoom;
             let transition = this.cartography.params.interface.cartography.range.transition.center;
 
-            if (!this.cartography.origin) {
+            if (!this.default) {
                 this.cartography.animate(center, zoom, transition, () => {
-                    // Activate the centering button
-                    this.listen = true;
-                    this.cartography.origin = true;
+                    this.default = true;
                     callback();
                 });
             }
@@ -388,6 +450,38 @@ class Range {
     opacity(value, callback) {
         let duration = this.params.interface.cartography.range.transition.display;
         animateOpacity(this.layer, duration, 60, value, callback)
+    }
+
+    activate() {
+        if (!this.transition && this.geometry) {
+            this.transition = true;
+            this.active = true;
+            addClass(this.activateButton, 'active');
+
+            if (this.geometry) {
+                this.listening = true;
+                if (this.moved) {
+                    removeClass(this.centerButton, 'collapse');
+                }
+            }
+
+            this.display(() => {
+                this.transition = false;
+            })
+        }
+    }
+
+    deactivate() {
+        if (!this.transition && this.geometry) {
+            this.transition = true;
+            this.active = false;
+            this.listening = false;
+            removeClass(this.activateButton, 'active');
+            addClass(this.centerButton, 'collapse');
+            this.hide(() => {
+                this.transition = false;
+            })
+        }
     }
 }
 

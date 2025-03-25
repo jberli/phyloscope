@@ -3,7 +3,7 @@
  * Define the header of the application.
  */
 
-import { makeDiv } from "../generic/dom.js";
+import { addSVG, makeDiv } from "../generic/dom.js";
 import Widget from "./widget.js";
 
 class Header extends Widget {
@@ -21,7 +21,8 @@ class Header extends Widget {
 class Logo {
     constructor(header) {
         this.header = header;
-        this.container = makeDiv('header-logo', 'header-module', this.header.app.params.interface.title);
+        this.container = makeDiv('header-logo', 'header-module');
+        addSVG(this.container, new URL('/static/explorer/img/logo.svg', import.meta.url));
         this.header.container.append(this.container);
     }
 }

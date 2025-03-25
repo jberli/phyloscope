@@ -65,8 +65,12 @@ function makeImage(url, height=null, width=null, id=null, c=null, alt='') {
  * @param  {DOMElement} target - Target to place the svg.
  * @param  {String} SVG - file url.
  */
-function addSVG(target, url) {
-    ajaxGet(url, (svg) => { target.innerHTML = svg; });
+function addSVG(target, url, callback) {
+    callback = callback || function () {};
+    ajaxGet(url, (svg) => {
+        target.innerHTML = svg;
+        callback();
+    });
 }
 
 /**

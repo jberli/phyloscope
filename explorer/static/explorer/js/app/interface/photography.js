@@ -4,7 +4,7 @@
  */
 
 import { loadImage } from "../generic/ajax.js";
-import { makeDiv, makeImage, addClass, removeClass, wait } from "../generic/dom.js";
+import { makeDiv, makeImage, addClass, removeClass, wait, addSVG } from "../generic/dom.js";
 import Widget from "./widget.js";
 
 /**
@@ -28,6 +28,13 @@ class Photography extends Widget {
         this.container = makeDiv('photography', 'sub-panel');
         this.parent.append(this.container);
 
+        this.leftarrow = makeDiv(null, 'photography-arrow-left photography-arrow button collapse');
+        addSVG(this.leftarrow, new URL('/static/explorer/img/arrow-left.svg', import.meta.url));
+        this.rightarrow = makeDiv(null, 'photography-arrow-right photography-arrow button collapse');
+        addSVG(this.rightarrow, new URL('/static/explorer/img/arrow-right.svg', import.meta.url));
+
+        this.container.append(this.leftarrow, this.rightarrow);
+
         // Create individual photo objects
         this.previous = new PhotoContainer(this, false, false);
         this.current = new PhotoContainer(this, true, false);
@@ -37,6 +44,20 @@ class Photography extends Widget {
         this.active = false;
         // Flag to know if the sliding is currently taking place
         this.sliding = false;
+
+        this.container.addEventListener('mouseover', () => {
+            if (this.active) {
+                removeClass(this.rightarrow, 'collapse');
+                removeClass(this.leftarrow, 'collapse');
+            }
+        });
+
+        this.container.addEventListener('mouseout', () => {
+            if (this.active) {
+                addClass(this.rightarrow, 'collapse');
+                addClass(this.leftarrow, 'collapse');
+            }
+        });
     }
 
     /**
@@ -56,7 +77,8 @@ class Photography extends Widget {
         else { this.active = false; }
 
         // Display the default photo in the current photo container
-        if (this.photographs.length > 0) { this.current.set(this.photographs[this.photoid], 'original'); }
+        if (this.photographs.length > 0) { this.current.setImage(this.photographs[this.photoid], 'original'); }
+        else { this.current.setSVG(taxon.iconic); }
 
         // Activate the sliding of the photographs
         this.slide();
@@ -82,32 +104,56 @@ class Photography extends Widget {
      */
     slide() {
         let self = this;
+
+        function slidePhotograph(direction) {
+            if (direction === 'right') {
+                self.previous.destroy();
+                self.current.smoosh();
+                self.previous = self.current;
+                self.current = self.next;
+                self.current.expand();
+                self.next = new PhotoContainer(self, false, false);
+                if (self.photoid == 0) { self.photoid = self.photographs.length - 1 }
+                else { self.photoid -= 1 }
+            }
+            else if (direction === 'left') {
+                self.next.destroy();
+                self.current.smoosh();
+                self.next = self.current;
+                self.current = self.previous;
+                self.current.expand();
+                self.previous = new PhotoContainer(self, false, true);
+                if (self.photoid == self.photographs.length - 1) { self.photoid = 0 }
+                else { self.photoid += 1 }
+            }
+            self.current.setImage(self.photographs[self.photoid], 'original');
+            wait(200, () => { self.sliding = false; })
+        }
+
+        this.rightarrow.addEventListener('click', () => {
+            if (self.active && !self.sliding) {
+                self.sliding = true;
+                slidePhotograph('right');
+            }
+        });
+
+        this.leftarrow.addEventListener('click', () => {
+            if (self.active && !self.sliding) {
+                self.sliding = true;
+                slidePhotograph('left');
+            }
+        });
+
         this.container.addEventListener('wheel', (e) => {
             if (self.active && !self.sliding) {
                 self.sliding = true;
                 if (e.type === 'wheel') {
                     if (e.deltaY > 0) {
-                        self.previous.destroy();
-                        self.current.smoosh();
-                        self.previous = self.current;
-                        self.current = self.next;
-                        self.current.expand();
-                        self.next = new PhotoContainer(self, false, false);
-                        if (self.photoid == 0) { self.photoid = self.photographs.length - 1 }
-                        else { self.photoid -= 1 }
+                        slidePhotograph('right');
                     } else {
-                        self.next.destroy();
-                        self.current.smoosh();
-                        self.next = self.current;
-                        self.current = self.previous;
-                        self.current.expand();
-                        self.previous = new PhotoContainer(self, false, true);
-                        if (self.photoid == self.photographs.length - 1) { self.photoid = 0 }
-                        else { self.photoid += 1 }
+                        slidePhotograph('left');
                     }
-                    self.current.set(self.photographs[self.photoid], 'original');
                 }
-                wait(200, () => { self.sliding = false; })
             }
         })
     }
@@ -137,7 +183,7 @@ class PhotoContainer {
         // Create DOM Elements
         this.container = makeDiv(null, 'photography-container' + c);
         this.mask = makeDiv(null, 'photography-mask mask');
-        this.loader = makeDiv(null, 'loader');
+        this.loader = makeDiv(null, 'loader-center');
         this.mask.append(this.loader);
         this.container.append(this.mask);
 
@@ -151,16 +197,28 @@ class PhotoContainer {
      * @param {Object} photo - Information about the photograph.
      * @param {string} size - Size of the photograph (small, medium, large, original). 
      */
-    set(photo, size) {
+    setImage(photo, size) {
         // If an image has already been set, remove it
         if (this.image !== undefined) { this.image.remove(); }
+
         // Make the image DOM Element
         this.image = makeImage(this.url + photo.id + '/' + size + '.' + photo.extension, null, null, null, 'image');
-        this.container.append(this.image);
         // Load the photograph from iNaturalist servers
-        loadImage(this.image).then(() => { this.loaded() });
+        loadImage(this.image).then(() => { this.loaded(); });
+
+        this.container.append(this.image);
         // Activate the adjustment interaction
         this.adjust();
+    }
+
+    setSVG(svg) {
+        // If an image has already been set, remove it
+        if (this.image !== undefined) { this.image.remove(); }
+
+        this.image = makeDiv(null, 'photo-svg');
+        addSVG(this.image, new URL('/static/explorer/img/iconic/' + svg + '.svg', import.meta.url), () => { this.loaded(); })
+
+        this.container.append(this.image);
     }
 
     /**

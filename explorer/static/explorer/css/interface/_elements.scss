@@ -1,14 +1,25 @@
-.help-container {
+.button-help-container {
     height: 2rem;
     width: 2rem;
 }
 
-.help {
+.button-help {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 2;
     border-radius: 50%;
+}
+
+.loader-center {
+    position: absolute;
+    z-index: 1;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: .8rem solid $main-color-light;
+    border-color: $main-color-light transparent $main-color-light transparent;
+    animation: rotationcw 1.2s linear infinite;
 }
 
 .loader-container {

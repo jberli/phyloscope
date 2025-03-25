@@ -10,7 +10,7 @@
 
 .description-container {
     flex: 1;
-    background-color: $interface-background;
+    background-color: $main-color-dark;
     transition: all .2s ease-in-out;
     display: flex;
     flex-direction: column;
@@ -112,7 +112,7 @@ $search-height: 3rem;
 
 .search-container {
     flex: 0;
-    background-color: $interface-foreground;
+    background-color: $main-color-light;
     height: $search-height;
 
     transition: height .2s ease-in-out;

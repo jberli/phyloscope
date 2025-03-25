@@ -12,3 +12,4 @@ pyinaturalist
 wikipedia-api
 shapely
 geopandas
+cartagen

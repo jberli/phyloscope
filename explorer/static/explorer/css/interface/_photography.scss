@@ -5,7 +5,7 @@
     height: 100%;
     width: 100%;
 
-    background-color: $main-color-mediumlight;
+    background-color: $main-color-dark;
     overflow: hidden;
     user-select: none;
 
@@ -42,6 +42,21 @@
     &.loaded { opacity: 0; }
 }
 
+.photography-arrow {
+    position: absolute;
+    z-index: 101;
+
+    top: calc(50% - 1rem);
+}
+
+.photography-arrow-left {
+    left: .5rem;
+}
+
+.photography-arrow-right {
+    right: .5rem;
+}
+
 .photo {
     height: inherit;
     width: inherit;
@@ -56,4 +71,15 @@
     border: 6px solid #fff;
     border-color: #fff transparent #fff transparent;
     animation: rotationcw 1.2s linear infinite;
+}
+
+.photo-svg {
+    height: inherit;
+    width: inherit;
+
+    & > svg {
+        height: inherit;
+        width: inherit;
+        fill: $main-color-light;
+    }
 }

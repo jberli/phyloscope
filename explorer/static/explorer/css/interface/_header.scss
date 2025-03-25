@@ -1,18 +1,23 @@
 #header {
-    height: 6rem;
-    background-color: $interface-background;
+    height: 8rem;
+    background-color: $main-color-light;
     display: flex;
-    justify-content: start;
+    justify-content: center;
     align-items: center;
     flex: unset;
 }
 
 #header-logo {
-    font-family: 'Polsyh';
-    font-size: 4rem;
-    color: $main-color-extralight;
-
+    color: $main-color-dark;
     user-select: none;
+    height: inherit;
+    width: 100%;
+    margin: 1rem;
+
+    & > svg {
+        height: inherit;
+        width: inherit;
+    }
 }
 
 .header-module {

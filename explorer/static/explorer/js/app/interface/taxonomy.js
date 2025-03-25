@@ -184,8 +184,8 @@ class Ancestry {
         this.acontainer = makeDiv(null, 'taxonomy-ancestry-container');
         this.container = makeDiv(null, 'taxonomy-ancestry');
 
-        this.helpcontainer = makeDiv(null, 'taxonomy-help-container help-container');
-        this.help = makeDiv(null, 'button help');
+        this.helpcontainer = makeDiv(null, 'taxonomy-button-help-container button-help-container');
+        this.help = makeDiv(null, 'button button-help');
         addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
 
         this.loader = makeDiv(null, 'loader-container');
@@ -671,14 +671,26 @@ class Taxon {
             let image = makeDiv(null, 'taxonomy-image-container');
     
             let infos = this.taxon.photographs[0];
-            if (infos !== undefined) {
-                let imageMask = makeDiv(null, 'photo-mask');
-                let loader = makeDiv(null, 'photo-loader');
-                let i = makeImage(url + infos.id + '/medium.' + infos.extension, null, null, null, 'photo');
-                loadImage(i).then(() => { addClass(imageMask, 'loaded') });
-                imageMask.appendChild(loader);
-                image.append(imageMask, i);
+            let imageMask = makeDiv(null, 'photo-mask');
+            let loader = makeDiv(null, 'photo-loader');
+
+            let i;
+            if (infos === undefined) {
+                i = makeDiv(null, 'photo-svg');
+                if (this.taxon.iconic !== null) {
+                    addSVG(i, new URL('/static/explorer/img/iconic/' + this.taxon.iconic + '.svg', import.meta.url), () => {
+                        addClass(imageMask, 'loaded');
+                    })
+                } else {
+                    addClass(imageMask, 'loaded');
+                }
+            } else {
+                i = makeImage(url + infos.id + '/medium.' + infos.extension, null, null, null, 'photo');
+                loadImage(i).then(() => { addClass(imageMask, 'loaded'); });
             }
+            
+            imageMask.appendChild(loader);
+            image.append(imageMask, i);
 
             let stats = this.taxon.count.toLocaleString();
             if (this.taxon.percentage) { stats += ' (' + formatPercentage(this.taxon.percentage) + ')'; }

@@ -169,11 +169,12 @@ $taxonomy-margin: 2rem;
     position: relative;
     height: inherit;
     width: inherit;
-    background-color: $main-color-mediumlight;
+    background-color: $main-color-extradark;
     border-top-left-radius: $border-radius;
     border-top-right-radius: $border-radius;
     overflow: hidden;
     pointer-events: none;
+
     &::before {
         opacity: 0;
     }
@@ -233,7 +234,7 @@ $taxonomy-margin: 2rem;
     align-items: center;
 }
 
-.taxonomy-help-container {
+.taxonomy-button-help-container {
     position: relative;
 }
 
@@ -300,7 +301,7 @@ $taxonomy-margin: 2rem;
     position: absolute;
     font-size: 1rem;
 
-    top: 2.8rem;
+    top: 2.3rem;
     z-index: 2;
 
     line-height: 1.5rem;
