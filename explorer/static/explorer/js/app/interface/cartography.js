@@ -222,8 +222,7 @@ class Cartography extends Widget {
         });
         this.map.addLayer(newlayer);
 
-        let transition = this.app.params.interface.transition;
-        animateOpacity(this.baselayer, transition, 60, 0, () => {
+        animateOpacity(this.baselayer, 500, 60, 0, () => {
             this.map.removeLayer(this.baselayer);
             newlayer.setZIndex(10);
             this.baselayer = newlayer;
@@ -232,7 +231,7 @@ class Cartography extends Widget {
     }
 
     changeButtonStyle(previous, style) {
-        let buttons = [ this.centerButton, this.baseLayerButton, this.helpcontainer, this.displayButton ];
+        let buttons = [ this.range.centerButton, this.baseLayerButton, this.helpcontainer, this.range.activateButton ];
         for (let i = 0; i < buttons.length; ++i) {
             removeClass(buttons[i], previous);
             addClass(buttons[i], style);
