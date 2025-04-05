@@ -1,18 +1,21 @@
 #header {
-    height: 8rem;
+    height: 11rem;
     background-color: $main-color-light;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: start;
     align-items: center;
-    flex: unset;
+
+    &:hover {
+        height: 11rem;
+    }
 }
 
-#header-logo {
+.header-logo {
+    height: 8rem;
     color: $main-color-dark;
     user-select: none;
-    height: inherit;
     width: 100%;
-    margin: 1rem;
 
     & > svg {
         height: inherit;
@@ -20,6 +23,54 @@
     }
 }
 
-.header-module {
-    margin: auto 1rem;
+.header-foldable {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.header-update-container {
+    display: flex;
+    flex-direction: column;
+    margin: .5rem 1rem;
+}
+
+.header-update {
+    font-size: .8rem;
+    line-height: 1rem;
+}
+
+.header-languages-container {
+    margin: .5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+}
+
+.header-language {
+    height: 1.6rem;
+    aspect-ratio: 10/6;
+
+    border-radius: $border-radius;
+    background-color: $main-color-extralight;
+    overflow: hidden;
+
+    transition: all .1s ease-in-out;
+    opacity: .7;
+    transform: scale(1, 1);
+    cursor: pointer;
+
+    &.active {
+        opacity: 1;
+        transform: scale(1.1, 1.1);
+    }
+
+    &:hover {
+        transform: scale(1.1, 1.1);
+    }
+
+    & > svg {
+        height: 1.6rem;
+        width: inherit;
+    }
 }

@@ -222,6 +222,13 @@ texts:
   vernaculars:
     en: 'Other names:'
     fr: 'Autres noms :'
+  database:
+    update:
+      en: 'Updated on '
+      fr: 'Actualisé le '
+    initialization:
+      en: 'Initialized on '
+      fr: 'Initialisé le '
   help:
     cartography:
       tutorial:
