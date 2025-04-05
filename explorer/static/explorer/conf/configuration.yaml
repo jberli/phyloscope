@@ -41,9 +41,9 @@ languages:
     en:
       locale: en-GB
       name: English
-  current: en
+  current: fr
 taxonomy:
-  current: 4051
+  current: 3616
 photography:
   url: https://inaturalist-open-data.s3.amazonaws.com/photos/
 typesorting:

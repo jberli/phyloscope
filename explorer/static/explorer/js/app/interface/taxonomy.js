@@ -219,11 +219,14 @@ class Ancestry {
         this.ancestors = [];
         let ancestry = this.taxonomy.app.updater.taxonomy.ancestry;
         this.total = 0;
+
+        let first = true;
         for (let i = 0; i < ancestry.length; ++i) {
-            let ancestor = new Ancestor(this, ancestry[i], true);
+            let ancestor = new Ancestor(this, ancestry[i], true, first);
             this.ancestors.push(ancestor);
             this.total += (ancestor.width - 5);
             if (this.total >= this.maxwidth) { this.shrinkAncestors(); }
+            first = false;
         }
 
         wait(10, () => {
@@ -258,7 +261,8 @@ class Ancestry {
     grow() {
         let parent = this.taxonomy.app.updater.getParent();
         this.taxonomy.app.updater.taxonomy.ancestry.push(parent);
-        let ancestor = new Ancestor(this, parent, false);
+        let first = this.ancestors.length > 0 ? false : true;
+        let ancestor = new Ancestor(this, parent, false, first);
         this.ancestors.push(ancestor);
         this.total += (ancestor.width - 5);
         if (this.total >= this.maxwidth) { this.shrinkAncestors(); }
@@ -290,7 +294,7 @@ class Ancestry {
 }
 
 class Ancestor {
-    constructor(ancestry, ancestor, collapse) {
+    constructor(ancestry, ancestor, collapse, first) {
         this.ancestry = ancestry;
         this.ancestor = ancestor;
         this.small = false;
@@ -311,7 +315,8 @@ class Ancestor {
         this.tooltip = makeDiv(null, 'taxonomy-ancestor-tooltip ' + this.ancestor.typesorting, this.name);
         this.container.append(this.label, this.tooltip);
 
-        this.width = calculateTextWidth(this.name, getComputedStyle(this.label), '1rem') + 40;
+        let margin = first ? 20 : 40;
+        this.width = calculateTextWidth(this.name, getComputedStyle(this.label), '1rem') + margin;
         this.label.style.width = this.width + 'px';
 
         this.label.addEventListener('click', (event) => {
@@ -363,6 +368,7 @@ class Ancestor {
         let transition = this.ancestry.taxonomy.params.interface.transition;
         this.label.innerHTML = '';
         this.label.style.width = '0';
+        this.label.style.paddingLeft = '0';
         wait(transition, () => {
             this.container.remove();
         });

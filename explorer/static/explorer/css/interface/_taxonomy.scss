@@ -281,6 +281,8 @@ $taxonomy-margin: 2rem;
     transform: scale(1, 1);
 
     &:first-child > .taxonomy-ancestor-label {
+        text-align: left;
+        padding-left: .8rem;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
         clip-path: polygon(calc(100% - .8rem) 0%, 100% 50%, calc(100% - .8rem) 100%, 0% 100%, 0% 0%);
