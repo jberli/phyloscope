@@ -38,6 +38,7 @@ def get_taxon_information(obj, lang):
             'parent': parent,
             'type': RANKS[obj.rank][lang],
             'typesorting': obj.rank,
+            'status': obj.status,
             'level': obj.level,
             'count': obj.count_species,
             'percentage': obj.percentage_parent,
