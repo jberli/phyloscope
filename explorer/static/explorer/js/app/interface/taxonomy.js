@@ -208,9 +208,11 @@ class Ancestry {
 
         new ResizeObserver(() => {
             this.maxwidth = this.container.clientWidth;
+            console.log(this.total);
+            console.log(this.maxwidth);
             if (this.total >= this.maxwidth - 1) { this.shrinkAncestors(); }
             else { this.expandAncestors(); }
-        }).observe(this.container);
+        }).observe(this.taxonomy.app.container);
     }
 
     update() {
@@ -224,7 +226,7 @@ class Ancestry {
         for (let i = 0; i < ancestry.length; ++i) {
             let ancestor = new Ancestor(this, ancestry[i], true, first);
             this.ancestors.push(ancestor);
-            this.total += (ancestor.width - 5);
+            this.total += (ancestor.width + ancestor.padding - 5);
             if (this.total >= this.maxwidth) { this.shrinkAncestors(); }
             first = false;
         }
@@ -238,7 +240,7 @@ class Ancestry {
         for (let i = this.ancestors.length - 1; i >= 0; --i) {
             let ancestor = this.ancestors[i];
             if (ancestor.small) {
-                let newtotal = this.total + (ancestor.width - ancestor.smallwidth)
+                let newtotal = this.total + (ancestor.width + ancestor.padding - ancestor.smallwidth)
                 if (newtotal < this.maxwidth) {
                     ancestor.expand();
                     this.total = newtotal;
@@ -252,7 +254,7 @@ class Ancestry {
             let ancestor = this.ancestors[i];
             if (!ancestor.small) {
                 ancestor.shrink();
-                this.total -= (ancestor.width - ancestor.smallwidth);
+                this.total -= (ancestor.width + ancestor.padding - ancestor.smallwidth);
                 if (this.total < this.maxwidth) { break; }
             }
         }
@@ -264,14 +266,14 @@ class Ancestry {
         let first = this.ancestors.length > 0 ? false : true;
         let ancestor = new Ancestor(this, parent, false, first);
         this.ancestors.push(ancestor);
-        this.total += (ancestor.width - 5);
+        this.total += (ancestor.width + ancestor.padding - 5);
         if (this.total >= this.maxwidth) { this.shrinkAncestors(); }
     }
 
     regress() {
         this.taxonomy.app.updater.taxonomy.ancestry.pop();
         let last = this.ancestors.pop();
-        this.total -= (last.width - 5);
+        this.total -= (last.width + last.padding - 5);
         this.expandAncestors();
         last.destroy();
     }
@@ -316,8 +318,11 @@ class Ancestor {
         this.container.append(this.label, this.tooltip);
 
         let margin = first ? 20 : 40;
+
+        this.padding = first ? 12 : 0;
         this.width = calculateTextWidth(this.name, getComputedStyle(this.label), '1rem') + margin;
         this.label.style.width = this.width + 'px';
+        this.label.style.paddingLeft = this.padding + 'px';
 
         this.label.addEventListener('click', (event) => {
             if (!this.ancestry.taxonomy.freezed) {
@@ -346,7 +351,7 @@ class Ancestor {
         if (this.small) {
             return this.smallwidth;
         } else {
-            return this.width;
+            return this.width + this.padding;
         }
     }
 
@@ -355,6 +360,7 @@ class Ancestor {
         addClass(this.container, 'small');
         this.label.innerHTML = '';
         this.label.style.width = this.smallwidth + 'px';
+        this.label.style.paddingLeft = 0;
     }
 
     expand() {
@@ -362,13 +368,14 @@ class Ancestor {
         removeClass(this.container, 'small');
         this.label.innerHTML = this.name;
         this.label.style.width = this.width + 'px';
+        this.label.style.paddingLeft = this.padding + 'px';
     }
 
     destroy() {
         let transition = this.ancestry.taxonomy.params.interface.transition;
         this.label.innerHTML = '';
         this.label.style.width = '0';
-        this.label.style.paddingLeft = '0';
+        this.label.style.paddingLeft = 0;
         wait(transition, () => {
             this.container.remove();
         });

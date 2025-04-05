@@ -282,13 +282,13 @@ $taxonomy-margin: 2rem;
 
     &:first-child > .taxonomy-ancestor-label {
         text-align: left;
-        padding-left: .8rem;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
         clip-path: polygon(calc(100% - .8rem) 0%, 100% 50%, calc(100% - .8rem) 100%, 0% 100%, 0% 0%);
     }
 
     &.small > .taxonomy-ancestor-label {
+        padding: 0;
         &:hover + .taxonomy-ancestor-tooltip {
             transform: translate(-50%, 0) scale(1, 1);
         }
