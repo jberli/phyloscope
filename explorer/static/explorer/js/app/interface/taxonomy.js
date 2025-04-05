@@ -6,6 +6,7 @@
 import { loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { calculateTextWidth, formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
+import { TaxonomyHelper } from "./helper.js";
 import Widget from "./widget.js";
 
 class Taxonomy extends Widget {
@@ -17,9 +18,14 @@ class Taxonomy extends Widget {
         this.container = makeDiv('taxonomy', 'sub-panel');
         this.parent.append(this.container);
 
+        this.infocontainer = makeDiv(null, 'taxonomy-information panel-information');
+        this.container.append(this.infocontainer);
+
         // Mask and loader
         this.mask = makeDiv(null, 'taxonomy-mask mask');
         this.container.append(this.mask);
+
+        this.helper = new TaxonomyHelper(this, this.container);
 
         this.ancestry = new Ancestry(this);
 
@@ -192,6 +198,8 @@ class Ancestry {
         this.loadersymbol = makeDiv(null, 'loader');
         this.loader.append(this.loadersymbol);
         this.helpcontainer.append(this.help, this.loader);
+
+        this.helpcontainer.addEventListener('click', () => { this.taxonomy.helper.trigger(false); })
 
         this.acontainer.append(this.container, this.helpcontainer);
         this.taxonomy.container.append(this.acontainer);
@@ -715,6 +723,12 @@ class Taxon {
             } else {
                 name = uppercaseFirstLetter(this.taxon.scientific);
                 html = '<i>' + uppercaseFirstLetter(this.taxon.scientific) + '</i>';
+            }
+
+            if (this.taxon.status.length > 0) {
+                let status = makeDiv(null, 'taxonomy-entry-status');
+                addSVG(status, new URL('/static/explorer/img/status/' + this.taxon.status.toLowerCase() + '.svg', import.meta.url));
+                this.container.append(status);
             }
     
             this.label = makeDiv(null, 'taxonomy-entry-label', html);        

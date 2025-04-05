@@ -5,6 +5,7 @@
 
 import { addClass, addSVG, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
+import { StatisticsHelper } from "./helper.js";
 import Widget from "./widget.js";
 
 class Statistics extends Widget {
@@ -26,6 +27,8 @@ class Statistics extends Widget {
         this.chart = makeDiv(null, 'statistics-chart collapse');
         this.container.append(this.chart);
 
+        this.helper = new StatisticsHelper(this, this.container);
+
         this.helpcontainer = makeDiv(null, 'statistics-button-help-container button-help-container');
         this.help = makeDiv(null, 'button button-help');
         addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
@@ -34,6 +37,10 @@ class Statistics extends Widget {
         this.loadersymbol = makeDiv(null, 'loader');
         this.loader.append(this.loadersymbol);
         this.helpcontainer.append(this.help, this.loader);
+
+        this.infocontainer = makeDiv(null, 'taxonomy-information panel-information');
+        this.container.append(this.infocontainer);
+        this.helpcontainer.addEventListener('click', () => { this.helper.trigger(false); })
 
         this.container.append(this.helpcontainer);
     }
@@ -148,7 +155,7 @@ class Statistics extends Widget {
                     obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                     if (!self.freezed) {
                         let locale = self.app.params.languages.available[self.app.params.languages.current].locale;
-                        let stats = formatPercentage(d.data.percentage) + ' - ' + d.data.value.toLocaleString(locale);
+                        let stats = d.data.value.toLocaleString(locale) + ' - ' + formatPercentage(d.data.percentage);
                         self.wrapText(d.data.name, stats);
                         self.currentactive = self.app.taxonomy.children.getActive();
                         self.app.taxonomy.children.slideTo(d.index + 1);
@@ -261,7 +268,7 @@ class Statistics extends Widget {
                     obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                     if (!self.freezed) {
                         let locale = self.app.params.languages.available[self.app.params.languages.current].locale;
-                        let stats = formatPercentage(d.data.percentage) + ' - ' + d.data.value.toLocaleString(locale);
+                        let stats = d.data.value.toLocaleString(locale) + ' - ' + formatPercentage(d.data.percentage);
                         self.wrapText(d.data.name, stats);
                         self.currentactive = self.app.taxonomy.children.getActive();
                         self.app.taxonomy.children.slideTo(d.index + 1);

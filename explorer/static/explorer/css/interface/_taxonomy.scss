@@ -12,7 +12,7 @@ $taxonomy-margin: 2rem;
 }
 
 .taxonomy-levels {
-    height: calc(100% - (4rem + 2 * #{$taxonomy-margin}));
+    height: calc(100% - (3rem + 2 * #{$taxonomy-margin}));
     margin: $taxonomy-margin calc(#{$taxonomy-margin} - 1rem);
     display: flex;
     flex-direction: column;
@@ -183,6 +183,22 @@ $taxonomy-margin: 2rem;
     }
 }
 
+.taxonomy-entry-status {
+    position: absolute;
+    z-index: 1;
+    top: .5rem;
+    right: .5rem;
+    border-radius: 50%;
+    height: 1.5vw;
+    width: 1.5vw;
+    pointer-events: none;
+
+    & > svg {
+        height: inherit;
+        width: inherit;
+    }
+}
+
 .taxonomy-entry-label {
     position: absolute;
     bottom: 0;
@@ -219,6 +235,7 @@ $taxonomy-margin: 2rem;
     font-size: .8rem;
     line-height: 1.2rem;
     padding: 0 .4rem;
+    pointer-events: none;
 
     text-wrap: nowrap;
 

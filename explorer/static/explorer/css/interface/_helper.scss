@@ -1,0 +1,142 @@
+.helper-container {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    height: calc(100% - 4rem);
+    width: calc(100% - 4rem);
+
+    padding: 2rem;
+
+    background-color: $main-color-dark;
+    color: $main-color-light;
+    border-radius: $border-radius;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow: auto;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease-in-out;
+
+    &.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+}
+
+.helper-title {
+    margin: 0 3rem;
+    font-size: 1.6rem;
+    font-weight: bold;
+    line-height: 2rem;
+    text-align: center;
+}
+
+.helper-element {
+    & > a {
+        font-weight: bold;
+        color: $links-color-light;
+    }
+}
+
+.helper-list-container {
+
+}
+
+.helper-list-text {
+    & > a {
+        font-weight: bold;
+        color: $links-color-light;
+    }
+}
+
+.helper-list {
+    margin: .8rem 0 0 0;
+    padding-left: 1rem;
+}
+
+.helper-list-element {
+    & > a {
+        font-weight: bold;
+        color: $links-color-light;
+    }
+}
+
+.helper-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.helper-button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: .5rem;
+    min-width: min-content;
+}
+
+.helper-button {
+    background-color: $main-color-light;
+    color: $main-color-dark;
+    user-select: none;
+
+    &.dark {
+        background-color: $main-color-dark;
+        color: $main-color-light;
+    }
+    &.light {
+        background-color: $main-color-light;
+        color: $main-color-dark;
+    }
+}
+
+.helper-button-label {
+    text-align: center;
+    max-width: 10rem;
+}
+
+.helper-button-basemap {
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 .4rem;
+    border-radius: $border-radius;
+    margin: 0 auto;
+    min-width: max-content;
+}
+
+.helper-button-display-container {
+    height: 2rem;
+    width: 3.4rem;
+    border-radius: 2rem;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    background-color: $main-color-light;
+}
+
+.helper-button-display-slider {
+    background-color: $main-color-dark;
+    height: 1.4rem;
+    width: 1.4rem;
+    border-radius: 1.4rem;
+    margin: .3rem;
+}
+
+.helper-button-center {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+    background-color: $main-color-light;
+
+    & > svg {
+        color: $main-color-dark;
+        height: 2rem;
+        width: 2rem;
+    }
+}

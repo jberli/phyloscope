@@ -5,6 +5,7 @@
 
 import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
 import { animateOpacity } from "../generic/map.js";
+import { CartographyHelper } from "./helper.js";
 import Widget from "./widget.js";
 
 /**
@@ -26,6 +27,12 @@ class Cartography extends Widget {
         // Create DOM elements
         this.container = makeDiv('cartography', 'sub-panel');
         this.parent.append(this.container);
+
+        this.helper = new CartographyHelper(this, this.container);
+        this.helper.update();
+
+        this.infocontainer = makeDiv(null, 'cartography-information panel-information');
+        this.container.append(this.infocontainer);
 
         this.resizercontainer = makeDiv(null, 'panel-resizer-container collapse');
         this.resizer = makeDiv(null, 'panel-resizer');
@@ -97,6 +104,8 @@ class Cartography extends Widget {
         this.helpcontainer = makeDiv(null, 'cartography-button-help-container button-help-container '  + this.getBaseStyle());
         this.help = makeDiv(null, 'button button-help');
         addSVG(this.help, new URL('/static/explorer/img/help.svg', import.meta.url));
+
+        this.helpcontainer.addEventListener('click', () => { this.helper.trigger(true); })
 
         this.loader = makeDiv(null, 'loader-container');
         this.loadersymbol = makeDiv(null, 'loader');
@@ -232,10 +241,12 @@ class Cartography extends Widget {
 
     changeButtonStyle(previous, style) {
         let buttons = [ this.range.centerButton, this.baseLayerButton, this.helpcontainer, this.range.activateButton ];
-        for (let i = 0; i < buttons.length; ++i) {
-            removeClass(buttons[i], previous);
-            addClass(buttons[i], style);
-        }
+        for (let i = 0; i < buttons.length; ++i) { this.changeStyle(buttons[i], previous, style); }
+    }
+
+    changeStyle(button, previous, style) {
+        removeClass(button, previous);
+        addClass(button, style);
     }
 
     getBaseStyle() {

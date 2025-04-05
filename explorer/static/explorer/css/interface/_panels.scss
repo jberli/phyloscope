@@ -26,8 +26,8 @@ $side-panel-background: $interface-background;
 .sub-panel {
     position: relative;
     border-radius: $border-radius;
-    overflow: hidden;
     transition: all .1s linear;
+    overflow: hidden;
 }
 
 #taxonomy {
@@ -119,4 +119,24 @@ $side-panel-background: $interface-background;
     border-radius: 1rem;
     background-color: $main-color-dark;
     cursor: pointer;
+}
+
+.panel-information {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    background-color: $main-color-dark;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease-in-out;
+
+    &.active {
+        opacity: 1;
+        pointer-events: all;
+    }
 }
