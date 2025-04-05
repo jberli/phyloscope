@@ -208,11 +208,9 @@ class Ancestry {
 
         new ResizeObserver(() => {
             this.maxwidth = this.container.clientWidth;
-            console.log(this.total);
-            console.log(this.maxwidth);
             if (this.total >= this.maxwidth - 1) { this.shrinkAncestors(); }
             else { this.expandAncestors(); }
-        }).observe(this.taxonomy.app.container);
+        }).observe(this.container);
     }
 
     update() {
