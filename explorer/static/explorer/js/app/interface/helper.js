@@ -1,4 +1,4 @@
-import { addClass, addSVG, makeDiv, removeClass } from "../generic/dom.js";
+import { addClass, addSVG, makeDiv, removeClass, wait } from "../generic/dom.js";
 
 class Helper {
     constructor(widget, parent, type) {
@@ -7,7 +7,7 @@ class Helper {
         this.type = type;
         this.active = false;
 
-        this.container = makeDiv(null, 'helper-container no-scrollbar');
+        this.container = makeDiv(null, 'helper-container');
         this.parent.append(this.container);
     }
 
@@ -48,11 +48,14 @@ class CartographyHelper extends Helper {
         let help = params.texts.help.cartography;
         let language = params.languages.current;
 
+        this.content = makeDiv(null, 'helper-content no-scrollbar hidden');
+        this.container.append(this.content);
+
         let tt = makeDiv(null, 'helper-title', help.tutorial.title[language]);
-        this.container.append(tt);
+        this.content.append(tt);
 
         let tcontainer = makeDiv(null, 'helper-buttons');
-        this.container.append(tcontainer);
+        this.content.append(tcontainer);
 
         let bcontainer = makeDiv(null, 'helper-button-container');
         let bbutton = makeDiv(null, 'helper-button-basemap helper-button', params.interface.cartography.baselayers[0].name[language]);
@@ -76,7 +79,7 @@ class CartographyHelper extends Helper {
         tcontainer.append(ccontainer);
 
         let st = makeDiv(null, 'helper-title', help.source.title[language]);
-        this.container.append(st);
+        this.content.append(st);
 
         help.source.content.forEach((s) => {
             if (s.type === 'ul' || s.type === 'ol') {
@@ -92,9 +95,11 @@ class CartographyHelper extends Helper {
                     u.append(li);
                 });
                 c.append(e, u);
-                this.container.append(c);
+                this.content.append(c);
             }
         });
+
+        wait(10, () => { removeClass(this.content, 'hidden'); });
     }
 }
 

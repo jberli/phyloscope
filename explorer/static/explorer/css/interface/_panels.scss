@@ -28,6 +28,10 @@ $side-panel-background: $interface-background;
     border-radius: $border-radius;
     transition: all .1s linear;
     overflow: hidden;
+
+    &.unselectable {
+        user-select: none;
+    }
 }
 
 #taxonomy {

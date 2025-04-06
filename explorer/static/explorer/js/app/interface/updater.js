@@ -90,6 +90,37 @@ class Updater {
         });
     }
 
+    switchLanguage(lang, callback) {
+        callback = callback || function () {};
+        this.app.freeze();
+        this.app.information.loading();
+        this.app.statistics.loading();
+        this.app.taxonomy.loading();
+        this.app.cartography.loading();
+        this.app.taxonomy.collapse();
+
+        if (this.app.information.search.active) { this.app.information.describing(); }
+
+        this.done = ['photography'];
+        this.params.languages.current = lang;
+        let index = this.getTaxon().id;
+
+        this.app.header.switchLanguage(lang);
+        
+        this.app.cartography.switchLanguage(lang, () => {
+            this.done.push('cartography');
+            this.return(callback);
+        });
+
+        ajaxGet('taxon/' + this.params.languages.current + '/' + index + '/', (r) => {
+            this.taxonomy = r;
+            this.app.statistics.current = this.app.statistics.prepare(this.getTaxon());
+            this.updateInformation(null, () => { this.return(callback); });
+            this.updateTaxonomy(() => { this.return(callback); });
+            this.updateStatistics(() => { this.return(callback); });
+        });
+    }
+
     updateFromSearch(index, callback) {
         callback = callback || function () {};
         this.app.freeze();

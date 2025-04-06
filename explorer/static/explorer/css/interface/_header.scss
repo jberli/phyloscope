@@ -6,9 +6,9 @@
     justify-content: start;
     align-items: center;
 
-    &:hover {
-        height: 11rem;
-    }
+    // &:hover {
+    //     height: 11rem;
+    // }
 }
 
 .header-logo {
@@ -24,49 +24,91 @@
 }
 
 .header-foldable {
-    display: flex;
+    height: 3rem;
     width: 100%;
+
+    display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .header-update-container {
     display: flex;
     flex-direction: column;
-    margin: .5rem 1rem;
+    justify-content: center;
+
+    height: 2rem;
+    margin-left: 1rem;
+
+    opacity: 1;
+    transition: opacity .2s ease-in-out;
+
+    &.hidden {
+        opacity: 0;
+    }
 }
 
 .header-update {
     font-size: .8rem;
+    font-style: italic;
     line-height: 1rem;
+    color: $main-color-dark;
 }
 
 .header-languages-container {
-    margin: .5rem 1rem;
+    height: 3rem;
+    margin-right: 1rem;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: .8rem;
+    gap: 1rem;
 }
 
 .header-language {
-    height: 1.6rem;
-    aspect-ratio: 10/6;
-
-    border-radius: $border-radius;
-    background-color: $main-color-extralight;
-    overflow: hidden;
-
-    transition: all .1s ease-in-out;
-    opacity: .7;
-    transform: scale(1, 1);
-    cursor: pointer;
-
-    &.active {
-        opacity: 1;
-        transform: scale(1.1, 1.1);
-    }
+    position: relative;
 
     &:hover {
-        transform: scale(1.1, 1.1);
+        & > .header-language-tooltip {
+            transform: scale(1, 1) translate(-50%);
+        }
+        & > .header-language-flag {
+            outline-width: .3rem;
+        }
+    }
+}
+
+.header-language-tooltip {
+    position: absolute;
+    top: -2rem;
+    left: 50%;
+    padding: .2rem .3rem;
+
+    background-color: $main-color-dark;
+    color: $main-color-light;
+    border-radius: $border-radius;
+
+    font-size: .8rem;
+    transform: scale(0, 0) translate(-50%);
+    transform-origin: 0 50%;
+    transition: transform .1s ease-in-out;
+}
+
+.header-language-flag {
+    height: 1.6rem;
+
+    outline-color: $main-color-extralight;
+    outline-style: solid;
+    outline-width: 0;
+    
+    border-radius: $border-radius;
+    background-color: $main-color-extralight;
+
+    transition: all .1s ease-in-out;
+    cursor: pointer;
+    overflow: hidden;
+
+    &.active {
+        outline-width: .3rem;
     }
 
     & > svg {

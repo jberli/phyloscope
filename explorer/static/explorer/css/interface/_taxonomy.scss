@@ -265,11 +265,11 @@ $taxonomy-margin: 2rem;
     transition: transform .1s ease-out;
     user-select: none;
 
-    &.initialize > .taxonomy-ancestor {
-        & > .taxonomy-ancestor-label {
-            transition: none;
-        }
-    }
+    // &.resizing > .taxonomy-ancestor {
+    //     & > .taxonomy-ancestor-label {
+    //         transition: none;
+    //     }
+    // }
 }
 
 .taxonomy-ancestor {

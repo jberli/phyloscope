@@ -21,6 +21,14 @@ class Widget {
     unfreeze() {
         this.freezed = false;
     }
+
+    unselectable() {
+        addClass(this.container, 'unselectable');
+    }
+
+    selectable() {
+        removeClass(this.container, 'unselectable');
+    }
 }
 
 export default Widget;

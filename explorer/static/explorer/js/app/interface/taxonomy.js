@@ -214,7 +214,7 @@ class Ancestry {
     }
 
     update() {
-        addClass(this.container, 'initialize');
+        addClass(this.container, 'resizing');
 
         this.ancestors = [];
         let ancestry = this.taxonomy.app.updater.taxonomy.ancestry;
@@ -230,7 +230,7 @@ class Ancestry {
         }
 
         wait(10, () => {
-            removeClass(this.container, 'initialize');
+            removeClass(this.container, 'resizing');
         });
     }
 

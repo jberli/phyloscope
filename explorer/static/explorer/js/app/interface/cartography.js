@@ -43,9 +43,6 @@ class Cartography extends Widget {
         let self = this;
         this.resizer.addEventListener('mousedown', () => {
             function moving(f) {
-                addClass(self.app.taxonomy.ancestry.container, 'initialize');
-                addClass(self.app.information.container, 'resizing');
-
                 let height = self.app.container.offsetHeight;
                 let width = self.app.container.offsetWidth;
                 
@@ -64,9 +61,9 @@ class Cartography extends Widget {
             function exit() {
                 document.removeEventListener('mousemove', moving);
                 document.removeEventListener('mouseup', exit);
-                removeClass(self.app.taxonomy.ancestry.container, 'initialize');
-                removeClass(self.app.information.container, 'resizing');
+                self.app.selectable();
             }
+            self.app.unselectable();
             document.addEventListener('mousemove', moving);
             document.addEventListener('mouseup', exit);
         })
@@ -89,9 +86,8 @@ class Cartography extends Widget {
         this.container.append(this.baseLayerButton);
 
         this.swapping = false;
-        // Activate the button to center the map when clicked
         this.baseLayerButton.addEventListener('click', () => {
-            if (!this.swapping) {
+            if (!this.swapping && !this.freezed) {
                 this.swapping = true;
                 this.cycleBaseLayer(() => { this.swapping = false; });
             }
@@ -252,6 +248,22 @@ class Cartography extends Widget {
     getBaseStyle() {
         return this.baselayers[this.baselayerindex].style;
     }
+
+    switchLanguage(language, callback) {
+        callback = callback || function () {};
+        let transition = this.app.params.interface.transition;
+        addClass(this.baseLayerButton, 'collapse');
+        addClass(this.helper.content, 'hidden');
+        wait(transition, () => {
+            this.baseLayerButton.innerHTML = this.baselayers[this.baselayerindex].name[language];
+            this.helper.update();
+            removeClass(this.baseLayerButton, 'collapse');
+            wait(transition, () => {
+                this.loaded();
+                callback();
+            });
+        });
+    }
 }
 
 /**
@@ -305,18 +317,22 @@ class Range {
 
         // Activate the button to center the map when clicked
         this.centerButton.addEventListener('click', () => {
-            addClass(this.centerButton, 'collapse');
-            this.listening = false;
-            this.center(() => {
-                this.moved = false;
-                this.listening = true;
-            });
+            if (!this.cartography.freezed) {
+                addClass(this.centerButton, 'collapse');
+                this.listening = false;
+                this.center(() => {
+                    this.moved = false;
+                    this.listening = true;
+                });
+            }
         });
 
         // Activate of deactivate the range on click
         this.activateButton.addEventListener('click', () => {
-            if (this.active) { this.deactivate(); }
-            else { this.activate(); }
+            if (!this.cartography.freezed) {
+                if (this.active) { this.deactivate(); }
+                else { this.activate(); }
+            }
         });
 
         // Display the centering button when moving the map

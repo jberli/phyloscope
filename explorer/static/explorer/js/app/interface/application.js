@@ -66,6 +66,8 @@ class Application {
     }
 
     freeze() {
+        this.header.freeze();
+        this.cartography.freeze();
         this.information.freeze();
         this.photography.freeze();
         this.taxonomy.freeze();
@@ -73,24 +75,30 @@ class Application {
     }
 
     unfreeze() {
+        this.header.unfreeze();
+        this.cartography.unfreeze();
         this.information.unfreeze();
         this.photography.unfreeze();
         this.taxonomy.unfreeze();
         this.statistics.unfreeze();
     }
 
-    enlarge(widget, callback) {
-        callback = callback || function () {};
-        if (widget.type === this.large) {
-            removeClass(this.container, widget.type);
-            this.large = '';
-            widget.large = false;
-        } else {
-            addClass(this.container, widget.type);
-            this.large = widget.type;
-            widget.large = true;
-        }
-        wait(this.params.interface.transition, callback);
+    unselectable() {
+        this.header.unselectable();
+        this.cartography.unselectable();
+        this.information.unselectable();
+        this.photography.unselectable();
+        this.taxonomy.unselectable();
+        this.statistics.unselectable();
+    }
+
+    selectable() {
+        this.header.selectable();
+        this.cartography.selectable();
+        this.information.selectable();
+        this.photography.selectable();
+        this.taxonomy.selectable();
+        this.statistics.selectable();
     }
 }
 
