@@ -215,6 +215,12 @@ class Search {
                             loadImage(image).then(() => { addClass(imageMask, 'loaded'); });
                             imageMask.appendChild(loader);
                             imageDiv.append(imageMask, image);
+                        } else {
+                            if (entry.iconic !== null) {
+                                let image = makeDiv(null, 'photo-svg');
+                                addSVG(image, new URL('/static/explorer/img/iconic/' + entry.iconic + '.svg', import.meta.url));
+                                imageDiv.append(image);
+                            }
                         }
 
                         // Create the element for the current result with image and label

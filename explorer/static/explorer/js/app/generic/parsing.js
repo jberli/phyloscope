@@ -96,6 +96,14 @@ function calculateTextWidth(text, style, fontsize) {
     return width;
 }
 
+function remToPx(rem) {
+    return rem * parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'));
+}
+
+function pxToRem(px) {
+    return px / parseInt(window.getComputedStyle(document.body.parentNode).getPropertyValue('font-size'))
+}
+
 /**
  * Create a dummy DOM element from a className and return the width property.
  * @param  {String} c Class to add.
@@ -134,5 +142,5 @@ function formatPercentage(float) {
 
 export {
     compare, removeTrailing, uppercaseFirstLetter, boldSubstring,
-    calculateTextWidth, calculateWidthFromClass, formatPercentage
+    calculateTextWidth, calculateWidthFromClass, formatPercentage, remToPx, pxToRem
 }

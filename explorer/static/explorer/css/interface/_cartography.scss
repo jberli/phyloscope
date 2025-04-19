@@ -1,12 +1,25 @@
+#map {
+    height: 100%;
+    width: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+}
+
 .cartography-button {
     border-radius: 50%;   
     &.dark {
         background-color: $main-color-dark;
-        & > svg { color: $main-color-light; }
+        & > svg {
+            transform: translateZ(0);
+            color: $main-color-light;
+        }
     }
     &.light {
         background-color: $main-color-light;
-        & > svg { color: $main-color-dark; }
+        & > svg {
+            transform: translateZ(0);
+            color: $main-color-dark;
+        }
     }
 }
 
@@ -77,6 +90,7 @@
     margin: .3rem;
 
     & > svg {
+        transform: translateZ(0);
         height: 1.4rem;
         width: 1.4rem;
     }
@@ -91,7 +105,10 @@
     &.dark {
         & > .button-help {
             background-color: $main-color-dark;
-            & > svg { color: $main-color-light; }
+            & > svg {
+                transform: translateZ(0);
+                color: $main-color-light;
+            }
         }
         & > .loader-container {
             & > .loader {
@@ -104,7 +121,10 @@
     &.light {
         & > .button-help {
             background-color: $main-color-light;
-            & > svg { color: $main-color-dark; }
+            & > svg {
+                transform: translateZ(0);
+                color: $main-color-dark;
+            }
         }
         & > .loader-container {
             & > .loader {
@@ -122,6 +142,7 @@
     margin: 1rem;
 
     & > svg {
+        transform: translateZ(0);
         color: $main-color-dark;
     }
 }

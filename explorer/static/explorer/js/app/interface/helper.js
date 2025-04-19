@@ -36,66 +36,146 @@ class Helper {
             if (style && cs === 'dark') { this.widget.changeStyle(this.widget.helpcontainer, cs, 'light'); }
         }
     }
-}
-
-class CartographyHelper extends Helper {
-    constructor(widget, parent, type) {
-        super(widget, parent, type);
-    }
 
     generate() {
         let params = this.widget.app.params
-        let help = params.texts.help.cartography;
+        let help = params.texts.help[this.type];
         let language = params.languages.current;
 
         this.content = makeDiv(null, 'helper-content no-scrollbar hidden');
         this.container.append(this.content);
 
-        let tt = makeDiv(null, 'helper-title', help.tutorial.title[language]);
-        this.content.append(tt);
+        help.forEach((c) => {
+            let type = c.type;
 
-        let tcontainer = makeDiv(null, 'helper-buttons');
-        this.content.append(tcontainer);
+            switch(type) {
+                case 'title': {
+                    let title = makeDiv(null, 'helper-title', c[language]);
+                    this.content.append(title);
+                    break;
+                }
 
-        let bcontainer = makeDiv(null, 'helper-button-container');
-        let bbutton = makeDiv(null, 'helper-button-basemap helper-button', params.interface.cartography.baselayers[0].name[language]);
-        let blabel = makeDiv(null, 'helper-button-label', help.tutorial.content.basemap[language]);
-        bcontainer.append(bbutton, blabel);
-        tcontainer.append(bcontainer);
+                case 'paragraph': {
+                    let paragraph = makeDiv(null, 'helper-paragraph', c.content[language])
+                    this.content.append(paragraph);
+                    break;
+                }
 
-        let rcontainer = makeDiv(null, 'helper-button-container');
-        let activateButton = makeDiv(null, 'helper-button-display-container active');
-        let activateButtonSlider = makeDiv(null, 'helper-button-display-slider');
-        activateButton.append(activateButtonSlider);
-        let rlabel = makeDiv(null, 'helper-button-label', help.tutorial.content.range[language]);
-        rcontainer.append(activateButton, rlabel);
-        tcontainer.append(rcontainer);
+                case 'list': {
+                    let s = c.sorted ? 'ol' : 'ul';
+                    let u = document.createElement(s);
+                    u.setAttribute('class', 'helper-list');
 
-        let ccontainer = makeDiv(null, 'helper-button-container');
-        let centerButton = makeDiv(null, 'helper-button-center');
-        addSVG(centerButton, new URL('/static/explorer/img/center.svg', import.meta.url));
-        let clabel = makeDiv(null, 'helper-button-label', help.tutorial.content.center[language]);
-        ccontainer.append(centerButton, clabel);
-        tcontainer.append(ccontainer);
+                    c.content.forEach((l) => {
+                        let li = document.createElement('li');
+                        li.setAttribute('class', 'helper-list-element');
+                        li.innerHTML = l[language];
+                        u.append(li);
+                    });
 
-        let st = makeDiv(null, 'helper-title', help.source.title[language]);
-        this.content.append(st);
+                    this.content.append(u);
+                    break;
+                }
 
-        help.source.content.forEach((s) => {
-            if (s.type === 'ul' || s.type === 'ol') {
-                let c = makeDiv(null, 'helper-list-container helper-element');
-                let e = makeDiv(null, 'helper-list-text')
-                e.innerHTML = s.text[language];
-                let u = document.createElement(s.type);
-                u.setAttribute('class', 'helper-list');
-                s.content.forEach((l) => {
-                    let li = document.createElement('li');
-                    li.setAttribute('class', 'helper-list-element');
-                    li.innerHTML = l[language];
-                    u.append(li);
-                });
-                c.append(e, u);
-                this.content.append(c);
+                case 'vector': {
+                    let vector = makeDiv(null, 'helper-vector');
+                    let label = makeDiv(null, 'helper-label', c.label[language]);
+                    addSVG(vector, new URL(`/static/explorer/img/helper/${c.svg}_${language}.svg`, import.meta.url));
+                    this.content.append(vector, label);
+                    break;
+                }
+
+                case 'buttons': {
+                    let buttons = makeDiv(null, 'helper-buttons');
+                    this.content.append(buttons);
+    
+                    c.content.forEach((element) => {
+                        let econtainer = makeDiv(null, 'helper-button-container');
+                        let button;
+    
+                        if (element.type === 'standard') {
+                            button = makeDiv(null, 'helper-button-standard helper-button', element.text[language]);
+                        }
+                        else if (element.type === 'slider') {
+                            button = makeDiv(null, 'helper-button-slider-container active');
+                            let slider = makeDiv(null, 'helper-button-slider');
+                            button.append(slider);
+                        }
+                        else if (element.type === 'vector') {
+                            button = makeDiv(null, 'helper-button-vector');
+                            addSVG(button, new URL('/static/explorer/img/' + element.svg + '.svg', import.meta.url));
+                        }
+    
+                        let label = makeDiv(null, 'helper-button-label', element.label[language]);
+                        econtainer.append(button, label);
+                        buttons.append(econtainer);
+                    });
+                    break;
+                }
+
+                case 'taxonomy': {
+                    let container = makeDiv(null, 'helper-taxonomy');
+                    let label = makeDiv(null, 'helper-label', c.label[language]);
+                    this.content.append(container, label);
+
+                    let ancestry = makeDiv(null, 'helper-taxonomy-ancestry');
+
+                    c.ancestry.forEach((element) => {
+                        let ancestor = makeDiv(null, 'helper-taxonomy-ancestor');
+                        let label = makeDiv(null, 'helper-taxonomy-ancestor-label', element[language]);
+                        ancestor.append(label);
+                        ancestry.append(ancestor);
+                    });
+
+                    let taxonomy = makeDiv(null, 'helper-taxonomy-container');
+                    let parents = makeDiv(null, 'helper-taxonomy-level');
+                    let p1 = makeDiv(null, 'helper-taxonomy-entry helper-taxonomy-placeholder');
+                    let parent = makeDiv(null, 'helper-taxonomy-entry', c.parent[language]);
+                    let p2 = makeDiv(null, 'helper-taxonomy-entry helper-taxonomy-placeholder');
+                    parents.append(p1, parent, p2);
+                    let siblings = makeDiv(null, 'helper-taxonomy-level');
+                    
+                    c.siblings.forEach((element) => {
+                        let sibling = makeDiv(null, 'helper-taxonomy-entry', element[language]);
+                        siblings.append(sibling);
+                    });
+    
+                    let children = makeDiv(null, 'helper-taxonomy-level');
+                    c.children.forEach((element) => {
+                        let child = makeDiv(null, 'helper-taxonomy-entry', element[language]);
+                        children.append(child);
+                    });
+    
+                    container.append(ancestry, taxonomy);
+                    taxonomy.append(parents, siblings, children);
+                    break;
+                }
+
+                case 'colorscale': {
+                    let container = makeDiv(null, 'helper-color-container');
+                    let current = makeDiv(null, 'helper-color-current', c.placeholder[language]);
+                    let colorscale = makeDiv(null, 'helper-color-scale');
+                    container.append(current, colorscale);
+
+                    for (let [level, value] of Object.entries(params.typesorting)) {
+                        let color = makeDiv(null, 'helper-color ' + level);
+                        colorscale.append(color);
+                        color.addEventListener('mouseenter', () => {
+                            addClass(current, level);
+                            addClass(current, 'hovering');
+                            current.innerHTML = `${value[language]} (${c.level[language]} ${value.level})`;
+                        });
+                        color.addEventListener('mouseleave', () => {
+                            removeClass(current, level);
+                            removeClass(current, 'hovering');
+                            current.innerHTML = c.placeholder[language];
+                        });
+                    }
+
+                    let label = makeDiv(null, 'helper-label', c.label[language]);
+                    this.content.append(container, label);
+                    break;
+                }
             }
         });
 
@@ -103,16 +183,4 @@ class CartographyHelper extends Helper {
     }
 }
 
-class TaxonomyHelper extends Helper {
-    constructor(widget, parent, type) {
-        super(widget, parent, type);
-    }
-}
-
-class StatisticsHelper extends Helper {
-    constructor(widget, parent, type) {
-        super(widget, parent, type);
-    }
-}
-
-export { CartographyHelper, TaxonomyHelper, StatisticsHelper }
+export { Helper }

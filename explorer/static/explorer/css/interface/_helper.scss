@@ -6,6 +6,7 @@
     height: 100%;
     width: 100%;
     background-color: $main-color-dark;
+    border-radius: $border-radius;
 
     opacity: 0;
     pointer-events: none;
@@ -28,13 +29,21 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: visible;
 
     opacity: 1;
     transition: opacity .2s ease-in-out;
 
     &.hidden {
         opacity: 0;
+    }
+}
+
+.helper-element {
+    & > a {
+        font-weight: bold;
+        color: $links-color-light;
     }
 }
 
@@ -46,26 +55,20 @@
     text-align: center;
 }
 
-.helper-element {
+.helper-paragraph {
     & > a {
         font-weight: bold;
         color: $links-color-light;
     }
 }
 
-.helper-list-container {
-
-}
-
-.helper-list-text {
-    & > a {
-        font-weight: bold;
-        color: $links-color-light;
-    }
+.helper-label {
+    font-style: italic;
+    text-align: center;
 }
 
 .helper-list {
-    margin: .8rem 0 0 0;
+    margin: 0;
     padding-left: 1rem;
 }
 
@@ -112,7 +115,7 @@
     max-width: 10rem;
 }
 
-.helper-button-basemap {
+.helper-button-standard {
     height: 2rem;
     line-height: 2rem;
     padding: 0 .4rem;
@@ -121,7 +124,7 @@
     min-width: max-content;
 }
 
-.helper-button-display-container {
+.helper-button-slider-container {
     height: 2rem;
     width: 3.4rem;
     border-radius: 2rem;
@@ -131,7 +134,7 @@
     background-color: $main-color-light;
 }
 
-.helper-button-display-slider {
+.helper-button-slider {
     background-color: $main-color-dark;
     height: 1.4rem;
     width: 1.4rem;
@@ -139,15 +142,164 @@
     margin: .3rem;
 }
 
-.helper-button-center {
+.helper-button-vector {
     height: 2rem;
     width: 2rem;
     border-radius: 50%;
     background-color: $main-color-light;
 
     & > svg {
+        transform: translateZ(0);
         color: $main-color-dark;
         height: 2rem;
         width: 2rem;
     }
+}
+
+.helper-vector {
+    display: flex;
+    justify-content: center;
+    & > svg {
+        transform: translateZ(0);
+        color: $main-color-light;
+        height: inherit;
+        width: inherit;
+    }
+}
+
+.helper-taxonomy {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 25rem;
+    aspect-ratio: 4/5;
+    margin: 0 auto;
+    user-select: none;
+}
+
+.helper-taxonomy-ancestry {
+    height: 2rem;
+    display: flex;
+    margin-right: -5px;
+}
+
+.helper-taxonomy-ancestor {
+    &:first-child > .helper-taxonomy-ancestor-label {
+        text-align: left;
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+        clip-path: polygon(calc(100% - .6rem) 0%, 100% 50%, calc(100% - .6rem) 100%, 0% 100%, 0% 0%);
+        padding-left: .5rem;
+    }
+}
+
+.helper-taxonomy-ancestor-label {
+    font-size: 1rem;
+    height: 2rem;
+    line-height: 2rem;
+    border-radius: $border-radius;
+    color: $main-color-dark;
+    background-color: $main-color-light;
+    padding: 0 1rem;
+
+    text-align: center;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    clip-path: polygon(calc(100% - .6rem) 0%, 100% 50%, calc(100% - .6rem) 100%, 0% 100%, .6rem 50%, 0% 0%);
+    overflow: hidden;
+}
+
+.helper-taxonomy-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 3rem);
+    gap: 1rem;
+}
+
+.helper-taxonomy-level {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    gap: 1rem;
+}
+
+.helper-taxonomy-entry {
+    flex: 1;
+    height: calc(100% - 1rem);
+    
+    color: $main-color-dark;
+    background-color: $main-color-light;
+    border-radius: $border-radius;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: .5rem;
+}
+
+.helper-taxonomy-placeholder {
+    opacity: 0;
+    user-select: none;
+    pointer-events: none;
+}
+
+.helper-color-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.helper-color-current {
+    border-radius: $border-radius;
+    background-color: $main-color-light;
+    color: $main-color-dark;
+    padding: .2rem .3rem;
+    white-space: nowrap;
+    font-size: .8rem;
+    margin: 0 auto .5rem auto;
+    transition: all .1s ease-in-out;
+
+    &.hovering {
+        color: $main-color-light;
+    }
+}
+
+.helper-color-scale {
+    display: flex;
+    width: 100%;
+    height: 2rem;
+}
+
+.helper-color {
+    position: relative;
+    height: 2rem;
+    flex: 1;
+    cursor: pointer;
+
+    &:first-child {
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+    }
+
+    &:last-child {
+        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+    }
+}
+
+.helper-color-tooltip {
+    position: absolute;
+    z-index: 4;
+    top: -1.6rem;
+    left: 50%;
+    padding: .2rem .3rem;
+    white-space: nowrap;
+    border-radius: $border-radius;
+    font-size: .8rem;
+    transform: scale(0, 0) translate(-50%);
+    transform-origin: 0 50%;
+    transition: transform .1s ease-in-out;
 }

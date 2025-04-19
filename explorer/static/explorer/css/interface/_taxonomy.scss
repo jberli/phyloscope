@@ -106,14 +106,8 @@ $taxonomy-margin: 2rem;
     pointer-events: all;
     overflow: hidden;
 
-    outline-style: solid;
-    outline-color: $taxonomy-entry-background;
-    outline-width: 0;
-
-    box-shadow: 0 0 3px $interface-shadows-dark;
-
     transform-origin: 50% 50%;
-    transition: flex .1s linear, box-shadow .2s ease-in-out, transform .2s ease-in-out;
+    transition: flex .1s linear, transform .2s ease-in-out;
 
     -webkit-user-select: none;  
     -moz-user-select: none;    
@@ -123,18 +117,15 @@ $taxonomy-margin: 2rem;
     &.smooshed {
         flex: 0;
         margin: 0;
-        box-shadow: unset;
     }
 
     &.collapse {
-        box-shadow: unset;
         transform: scale(0, 0);
     }
 
     &.placeholder {
         cursor: default;
         pointer-events: none;
-        box-shadow: unset;
     }
 
     &.active > .taxonomy-entry-label {
@@ -194,6 +185,7 @@ $taxonomy-margin: 2rem;
     pointer-events: none;
 
     & > svg {
+        transform: translateZ(0);
         height: inherit;
         width: inherit;
     }

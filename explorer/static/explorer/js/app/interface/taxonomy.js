@@ -6,7 +6,7 @@
 import { loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { calculateTextWidth, formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
-import { TaxonomyHelper } from "./helper.js";
+import { Helper } from "./helper.js";
 import Widget from "./widget.js";
 
 class Taxonomy extends Widget {
@@ -18,14 +18,15 @@ class Taxonomy extends Widget {
         this.container = makeDiv('taxonomy', 'sub-panel');
         this.parent.append(this.container);
 
+        this.helper = new Helper(this, this.container, this.type);
+        this.helper.update();
+
         this.infocontainer = makeDiv(null, 'taxonomy-information panel-information');
         this.container.append(this.infocontainer);
 
         // Mask and loader
         this.mask = makeDiv(null, 'taxonomy-mask mask');
         this.container.append(this.mask);
-
-        this.helper = new TaxonomyHelper(this, this.container);
 
         this.ancestry = new Ancestry(this);
 
@@ -40,9 +41,11 @@ class Taxonomy extends Widget {
     }
 
     update(callback) {
+        callback = callback || function () {};
         this.loading();
         this.collapse();
         wait(this.params.interface.transition, () => {
+            this.helper.update();
             this.clear();
             this.ancestry.update();
             this.grandparents.update();
@@ -158,6 +161,7 @@ class Taxonomy extends Widget {
     }
 
     collapse() {
+        addClass(this.helper.content, 'hidden');
         this.ancestry.collapse();
         this.parents.collapse();
         this.siblings.collapse();
@@ -165,6 +169,7 @@ class Taxonomy extends Widget {
     }
 
     reveal() {
+        removeClass(this.helper.content, 'hidden');
         this.ancestry.reveal();
         this.parents.reveal();
         this.siblings.reveal();

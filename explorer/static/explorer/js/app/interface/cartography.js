@@ -5,7 +5,7 @@
 
 import { makeDiv, addClass, removeClass, addSVG, wait } from "../generic/dom.js";
 import { animateOpacity } from "../generic/map.js";
-import { CartographyHelper } from "./helper.js";
+import { Helper } from "./helper.js";
 import Widget from "./widget.js";
 
 /**
@@ -28,7 +28,7 @@ class Cartography extends Widget {
         this.container = makeDiv('cartography', 'sub-panel');
         this.parent.append(this.container);
 
-        this.helper = new CartographyHelper(this, this.container);
+        this.helper = new Helper(this, this.container, this.type);
         this.helper.update();
 
         this.infocontainer = makeDiv(null, 'cartography-information panel-information');
@@ -66,8 +66,14 @@ class Cartography extends Widget {
             self.app.unselectable();
             document.addEventListener('mousemove', moving);
             document.addEventListener('mouseup', exit);
-        })
+        });
 
+        this.resizer.addEventListener('dblclick', () => {
+            self.app.first.style.flex = '35%';
+            self.app.second.style.flex = '35%';
+            self.app.information.container.style.flex = '30%';
+            self.container.style.flex = '70%';
+        });
 
         // Map DOM element
         this.mapdiv = makeDiv('map', 'ol-map');

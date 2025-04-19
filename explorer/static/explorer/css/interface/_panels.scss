@@ -35,13 +35,14 @@ $side-panel-background: $interface-background;
 }
 
 #taxonomy {
+    overflow: visible;
+    max-height: calc(100% - 12rem);
     flex: 1;
     background-color: $main-color-dark;
 }
 
 #information {
     flex: 30%;
-    font-family: 'Cantarell';
     color: $main-color-extralight;
     display: flex;
     flex-direction: column;

@@ -27,7 +27,8 @@ def lookup(language, value, limit):
                 'scientific': e.name,
                 'type': RANKS[e.rank][language],
                 'typesorting': e.rank,
-                'picture': link
+                'picture': link,
+                'iconic': e.iconic
             })
             # Add the taxon as being added
             taxons.append(e.tid)

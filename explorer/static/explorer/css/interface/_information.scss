@@ -73,6 +73,7 @@
 .description-button {
     cursor: pointer;
     & > svg {
+        transform: translateZ(0);
         height: 2rem;
         width: 2rem;
     }

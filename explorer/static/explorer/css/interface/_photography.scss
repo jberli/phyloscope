@@ -55,6 +55,7 @@
     width: 1.4rem;
     margin-right: .2rem;
     & > svg {
+        transform: translateZ(0);
         fill: $main-color-dark;
         height: inherit;
         width: inherit;
@@ -116,6 +117,7 @@
     width: inherit;
 
     & > svg {
+        transform: translateZ(0);
         height: inherit;
         width: inherit;
         fill: $main-color-light;

@@ -5,7 +5,7 @@
 
 import { addClass, addSVG, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
 import { formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
-import { StatisticsHelper } from "./helper.js";
+import { Helper } from "./helper.js";
 import Widget from "./widget.js";
 
 class Statistics extends Widget {
@@ -27,7 +27,7 @@ class Statistics extends Widget {
         this.chart = makeDiv(null, 'statistics-chart collapse');
         this.container.append(this.chart);
 
-        this.helper = new StatisticsHelper(this, this.container);
+        // this.helper = new Helper(this, this.container);
 
         this.helpcontainer = makeDiv(null, 'statistics-button-help-container button-help-container');
         this.help = makeDiv(null, 'button button-help');

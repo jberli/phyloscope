@@ -100,6 +100,7 @@
     }
 
     & > svg {
+        transform: translateZ(0);
         transition: color .1s ease-in-out;
         color: $main-color-dark;
         height: 2rem;
@@ -110,16 +111,23 @@
         transform: scale(1.1, 1.1);
         background-color: $main-color-dark;
         & > svg {
+            transform: translateZ(0);
             color: $main-color-light;
         }
     }
 
     &.dark {
         background-color: $main-color-dark;
-        & > svg { color: $main-color-light; }
+        & > svg {
+            transform: translateZ(0);
+            color: $main-color-light;
+        }
     }
     &.light {
         background-color: $main-color-light;
-        & > svg { color: $main-color-dark; }
+        & > svg {
+            transform: translateZ(0);
+            color: $main-color-dark;
+        }
     }
 }
