@@ -188,34 +188,34 @@ typesorting:
     en: Infrahybrid
     fr: Infra-hybride
 iucn:
-  EX:
+  ex:
     en: Extinct
     fr: Éteinte
-  EW:
+  ew:
     en: Extinct in the wild
     fr: Éteinte à l'état sauvage
-  CR:
+  cr:
     en: Critically endangered
     fr: En danger critique d'extinction
-  EN:
+  en:
     en: Endangered
     fr: En danger
-  VU:
+  vu:
     en: Vulnerable
     fr: Vulnérable
-  NT:
+  nt:
     en: Near threatened
     fr: Quasi menacée
-  CD:
+  cd:
     en: Conservation dependent
     fr: Dépendente de la conservation
-  LC:
+  lc:
     en: Least concern
     fr: Préoccupation mineure
-  DD:
+  dd:
     en: Data deficient
     fr: Données insuffisantes
-  NE:
+  ne:
     en: Not evaluated
     fr: Non-évaluée
 texts:
@@ -259,6 +259,14 @@ texts:
             label:
               en: Center the map on the taxon's range extent
               fr: Centrer la carte sur la zone de répartition du taxon
+      - type: paragraph
+        content:
+          en: >
+            In the top right of this cartographic widget, a circle inside the border allows you to resize the map. Double-clicking it
+            will restore its initial size.
+          fr: >
+            En haut à droite de cette cartographie, un cercle dans la bordure permet de redimensionner la carte. Double cliquer dessus permet
+            de revenir à sa taille initiale.
       - type: title
         en: Data source
         fr: Source des données
@@ -330,11 +338,11 @@ texts:
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            The taxonomic view is a representation of the tree of life (phylogenetic tree). To facilitate its comprehension,
+            the following explanations use an analogy with the family tree (ancestores, parents, children, <i>etc.</i>).
           fr: >
-            La vue taxonomique est une représentation de l'arbre du vivant. Afin de faciliter sa compréhension,
-            les explications qui suivent utilisent un analogie avec la famille (ancêtres, parents, enfants, <i>etc.</i>).
-            Un code couleur arbitraire est utilisé pour représenter les différents niveaux de la taxonomie.
+            La vue taxonomique est une représentation de l'arbre du vivant (arbre phylogénétique). Afin de faciliter sa compréhension,
+            les explications qui suivent utilisent un analogie avec un arbre généalogique (ancêtres, parents, enfants, <i>etc.</i>).
       - type: taxonomy
         ancestry:
           - en: Life
@@ -362,46 +370,75 @@ texts:
             fr: Enfant suivant
         label:
           en: >
+            Figure 1 : Schematization of the taxonomic view
           fr: >
-            Figure 1 : Schématisation de la vue taxonomique du Phyloscope
+            Figure 1 : Schématisation de la vue taxonomique
       - type: list
         sorted: false
         content:
           - en: >
+              At the top, the list of <b>ancestors</b> are visible from the root (life itself) to the parent of the current taxon.
+              It is possible to click on each ancestor to activate it.
             fr: >
-              Tout en haut, la liste des <b>ancêtres</b> du taxon actif sont visibles de la racine (la vie) jusqu'au parent du taxon actif.
+              Tout en haut, la liste des <b>ancêtres</b> sont visibles de la racine (la vie) jusqu'au parent du taxon actif.
               Il est possible de cliquer sur chaque ancêtre pour l'activer.
           - en: >
+              The upper level contains the <b>parent</b> of the current taxon. Clicking on it will go up the taxonomy and the parent will become
+              the current taxon.
             fr: >
               Le niveau supérieur comporte le <b>parent</b> du taxon actif. Cliquer dessus remonte la taxonomie et le parent devient le taxon actif.
           - en: >
+              The middle level contains the <b>current taxon</b> surrounded by its siblings (<i>i.e.</i> the other children of the parent of the current taxon).
+              Clicking on a sibling or scrolling on the level allows you to change the current taxon to its previous or following sibling.
+              This level is ordered by the number of terminal taxon (<i>cf.</i> Figure 3) composing every taxon from left to right.
             fr: >
               Le niveau intermédiaire comporte le <b>taxon actif</b> ainsi que ses frères (<i>i.e.</i> les autres enfants du parent du taxon actif).
-              Cliquer dessus ou utiliser la molette de la souris permet de changer le taxon actif pour le frère suivant ou précédent. Ce niveau est
-              classé par le nombre de taxon contenu dans chaque taxon de gauche à droite.
+              Cliquer sur un frère ou utiliser la molette de la souris sur le niveau permet de changer le taxon actif pour le frère suivant ou précédent.
+              Ce niveau est classé par le nombre de taxon terminaux (<i>cf.</i> Figure 3) contenu dans chaque taxon de gauche à droite.
           - en: >
+              The lower level contains the <b>children</b> of the current taxon. Clicking on the child in the center will go down the taxonomy and the child will become the
+              current taxon. Clicking on the surrounding children or scrolling on the level allows you to navigate in the children of the current taxon. This level is also
+              ordered by the number of terminal taxon (<i>cf.</i> Figure 3) composing every child from left to right.
             fr: >
-              Le niveau inférieur comporte les <b>enfants</b> du taxon actif. Cliquer sur l'enfant situé au centre descend l'enfant devient le taxon actif.
+              Le niveau inférieur comporte les <b>enfants</b> du taxon actif. Cliquer sur l'enfant situé au centre descend la taxonomie et l'enfant devient le taxon actif.
               Cliquer sur un des deux autres enfant ou utiliser la molette permet de naviguer dans les enfants du taxon actif. Ce niveau est également
-              classé par le nombre de taxon contenu dans chaque enfant de gauche à droite.
+              classé par le nombre de taxon terminaux (<i>cf.</i> Figure 3) contenu dans chaque enfant de gauche à droite.
       - type: colorscale
         placeholder:
           en: Hover on a color
-          fr: Passer le cursor sur une color
+          fr: Passer la souris sur une couleur
         level:
           en: level
           fr: niveau
         label:
           en: >
+            Figure 2 : Colours used to represent every level of the taxonomy
           fr: >
             Figure 2 : Les couleurs utilisées pour représenter les niveaux de la taxonomie
+      - type: paragraph
+        content:
+          en: >
+            Every level of the taxonomy is represented by an arbitrary colour, from the red (Life) to the orange (infra-hybrid).
+            This allows us to have an any of its position within the phylogenetic tree. This colour is used by the range area of the taxon
+            in the cartographic view, but it is independant from the colours used by the donough chart.
+          fr: >
+            Chaque niveau de la taxonomie est représenté par une couleur arbitraire, du rouge (la vie) à l'orange (infra-hybride).
+            Cela permet d'avoir une idée de sa position dans l'arbre phylogénétique. Cette couleur est également utilisée par l'aire de répartition
+            du taxon dans la vue cartographique mais elle est indépendante des couleurs utilisées par le graphique à anneaux.
       - type: title
         en: What is phylogenetics?
         fr: Qu'est-ce que la phylogénétique ?
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            The term <a href='https://en.wikipedia.org/wiki/Taxonomy' target='_blank'>taxonomy</a> refers to a way of classifying and categorising data,
+            generally in the form of a hierarchy. An element of this taxonomic tree is called a taxon (taxa in the plural).
+            To represent the diversity of Life, scientists use <a href='https://en.wikipedia.org/wiki/Taxonomy_(biology)' target='_blank'>taxonomy</a> to
+            represent the relationship betweeb species, we call that a <a href='https://en.wikipedia.org/wiki/Phylogenetic_tree' target='_blank'>phylogenetic tree</a>.
+            This relationship reflects the <a href='https://en.wikipedia.org/wiki/History_of_life' target='_blank'>history of Life</a>. A taxon from this taxonomy
+            then refers to any level of this tree, for example a <a href='https://en.wikipedia.org/wiki/Species' target='_blank'>species</a> (<i>e.g. Columba palumbus</i>),
+            <a href='https://en.wikipedia.org/wiki/Class_(biology)' target='_blank'>class</a>  (<i>e.g.</i> birds) or even
+            <a href='https://en.wikipedia.org/wiki/Life' target='_blank'>Life</a> itself.
           fr: >
             Le terme taxonomie renvoie à une manière de classifier et de catégoriser des données, généralement sous forme d'une hiérarchie. Un élément de
             cet arbre taxonomique est appelé taxon (ou taxa au pluriel). Pour représenter la diversité de la vie, les scientifiques utilisent la
@@ -409,13 +446,20 @@ texts:
             <a href='https://fr.wikipedia.org/wiki/Arbre_phylog%C3%A9n%C3%A9tique' target='_blank'>arbre phylogénétique</a>. Cette relation reflète
             <a href='https://fr.wikipedia.org/wiki/Histoire_%C3%A9volutive_du_vivant' target='_blank'>l'histoire évolutive</a> partagées par ces espèces.
             Un taxon de cette taxonomie désigne alors n'importe quel niveau de cet arbre, par exemple une
-            <a href='https://fr.wikipedia.org/wiki/Esp%C3%A8ce' target='_blank'>espèce</a> (<i>e.g.</i> Columba palumbus), une
+            <a href='https://fr.wikipedia.org/wiki/Esp%C3%A8ce' target='_blank'>espèce</a> (<i>e.g. Columba palumbus</i>), une
             <a href='https://fr.wikipedia.org/wiki/Classe_(biologie)' target='_blank'>classe</a> (<i>e.g.</i> les oiseaux) ou encore la
             <a href='https://fr.wikipedia.org/wiki/Vie' target='_blank'>vie</a> elle-même.
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            The phylogenetic tree used here comes from the collaborative database <a href='https://www.inaturalist.org/' target='_blank'>iNaturalist</a>.
+            This database uses <a href='https://en.wikipedia.org/wiki/Cladistics' target='_blank'>cladistics</a> as an underlying principle. Cladistics is
+            an approach to biological classification in which organisms are categorized in groups based on hypothesis of
+            <a href='https://en.wikipedia.org/wiki/Most_recent_common_ancestor' target='_blank'>most recent common ancestry</a> (<i>cf.</i> Figure 3).
+            Those groups, called <a href='https://en.wikipedia.org/wiki/Clade' target='_blank'>clades</a> must be
+            <a href='https://en.wikipedia.org/wiki/Monophyly' target='_blank'>monophyletic</a> which means it must represent every taxon that evolved
+            from that group's common ancestor. Using this logic, groups like worms and fishes doesn't exist because they encompass such a diverse
+            range of species that we would need to include humans as well.
           fr: >
             L'arbre phylogénétique utilisé ici provient de la base de données collaborative <a href='https://www.inaturalist.org/' target='_blank'>iNaturalist</a>.
             Cette base de données utilise la <a href='https://fr.wikipedia.org/wiki/Cladistique' target='_blank'>cladistique</a> comme principe sous-jacent. La cladistique
@@ -429,43 +473,93 @@ texts:
         svg: phylogenetic
         label:
           en: >
+            Figure 3 : Standard representation of a clade in phylogenetics
           fr: >
             Figure 3 : Représentation classique d'un clade en phylogénétique
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            Our phylogenetic tree is then a simplification of the phylogenetic tree of the Life. This simplification is basically a reduction of the number
+            of intermediate taxa by selecting only the ones that are more representative. This selection can be a heriage from the history of evolutionary biology,
+            but it is often the reflection of a <a href='https://en.wikipedia.org/wiki/Speciation' target='_blank'>spectiation</a> induced by different factors:
+            tectonic movements (species isolation, volcanic activities, <i>etc.</i>), anthropic environmental modifications, <i>etc.</i>
           fr: >
-            Cet arbre phylogénétique est une simplification de l'arbre phylogénétique du vivant. Il s'agit d'une réduction du nombre
+            Notre arbre phylogénétique est donc une simplification de l'arbre phylogénétique du vivant. Il s'agit d'une réduction du nombre
             de taxon intermédiaire en sélectionnant les taxa les plus représentatifs. Cette sélection peut être un héritage de l'histoire
             de la biologie de l'évolution, mais il s'agit souvent de refléter la <a href='https://fr.wikipedia.org/wiki/Sp%C3%A9ciation' target='_blank'>spéciation</a>
-            induite par différents facteurs : les mouvements tectoniques (isolation des espèces, activité volcanique), les
-            modifications anthropiques d'un milieu, <i>etc.</i>).
+            induite par différents facteurs : les mouvements tectoniques (isolation des espèces, activité volcanique, <i>etc.</i>), les
+            modifications anthropiques d'un milieu, <i>etc.</i>
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            If we take for example, three orders: <i>columbiformes</i> (pigeons and doves), <i>pterocliformes</i> (sandgrouse) and <i>cuculiformes</i> (cuckoos). In our database,
+            those three orders are directly below the class <i>Aves</i> (birds). In reality, <i>columbiformes</i> and <i>pterocliformes</i> are closer to each other than they
+            are to <i>cuculiformes</i> and this information is not present in our database. Those three orders belong to the clade
+            <a href='https://en.wikipedia.org/wiki/Columbaves' target='_blank'><i>columbaves</i></a>, as shown by the reprentation of the clade in Figure 4.
+            It is important to acknowledge the fact that an exhaustive phylogenetic tree doesn't exist currently and will probably never exist,
+            indeed, all species have a different degree of proximity and it is only quantified by genetic studies.
           fr: >
-            Prenons par exemple trois ordres : les <a href='https://fr.wikipedia.org/wiki/Columbiformes' target='_blank'>columbiformes</a> (pigeons et tourterelles),
-            les <a href='https://fr.wikipedia.org/wiki/Pterocliformes' target='_blank'>pterocliformes</a> (gangas et syrrhaptes) et les
-            <a href='https://fr.wikipedia.org/wiki/Cuculiformes' target='_blank'>cuculiformes</a> (coucous et apparentés).
-            Dans notre base de données simplifiées, ces trois ordres appartiennent directement à la classe des oiseaux.
-            Mais en réalité, les columbiformes et les pterocliformes sont plus proches entre eux qu'ils ne le sont des cuculiformes et cette information n'est pas
-            présente dans notre base. Ces trois ordres appartiennent au clade des columbaves, comme le montre la Figure 4.
+            Prenons par exemple trois ordres : les <a href='https://fr.wikipedia.org/wiki/Columbiformes' target='_blank'><i>columbiformes</i></a> (pigeons et tourterelles),
+            les <a href='https://fr.wikipedia.org/wiki/Pterocliformes' target='_blank'><i>pterocliformes</i></a> (gangas et syrrhaptes) et les
+            <a href='https://fr.wikipedia.org/wiki/Cuculiformes' target='_blank'><i>cuculiformes</i></a> (coucous et apparentés).
+            Dans notre base de données simplifiées, ces trois ordres appartiennent directement à la classe <i>Aves</i> (les oiseaux).
+            Mais en réalité, les <i>columbiformes</i> et les <i>pterocliformes</i> sont plus proches entre eux qu'ils ne le sont des <i>cuculiformes</i> et cette information n'est pas
+            présente dans notre base. Ces trois ordres appartiennent au clade des <i>columbaves</i>, comme le montre la représentation du clade dans la Figure 4.
+            Il est tout de même important de conserver à l'esprit qu'un arbre phylogénétique exhaustif n'existe pas actuellement et sans doute n'existera jamais,
+            car toutes les expèces ont un différent degré de proximité et celle-ci n'est quantifiée que par des études génétiques.
       - type: vector
         svg: aves
         label:
           en: >
+            Figure 4 : Representation of the clade <i>Columbaves</i>
           fr: >
-            Figure 4 : Représentation du clade Columbaves
+            Figure 4 : Représentation du clade <i>Columbaves</i>
       - type: paragraph
         content:
           en: >
-            Geographical species range data
+            Research on genetics is forever evolving et some taxa are subject to changes when new discoveries emerge. Phyloscope is updated each month, 
+            and the database is re-initialized once a year. This initialization rebuild the full taxonomy and allow for the deletion of taxa that do not exist
+            anymore and add new ones.
           fr: >
-            La recherche sur la génétique ne cesse d'avancer et certains taxons sont susceptibles de changer lorsque de nouvelles découvertes
+            La recherche sur la génétique ne cesse d'avancer et certains taxa sont susceptibles de changer lorsque de nouvelles découvertes
             émergent. Phyloscope est mis-à-jour chaque mois, et la base est complètement réinitialisée une fois par an.
             Cette réinitialisation reconstruit entièrement la taxonomie et permet de supprimer les taxa qui n'existent plus et d'ajouter des nouveaux.
     statistics:
-      en: ''
-      fr: ''
+      - type: title
+        en: The doughnut chart
+        fr: Le graphique en anneaux
+      - type: paragraph
+        content:
+          en: >
+            The doughnut chart offers an alternative view of the taxonomy that highlights the proportion of every child taxon contained within the current taxon.
+            This gives an idea of its diversity (Figure 1). Without interaction, the centre of the chart displays the name of the current taxon and the number of
+            terminal taxa (<i>cf.</i> Help of the taxonomic view - Figure 3) that compose it. When hovering the mouse hover children taxa, the centre displays the full
+            name of the hovered child, the number of terminal taxa that compose it, and the percentage it occupies within the current taxon. Furthermore, while hovering
+            the active children from the taxonomic view is updated.
+          fr: >
+            Le graphique en anneaux propose une vue alternative de la taxonomie mettant en avant la proportion de chaque taxon enfant du taxon actif. Cela
+            permet d'avoir une idée de sa diversité (Figure 1). Sans interaction, le centre du graphique affiche le nom du taxon actif et le nombre de taxa terminaux
+            (<i>cf.</i> Aide de la vue taxonomique - Figure 3) qui le compose. Lors du passage du la souris sur les taxa enfant, le centre affiche le nom
+            entier du taxon enfant survolé, le nombre de taxa terminaux qui le compose, et le pourcentage qu'il occupe dans le taxon actif. De plus, lors
+            du passage de la souris, l'enfant actif de la vue taxonomique est également mis-à-jour.
+      - type: vector
+        svg: donut
+        label:
+          en: >
+            Figure 1 : The doughnut chart showing the proportion of every taxon child
+          fr: >
+            Figure 1 : Le graphique en anneau montre les proportion de chaque taxon enfant
+      - type: paragraph
+        content:
+          en: >
+            It is possible to navigate in the taxonomic tree by using this chart. By clicking in the centre, the taxonomy goes up and the parent
+            becomes the current taxon. By clicking on a child taxon, the taxonomy goes down and the selected child becomes the current taxon, revealing
+            its own children in place of the current ones.
+            The fluidity of the chart's animation can sometimes be poor, it is highly dependent on the number of children of the current taxon as well
+            as the processing power of your computer.
+          fr: >
+            Il est possible de naviguer dans la taxonomie en utilisant ce graphique. En cliquant au centre, la taxonomie remonte et le parent
+            devient le taxon actif. En cliquant sur un taxon enfant, la taxonomie descend et le taxon enfant selectionné devient le taxon actif, révelant
+            ses propres enfants à la place des enfants actuels.
+            La fluidité de l'animation du graphique à anneaux peut parfois être mauvaise, elle dépend du nombre d'enfants du taxon actif et de la
+            puissance de calcul de votre ordinateur.

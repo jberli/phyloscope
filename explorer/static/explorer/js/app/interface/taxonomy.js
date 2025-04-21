@@ -45,7 +45,6 @@ class Taxonomy extends Widget {
         this.loading();
         this.collapse();
         wait(this.params.interface.transition, () => {
-            this.helper.update();
             this.clear();
             this.ancestry.update();
             this.grandparents.update();
@@ -161,7 +160,6 @@ class Taxonomy extends Widget {
     }
 
     collapse() {
-        addClass(this.helper.content, 'hidden');
         this.ancestry.collapse();
         this.parents.collapse();
         this.siblings.collapse();
@@ -169,7 +167,6 @@ class Taxonomy extends Widget {
     }
 
     reveal() {
-        removeClass(this.helper.content, 'hidden');
         this.ancestry.reveal();
         this.parents.reveal();
         this.siblings.reveal();

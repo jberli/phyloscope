@@ -27,7 +27,8 @@ class Statistics extends Widget {
         this.chart = makeDiv(null, 'statistics-chart collapse');
         this.container.append(this.chart);
 
-        // this.helper = new Helper(this, this.container);
+        this.helper = new Helper(this, this.container, this.type);
+        this.helper.update();
 
         this.helpcontainer = makeDiv(null, 'statistics-button-help-container button-help-container');
         this.help = makeDiv(null, 'button button-help');

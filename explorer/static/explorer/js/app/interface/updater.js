@@ -92,12 +92,20 @@ class Updater {
 
     switchLanguage(lang, callback) {
         callback = callback || function () {};
+        let transition = this.app.params.interface.transition;
         this.app.freeze();
         this.app.information.loading();
         this.app.statistics.loading();
         this.app.taxonomy.loading();
         this.app.cartography.loading();
         this.app.taxonomy.collapse();
+
+        addClass(this.app.taxonomy.helper.content, 'hidden');
+        addClass(this.app.statistics.helper.content, 'hidden');
+        wait(transition, () => {
+            this.app.taxonomy.helper.update();
+            this.app.statistics.helper.update();
+        });
 
         if (this.app.information.search.active) { this.app.information.describing(); }
 
