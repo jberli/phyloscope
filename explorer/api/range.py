@@ -32,7 +32,7 @@ def get_range(index):
         'typesorting': t
     }
 
-def update_range():
+def update_range(initialize=False):
     """
     Fetch taxon range and update the database.
     """
@@ -46,31 +46,31 @@ def update_range():
     if not os.path.exists(pathtmp):
         os.makedirs(pathtmp)
     
-    # # Download the metadata file
-    # r = requests.get(urlmeta)
-    # # Parse to json
-    # metadata = json.loads(r.content)
+    # Download the metadata file
+    r = requests.get(urlmeta)
+    # Parse to json
+    metadata = json.loads(r.content)
 
-    # inb = len(metadata['collections'].keys())
-    # before = datetime.datetime.now()
-    # bar = IncrementalBar('...Downloading range files     ', max=inb, suffix='%(percent)d%%')
-    # # Loop through each collection
-    # for k, info in metadata['collections'].items():
-    #     if info['archives'] > 1:
-    #         for i in range(1, info['archives'] + 1):
-    #             try:
-    #                 download(f'{urlgpkg}_{k}_{i}.gpkg', f'{directory}/{tmp}/{k}_{i}.gpkg')
-    #             except:
-    #                 pass
-    #     else:
-    #         try:
-    #             download(f'{urlgpkg}_{k}.gpkg', f'{directory}/{tmp}/{k}.gpkg')
-    #         except:
-    #             pass
-    #     bar.next()
-    # bar.next()
-    # after = datetime.datetime.now()
-    # print(f' in {str(after - before)}')
+    inb = len(metadata['collections'].keys())
+    before = datetime.datetime.now()
+    bar = IncrementalBar('...Downloading range files     ', max=inb, suffix='%(percent)d%%')
+    # Loop through each collection
+    for k, info in metadata['collections'].items():
+        if info['archives'] > 1:
+            for i in range(1, info['archives'] + 1):
+                try:
+                    download(f'{urlgpkg}_{k}_{i}.gpkg', f'{directory}/{tmp}/{k}_{i}.gpkg')
+                except:
+                    pass
+        else:
+            try:
+                download(f'{urlgpkg}_{k}.gpkg', f'{directory}/{tmp}/{k}.gpkg')
+            except:
+                pass
+        bar.next()
+    bar.next()
+    after = datetime.datetime.now()
+    print(f' in {str(after - before)}')
 
     osdir = os.fsencode(pathtmp)
     
@@ -89,6 +89,10 @@ def update_range():
             geom = entry.geometry
             taxon = Taxon.objects.filter(tid=tid)
             if len(taxon) > 0:
+                if not initialize:
+                    if taxon[0].range is not None:
+                        continue
+
                 taxon[0].range = GEOSGeometry(correct_geometry(geom).wkt, srid=3857)
                 taxon[0].save()
             bar.next()
@@ -100,16 +104,16 @@ def update_range():
     taxons = Taxon.objects.all().order_by('level')
     bar = IncrementalBar(f'...Adding range to ancestry ', max=len(taxons), suffix='%(percent)d%%')
     for taxon in taxons:
-        print(taxon.tid, taxon.rank, taxon.name)
         children = taxon.children.all()
-        if len(children) > 0:
+        if len(children) > 0 and taxon.range is None:
             geometry = None
             for child in children:
-                multi = child.range
-                if geometry is None:
-                    geometry = multi
-                else:
-                    geometry = unary_union([make_valid(geometry), multi])
+                if child.range is not None:
+                    multi = from_wkt(child.range.wkt)
+                    if geometry is None:
+                        geometry = multi
+                    else:
+                        geometry = unary_union([ make_valid(geometry), multi ])
             if geometry is not None:
                 part = []
                 if geometry.geom_type == 'Polygon':
@@ -125,4 +129,4 @@ def update_range():
     after = datetime.datetime.now()
 
     print(f' in {str(after - before)}')
-    # shutil.rmtree(pathtmp)
+    shutil.rmtree(pathtmp)

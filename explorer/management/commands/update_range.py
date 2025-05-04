@@ -19,6 +19,6 @@ class Command(BaseCommand):
         else:
             doit = prompt('''You are about to fetch and update ranges. This operation might take some time. Continue? ''')
         if (doit):
-            update_range()
+            update_range(False)
         else:
             print('Nothing was done')

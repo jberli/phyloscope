@@ -33,8 +33,7 @@ class Header extends Widget {
         let githubtooltip = makeDiv(null, 'header-github-tooltip', 'GitHub');
         this.githubcontainer.append(github, githubtooltip);
 
-        this.lastupdate = new Date(this.params.database.update);
-        this.lastinit = new Date(this.params.database.initialization);
+        this.lastupdate = new Date(this.params.update);
         let locale = this.params.languages.available[language].locale;
         let options = { weekday: "short", year: "numeric", month: "long", day: "numeric" };
 
@@ -45,15 +44,12 @@ class Header extends Widget {
 
         this.updatelabels = makeDiv(null, 'header-update-labels');
         this.updatetext = this.params.texts.database.update[language] + ' ' + this.lastupdate.toLocaleDateString(locale, options);
-        this.inittext = this.params.texts.database.initialization[language] + ' ' + this.lastinit.toLocaleDateString(locale, options);
         this.update = makeDiv(null, 'header-update-line', this.updatetext);
-        this.init = makeDiv(null, 'header-update-line', this.inittext);
-        this.updatelabels.append(this.update, this.init);
+        this.updatelabels.append(this.update);
         this.updatecontainer.append(this.updatelabels);
 
         let uwidth = pxToRem(calculateTextWidth(this.updatetext, getComputedStyle(this.update), .8));
-        let iwidth = pxToRem(calculateTextWidth(this.inittext, getComputedStyle(this.init), .8));
-        this.updatewidth = Math.max(uwidth, iwidth) + 3;
+        this.updatewidth = uwidth + 3;
 
         this.updatecontainer.addEventListener('mouseover', (e) => {
             addClass(this.updatecontainer, 'information');

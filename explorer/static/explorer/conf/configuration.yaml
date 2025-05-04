@@ -43,7 +43,7 @@ languages:
       name: English
   current: fr
 taxonomy:
-  current: 3
+  current: 1
 photography:
   url: https://inaturalist-open-data.s3.amazonaws.com/photos/
 typesorting:
