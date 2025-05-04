@@ -517,13 +517,10 @@ texts:
       - type: paragraph
         content:
           en: >
-            Research on genetics is forever evolving et some taxa are subject to changes when new discoveries emerge. Phyloscope is updated each month, 
-            and the database is re-initialized once a year. This initialization rebuild the full taxonomy and allow for the deletion of taxa that do not exist
-            anymore and add new ones.
+            Research on genetics is forever evolving et some taxa are subject to changes when new discoveries emerge. Phyloscope is updated each month.
           fr: >
             La recherche sur la génétique ne cesse d'avancer et certains taxa sont susceptibles de changer lorsque de nouvelles découvertes
-            émergent. Phyloscope est mis-à-jour chaque mois, et la base est complètement réinitialisée une fois par an.
-            Cette réinitialisation reconstruit entièrement la taxonomie et permet de supprimer les taxa qui n'existent plus et d'ajouter des nouveaux.
+            émergent. Phyloscope est mis-à-jour tous les mois.
     statistics:
       - type: title
         en: The doughnut chart

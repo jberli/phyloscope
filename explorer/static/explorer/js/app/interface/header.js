@@ -89,13 +89,10 @@ class Header extends Widget {
         let locale = this.params.languages.available[language].locale;
         let options = { weekday: "short", year: "numeric", month: "long", day: "numeric" };
         this.updatetext = this.params.texts.database.update[language] + ' ' + this.lastupdate.toLocaleDateString(locale, options);
-        this.inittext = this.params.texts.database.initialization[language] + ' ' + this.lastinit.toLocaleDateString(locale, options);
         let uwidth = pxToRem(calculateTextWidth(this.updatetext, getComputedStyle(this.update), .8));
-        let iwidth = pxToRem(calculateTextWidth(this.inittext, getComputedStyle(this.init), .8));
-        this.updatewidth = Math.max(uwidth, iwidth) + 3;
+        this.updatewidth = uwidth + 3;
 
         this.update.innerHTML = this.updatetext;
-        this.init.innerHTML = this.inittext;
     }
 }
 
