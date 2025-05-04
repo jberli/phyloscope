@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from explorer.api.iconic import update_iconic_taxon
+from explorer.api.database import initialize
 from phyloscope.management.warnings import prompt
 
 class Command(BaseCommand):
-    help = 'Update iconic'
+    help = 'Update database'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -17,8 +17,8 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt('''You are about to update iconic taxon. This operation might take some time. Continue? ''')
+            doit = prompt('''You are about to remove all entries from the database and rebuild it from scratch. Continue? ''')
         if (doit):
-            update_iconic_taxon()
+            initialize(limit=10)
         else:
             print('Nothing was done')

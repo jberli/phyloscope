@@ -14,12 +14,13 @@ from django.db.models import Max
 from explorer.api.tools.models import wipe_database, display_database_information
 from explorer.api.tools.files import get_row_number, read_csv, read_entry, download
 from explorer.api.tools.fetch import fetch_api
+from explorer.api.tools.iconic import update_iconic_taxon
 from explorer.api.configuration import get_configuration
 
 # Import models to access the database
 from explorer.models import Taxon, Names, Photo 
 
-def fetch_data(taxons, tmp, batch=30, maximum=10000):
+def fetch_data(taxons, tmp, batch=30, maximum=9000):
     """
     Fetch the missing taxons using the iNaturalist API and write
     the results inside .csv files.
@@ -265,19 +266,173 @@ def insert_data(taxons, tmp):
     print(f' in {str(after - before)}')
     bar.finish()
 
-def update(initialize=False, limit=None, batch=30, maximum=10000):
+def get_taxonomy_from_file(directory, limit=None, update=True):
+    pathzip = f'{directory}/taxonomy.zip'
+
+    # Download the file inside the data folder
+    print('Downloading taxonomy file...')
+    # download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
+
+    # Extract the zip file in a temporary file
+    with zipfile.ZipFile(pathzip, 'r') as z:
+        z.extractall(directory)
+
+    typesorting = get_configuration()['typesorting']
+
+    mapper = {}
+    # Create a custom mapper to order data according to the typesorting
+    for typesort, entry in typesorting.items():
+        mapper[typesort] = entry['level']
+
+    # Retrieve the list of taxon index already present in database
+    taxons = [ x['tid'] for x in list(Taxon.objects.order_by('tid').values('tid').distinct()) ]
+    # Columns to keep
+    tokeep = [ 'id', 'scientificName', 'taxonRank' ]
+
+    # Read the taxa file as a Panda dataframe
+    df = pd.read_csv(f'{directory}/taxa.csv', sep=',')
+    # Drop unwanted columns
+    df = df.drop(df.columns.difference(tokeep), axis=1)
+    # Add a new column with the custom level mapper
+    df['level'] = df['taxonRank'].map(mapper)
+
+    # Sort the dataframe by level in descending order (Life -> species)
+    df = df.sort_values(by=['level'], ascending=False)
+    # Convert id and level to numeric
+    df['id'] = pd.to_numeric(df['id'])
+    df['level'] = pd.to_numeric(df['level'])
+
+    # The list of taxon present in database absent from the fetched file
+    absent = [ i for i in taxons if int(i) not in df.id.values ]
+
+    if update:
+        # Remove already present taxa
+        mask = df['id'].isin(taxons)
+        df = df[-mask]
+
+    # If a limit has been specified, dump data above the value
+    if limit is not None:
+        df = df.head(limit)
+
+    # Create the list of new taxon id to fetch
+    return df['id'].to_list(), absent
+
+def add_missing_parents(directory):
+    # Retrieve the list of taxon index already present in database
+    orphans = [ x.tid for x in list(Taxon.objects.filter(parent__isnull=True)) ]
+    
+    # If new taxons were found (should be if limit > 0 and taxonomy file is not empty)
+    if len(orphans) > 0:
+        # Fetch data and write in csv files
+        fetch_data(orphans, directory)
+
+        inb = get_row_number(f'{directory}/taxa_infos.csv')
+        ifields = [ 'id', 'parent', 'rank_level', 'rank', 'name', 'extinct', 'status', 'wikipedia' ]
+        ir, ireader, iindexes = read_csv(f'{directory}/taxa_infos.csv', ifields, '|')
+
+        before = datetime.datetime.now()
+        bar = IncrementalBar('...Add missing parents     ', max=inb, suffix='%(percent)d%%')
+        for row in ireader:
+            entry = read_entry(row, ifields, iindexes)
+            tid = int(entry['id'])
+            if entry['parent'] != '':
+                parent_id = int(entry['parent'])
+                if len(Taxon.objects.filter(tid=tid)) > 0:
+                    taxon = Taxon.objects.get(tid=tid)
+                    if len(Taxon.objects.filter(tid=parent_id)) > 0:
+                        parent = Taxon.objects.get(tid=parent_id)
+                        taxon.parent = parent
+                        taxon.save()
+            bar.next()
+        bar.next()
+        after = datetime.datetime.now()
+        print(f' in {str(after - before)}')
+
+def initialize(limit=None, bacth=30, maximum=9000):
+    """
+    Initialize the database: wipe the existing one, download the taxonomy, fetch
+    information through the API and insert them.
+
+    Also retrieve the taxon ranges, process them and insert them.
+    """
+    print("Initializing database...")
+
+    # Set the temp fil directory
+    directory = '.update'
+
+    # Create or erase the history file
+    whistory = open(f'{directory}/history', 'w')
+    start = datetime.datetime.now()
+    whistory.write('INIT\t')
+    whistory.write(f'{start.strftime('%Y-%m-%d %H:%M:%S')}\t')
+    whistory.close()
+
+    pathtmp = f'{directory}/tmp'
+
+    if not os.path.exists(pathtmp):
+        os.makedirs(pathtmp)
+    
+    status = 'FAIL'
+    try:
+        # Get the list of taxon
+        new_taxons, absents = get_taxonomy_from_file(pathtmp, limit, False)
+        print()
+
+        # If new taxons were found (should be if limit > 0 and taxonomy file is not empty)
+        if len(new_taxons) > 0:
+            # Fetch data and write in csv files
+            fetch_data(new_taxons, pathtmp)
+
+            # Wipe the database
+            wipe_database()
+
+            # Inserting fetched data in database.
+            insert_data(new_taxons, pathtmp)
+        else:
+            print(f'No new taxon to add in database. Ending.')
+
+        # Add missing parents
+        add_missing_parents(pathtmp)
+
+        # Update all iconic taxa
+        update_iconic_taxon()
+        print()
+
+        # Display database information
+        display_database_information()
+
+        status = 'SUCCESS'
+
+    except:
+        raise Exception('An error occured.')
+
+    finally:
+        # Get current time
+        end = datetime.datetime.now()
+        # Open history file and write new line with end time
+        whistory = open(f'{directory}/history', 'a')
+        whistory.write(f'{end.strftime('%Y-%m-%d %H:%M:%S')}\t')
+        # Write elapsed time
+        elapsed = end - start
+        whistory.write(f'{elapsed}\t')
+        # Write status (FAIL or SUCCESS)
+        whistory.write(status)
+        whistory.close()
+
+        # Remove temp taxonomy file
+        print('Cleaning temporary files...')
+        # shutil.rmtree(pathtmp)
+
+def update(limit=None, bacth=30, maximum=9000):
     """
     Update the database.
+
+    First, download the full taxonomy list, compare taxon id to get missing taxons or taxons
+    that do not exist anymore and remove or add them and propagate changes.
     """
-    if initialize:
-        print("Initializing database...")
-        utype = 'initialization'
-    else:
-        print("Updating database...")
-        utype = 'update'
+    print("Updating database...")
 
     directory = '.update'
-    tmp = 'tmp'
 
     number_update = get_row_number(f'{directory}/history') 
     whistory = open(f'{directory}/history', 'a')
@@ -287,70 +442,41 @@ def update(initialize=False, limit=None, batch=30, maximum=10000):
 
     # Get the current date
     start = datetime.datetime.now()
-    whistory.write(f'{utype}\t')
+    whistory.write('UPDATE\t')
     whistory.write(f'{start.strftime('%Y-%m-%d %H:%M:%S')}\t')
     whistory.close()
-    # Set the file name with the current date
-    filename = f'taxonomy'
-    filezip = f'{filename}.zip'
-    pathtmp = f'{directory}/{tmp}'
-    pathzip = f'{pathtmp}/{filezip}'
+
+    pathtmp = f'{directory}/tmp'
 
     if not os.path.exists(pathtmp):
         os.makedirs(pathtmp)
 
     status = 'FAIL'
     try:
-        # Download the file inside the data folder
-        print('Downloading taxonomy file...')
-        download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
-
-        # Extract the zip file in a temporary file
-        with zipfile.ZipFile(pathzip, 'r') as z:
-            z.extractall(pathtmp)
-
-        typesorting = get_configuration()['typesorting']
-
-        mapper = {}
-        for typesort, entry in typesorting.items():
-            mapper[typesort] = entry['level']
-
-        # Retrieve the list of taxon index already present in database
-        taxons = [ x['tid'] for x in list(Taxon.objects.order_by('tid').values('tid').distinct()) ]
-
-        tokeep = [ 'id', 'scientificName', 'taxonRank' ]
-
-        df = pd.read_csv(f'{pathtmp}/taxa.csv', sep=',')
-        df = df.drop(df.columns.difference(tokeep), axis=1)
-        df['level'] = df['taxonRank'].map(mapper)
-    
-        df = df.sort_values(by=['level'], ascending=False)
-        df['id'] = pd.to_numeric(df['id'])
-        df['level'] = pd.to_numeric(df['level'])
-
-        if not initialize:
-            mask = df['id'].isin(taxons)
-            df = df[-mask]
-
-        if limit is not None:
-            df = df.head(limit)
-
-        new_taxons = df['id'].to_list()
-
+        # Get the list of taxon
+        new_taxons, absents = get_taxonomy_from_file(pathtmp, limit, True)
         print()
+
+        # Remove entries not existing in updated taxonomy file
+        for index in absents:
+            Taxon.objects.filter(tid=index).delete()
+
         # If missing taxons were found
         if len(new_taxons) > 0:
             # Fetch data and write in csv files
             fetch_data(new_taxons, pathtmp)
 
-            # If initialize mode is true, wipe the database
-            if initialize:
-                wipe_database()
-
             # Inserting fetched data in database.
             insert_data(new_taxons, pathtmp)
         else:
             print(f'No new taxon to add in database. Ending.')
+
+        # Add missing parents
+        add_missing_parents(pathtmp)
+
+        # Update all iconic taxa
+        update_iconic_taxon()
+        print()
 
         # Display database information
         display_database_information()
@@ -370,4 +496,4 @@ def update(initialize=False, limit=None, batch=30, maximum=10000):
         whistory.close()
 
         print('Cleaning temporary files...')
-        shutil.rmtree(pathtmp)
+        # shutil.rmtree(pathtmp)

@@ -9,22 +9,11 @@ def get_configuration():
 
     r = open('.update/history', 'r')
     updates = list(csv.reader(r, delimiter='\t'))
-
-    update = None
-    initialization = None
-    for u in reversed(updates):
-        if u[4] == 'SUCCESS':
-            update = u[2]
-            break
-
-    for u in reversed(updates):
-        if u[0] == 'initialization' and u[4] == 'SUCCESS':
-            initialization = u[2]
-            break
+    updates.pop()
     
-    c['database'] = {
-        'update': update,
-        'initialization': initialization
-    }
+    if len(updates) > 0:
+        c['update'] = updates.pop()[2]
+    else:
+        c['update'] = None
 
     return c

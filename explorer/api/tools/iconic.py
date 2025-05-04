@@ -21,7 +21,7 @@ def update_iconic_taxon():
     Update the iconic taxon name
     """
     taxons = Taxon.objects.order_by('-level')
-    bar = IncrementalBar('...Add iconic taxon       ', max=len(taxons), suffix='%(percent)d%%')
+    bar = IncrementalBar('...Add iconic taxon        ', max=len(taxons), suffix='%(percent)d%%')
     before = datetime.datetime.now()
 
     def update_children(children, filename):
@@ -32,13 +32,16 @@ def update_iconic_taxon():
                 bar.next()
                 update_children(child.children.all(), filename)
 
-    
     for t, filename in ICONIC.items():
         bar.next()
-        taxon = Taxon.objects.get(tid=t)
-        taxon.iconic = filename
-        taxon.save()
-        update_children(taxon.children.all(), filename)
+        taxa = Taxon.objects.filter(tid=t)
+
+        if len(taxa) > 0:
+            taxon = taxa[0]
+            taxon.iconic = filename
+            taxon.save()
+            update_children(taxon.children.all(), filename)
+        
         bar.next()
     
     bar.next()

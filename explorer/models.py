@@ -11,7 +11,6 @@ class Taxon(models.Model):
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)
     count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
-    present = models.BooleanField(db_column='present', default=True, null=False)
     range = models.MultiPolygonField(db_column='range', srid=3857, blank=True, null=True, unique=False)
     class Meta:
         managed = True

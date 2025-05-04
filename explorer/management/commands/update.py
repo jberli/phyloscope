@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from explorer.api.range import update_ancestry_range
+from explorer.api.database import update
 from phyloscope.management.warnings import prompt
 
 class Command(BaseCommand):
@@ -17,8 +17,8 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt('''You are about to update the range ancestry. This operation might take some time. Continue? ''')
+            doit = prompt('''You are about to add entries to the database.This operation might take some time. Continue? ''')
         if (doit):
-            update_ancestry_range()
+            update(limit=10)
         else:
             print('Nothing was done')

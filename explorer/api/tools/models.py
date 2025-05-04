@@ -55,50 +55,6 @@ def display_database_information(db='phyloscope'):
                 rcount = Taxon.objects.filter(range__isnull=False).count()
                 print(f'{tcount} taxons - {ncount} vernacular names - {pcount} photos - {rcount} ranges')
 
-def get_taxonomy():
-    """
-    Retrieve the already existing taxonomy from the database.
-    """
-    return {
-        'kingdom': [x['key'] for x in  list(Kingdom.objects.order_by('key').values('key').distinct())],
-        'phylum': [x['key'] for x in  list(Phylum.objects.order_by('key').values('key').distinct())],
-        'class': [x['key'] for x in  list(Class.objects.order_by('key').values('key').distinct())],
-        'order': [x['key'] for x in  list(Order.objects.order_by('key').values('key').distinct())],
-        'family': [x['key'] for x in  list(Family.objects.order_by('key').values('key').distinct())],
-        'genus': [x['key'] for x in  list(Genus.objects.order_by('key').values('key').distinct())],
-        'species': [x['key'] for x in  list(Species.objects.order_by('key').values('key').distinct())],
-        'taxon': [x['taxon'] for x in  list(Species.objects.order_by('taxon').values('taxon').distinct())],
-        'iucn': [x['code'] for x in  list(IUCN.objects.order_by('code').values('code').distinct())]
-    }
-
-def get_taxon_id():
-    return {
-        'kingdom': [x['taxon'] for x in  list(Kingdom.objects.order_by('taxon').values('taxon').distinct())],
-        'phylum': [x['taxon'] for x in  list(Phylum.objects.order_by('taxon').values('taxon').distinct())],
-        'class': [x['taxon'] for x in  list(Class.objects.order_by('taxon').values('taxon').distinct())],
-        'order': [x['taxon'] for x in  list(Order.objects.order_by('taxon').values('taxon').distinct())],
-        'family': [x['taxon'] for x in  list(Family.objects.order_by('taxon').values('taxon').distinct())],
-        'genus': [x['taxon'] for x in  list(Genus.objects.order_by('taxon').values('taxon').distinct())],
-        'species': [x['taxon'] for x in  list(Species.objects.order_by('taxon').values('taxon').distinct())],
-    }
-
-def get_iucn():
-    """
-    Get a dict with correspondance of IUCN status.
-    """
-    return {
-        'EX': ['Extinct', 'Éteinte'],
-        'EW': ['Extinct in the wild', "Éteinte à l'état sauvage"],
-        'CR': ['Critically endangered', "En danger critique d'extinction"],
-        'EN': ['Endangered', 'En danger'],
-        'VU': ['Vulnerable', 'Vulnérable'],
-        'NT': ['Near threatened', 'Quasi menacée'],
-        'CD': ['Conservation dependent', 'Dépendente de la conservation'],
-        'LC': ['Least concern', 'Préoccupation mineure'],
-        'DD': ['Data deficient', 'Données insuffisantes'],
-        'NE': ['Not evaluated', 'Non-évaluée']
-    }
-
 def get_date(time):
     """
     Return a date object or None if conversion did not work.
