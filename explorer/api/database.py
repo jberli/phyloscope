@@ -20,7 +20,7 @@ from explorer.api.configuration import get_configuration
 # Import models to access the database
 from explorer.models import Taxon, Names, Photo 
 
-def fetch_data(taxons, tmp, batch=30, maximum=9000):
+def fetch_data(taxons, tmp, batch=30, maximum=10000):
     """
     Fetch the missing taxons using the iNaturalist API and write
     the results inside .csv files.
@@ -98,7 +98,7 @@ def insert_data(taxons, tmp):
     ir, ireader, iindexes = read_csv(f'{tmp}/taxa_infos.csv', ifields, '|')
 
     before = datetime.datetime.now()
-    bar = IncrementalBar('...1/7 taxon               ', max=inb, suffix='%(percent)d%%')
+    bar = IncrementalBar('...1/5 taxon               ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
         if entry['id'] != '':
@@ -123,7 +123,7 @@ def insert_data(taxons, tmp):
     pr, preader, pindexes = read_csv(f'{tmp}/taxa_photos.csv', pfields, '|')
 
     before = datetime.datetime.now()
-    bar = IncrementalBar('...2/7 photo               ', max=pnb, suffix='%(percent)d%%') 
+    bar = IncrementalBar('...2/5 photo               ', max=pnb, suffix='%(percent)d%%') 
     for row in preader:
         entry = read_entry(row, pfields, pindexes)
         if entry['taxon'] != '':
@@ -149,7 +149,7 @@ def insert_data(taxons, tmp):
     ner, nereader, neindexes = read_csv(f'{tmp}/VernacularNames-english.csv', nefields, ',')
 
     before = datetime.datetime.now()
-    bar = IncrementalBar('...3/7 english vernacular  ', max=nenb, suffix='%(percent)d%%')
+    bar = IncrementalBar('...3/5 english vernacular  ', max=nenb, suffix='%(percent)d%%')
     for row in nereader:
         entry = read_entry(row, nefields, neindexes)
         if entry['id'] != '':
@@ -172,7 +172,7 @@ def insert_data(taxons, tmp):
     nfr, nfreader, nfindexes = read_csv(f'{tmp}/VernacularNames-french.csv', nffields, ',')
 
     before = datetime.datetime.now()
-    bar = IncrementalBar('...4/7 french vernacular   ', max=nfnb, suffix='%(percent)d%%')
+    bar = IncrementalBar('...4/5 french vernacular   ', max=nfnb, suffix='%(percent)d%%')
     for row in nfreader:
         entry = read_entry(row, nffields, nfindexes)
         if entry['id'] != '':
@@ -202,7 +202,7 @@ def insert_data(taxons, tmp):
     ir, ireader, iindexes = read_csv(f'{tmp}/taxa_infos.csv', ifields, '|')
 
     before = datetime.datetime.now()
-    bar = IncrementalBar('...5/7 find parents        ', max=inb, suffix='%(percent)d%%')
+    bar = IncrementalBar('...5/5 find parents        ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
         tid = int(entry['id'])
@@ -220,58 +220,12 @@ def insert_data(taxons, tmp):
     after = datetime.datetime.now()
     print(f' in {str(after - before)}')
 
-    taxa = Taxon.objects.order_by('level')
-    highest = taxa.last().level
-
-    before = datetime.datetime.now()
-    bar = IncrementalBar('...6/7 count species       ', max=len(taxa), suffix='%(percent)d%%')
-    for t in taxa:
-        children = t.children.all()
-        if len(children) == 0:
-            t.count_species = 1
-            t.save()
-        else:
-            total = 0
-            add = True
-            for child in children:
-                if child.count_species is None:
-                    add = False
-                    break
-                total += child.count_species
-            if add:
-                t.count_species = total
-                t.save()
-        bar.next()
-    bar.next()
-    after = datetime.datetime.now()
-    print(f' in {str(after - before)}')
-
-    done = []
-    before = datetime.datetime.now()
-    bar = IncrementalBar('...7/7 calculate percentage', max=len(taxa), suffix='%(percent)d%%')
-    for t in taxa:
-        parent = t.parent
-        if parent is not None:
-            if parent.tid not in done:
-                count = parent.count_species
-                siblings = parent.children.all()
-                for sibling in siblings:
-                    scount = sibling.count_species
-                    sibling.percentage_parent = 100 * scount / count
-                    sibling.save()
-                done.append(parent.tid)
-        bar.next()
-    bar.next()
-    after = datetime.datetime.now()
-    print(f' in {str(after - before)}')
-    bar.finish()
-
 def get_taxonomy_from_file(directory, limit=None, update=True):
     pathzip = f'{directory}/taxonomy.zip'
 
     # Download the file inside the data folder
     print('Downloading taxonomy file...')
-    # download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
+    download('https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip', pathzip)
 
     # Extract the zip file in a temporary file
     with zipfile.ZipFile(pathzip, 'r') as z:
@@ -348,7 +302,7 @@ def add_missing_parents(directory):
         after = datetime.datetime.now()
         print(f' in {str(after - before)}')
 
-def initialize(limit=None, bacth=30, maximum=9000):
+def initialize(limit=None, batch=30, maximum=10000):
     """
     Initialize the database: wipe the existing one, download the taxonomy, fetch
     information through the API and insert them.
@@ -381,9 +335,9 @@ def initialize(limit=None, bacth=30, maximum=9000):
         # If new taxons were found (should be if limit > 0 and taxonomy file is not empty)
         if len(new_taxons) > 0:
             # Fetch data and write in csv files
-            fetch_data(new_taxons, pathtmp)
+            fetch_data(new_taxons, pathtmp, batch, maximum)
 
-            # Wipe the database
+            # Wipe the database.
             wipe_database()
 
             # Inserting fetched data in database.
@@ -393,9 +347,6 @@ def initialize(limit=None, bacth=30, maximum=9000):
 
         # Add missing parents
         add_missing_parents(pathtmp)
-
-        # Update all iconic taxa
-        update_iconic_taxon()
         print()
 
         # Display database information
@@ -423,7 +374,7 @@ def initialize(limit=None, bacth=30, maximum=9000):
         print('Cleaning temporary files...')
         # shutil.rmtree(pathtmp)
 
-def update(limit=None, bacth=30, maximum=9000):
+def update(limit=None, batch=30, maximum=10000):
     """
     Update the database.
 
@@ -464,7 +415,7 @@ def update(limit=None, bacth=30, maximum=9000):
         # If missing taxons were found
         if len(new_taxons) > 0:
             # Fetch data and write in csv files
-            fetch_data(new_taxons, pathtmp)
+            fetch_data(new_taxons, pathtmp, batch, maximum)
 
             # Inserting fetched data in database.
             insert_data(new_taxons, pathtmp)
@@ -473,9 +424,6 @@ def update(limit=None, bacth=30, maximum=9000):
 
         # Add missing parents
         add_missing_parents(pathtmp)
-
-        # Update all iconic taxa
-        update_iconic_taxon()
         print()
 
         # Display database information
@@ -496,4 +444,4 @@ def update(limit=None, bacth=30, maximum=9000):
         whistory.close()
 
         print('Cleaning temporary files...')
-        # shutil.rmtree(pathtmp)
+        shutil.rmtree(pathtmp)
