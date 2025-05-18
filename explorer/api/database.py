@@ -56,9 +56,13 @@ def fetch_data(taxons, tmp, batch=30, maximum=10000):
         taxa.append(i)
         # Wait until taxa has 30 entries before fetching info
         if len(taxa) >= batch:
-            # Fetch information from iNaturalist API and insert them in files
-            infos = fetch_api(taxa)
-            insert_information(infos, writerinfos, writerphoto)
+            try:
+                # Fetch information from iNaturalist API and insert them in files
+                infos = fetch_api(taxa)
+                insert_information(infos, writerinfos, writerphoto)
+            except:
+                print('error when fetching batch. Skipping...')
+
             # Reset taxa list
             taxa = []
             # Wait 1 second to avoid overloading the API
@@ -231,6 +235,7 @@ def get_taxonomy_from_file(directory, limit=None, update=True):
     with zipfile.ZipFile(pathzip, 'r') as z:
         z.extractall(directory)
 
+    print('Finding missing taxa...')
     typesorting = get_configuration()['typesorting']
 
     mapper = {}
