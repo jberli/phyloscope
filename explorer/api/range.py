@@ -93,7 +93,8 @@ def update_range(initialize=False):
                     if taxon[0].range is not None:
                         continue
 
-                taxon[0].range = GEOSGeometry(correct_geometry(geom).wkt, srid=3857)
+                corrected = correct_geometry(geom)
+                taxon[0].range = GEOSGeometry(corrected.wkt, srid=3857)
                 taxon[0].save()
             bar.next()
         bar.next()

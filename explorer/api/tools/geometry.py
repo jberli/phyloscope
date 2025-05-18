@@ -271,14 +271,32 @@ def correct_geometry(polygon):
             total += height
         return squares
 
+    def remove_flat_angles(coordinates, tolerance=1):
+        coords = list(coordinates)
+        coords.pop()
+
+        result = []
+        for i in range(0, len(coords)):
+            c0 = coords[i - 1] if i > 0 else coords[-1]
+            c1 = coords[i]
+            c2 = coords[i + 1] if i < len(coords) - 1 else coords[0]
+            angle = abs(np.degrees(np.arctan2(c1[1] - c2[1], c1[0] - c2[0]) - np.arctan2(c1[1] - c0[1], c1[0] - c0[0])))
+
+            if not abs(angle - 180) < tolerance:
+                result.append(c1)            
+
+        return result
+
     def smooth(polygon, sigma=30000, sample=30000):
         exterior = gaussian_smoothing(polygon, sigma, sample).exterior.coords
+        exterior = remove_flat_angles(exterior)
+
         interiors = []
         for i in polygon.interiors:
             if i.length > sample:
                 s = gaussian_smoothing(Polygon(i), sigma, sample)
                 if (s.area > 1000000000):
-                    interiors.append(s.exterior.coords)
+                    interiors.append(remove_flat_angles(s.exterior.coords))
         if len(interiors) > 0:
             return Polygon(exterior, interiors)
         else:
