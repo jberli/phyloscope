@@ -49,4 +49,5 @@ IUCN = {
     'LC': { 'en': 'Least concern', 'fr': 'Préoccupation mineure' },
     'DD': { 'en': 'Data deficient', 'fr': 'Données insuffisantes' },
     'NE': { 'en': 'Not evaluated', 'fr': 'Non-évaluée' },
+    'UN': { 'en': 'Unknow', 'fr': 'Inconnu' },
 }

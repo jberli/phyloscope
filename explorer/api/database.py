@@ -105,6 +105,7 @@ def insert_data(taxons, tmp):
     bar = IncrementalBar('...1/5 taxon               ', max=inb, suffix='%(percent)d%%')
     for row in ireader:
         entry = read_entry(row, ifields, iindexes)
+        status = entry['status'] if entry['status'] != '' else 'UN'
         if entry['id'] != '':
             tid = int(entry['id'])
             taxon = Taxon(
@@ -112,7 +113,7 @@ def insert_data(taxons, tmp):
                 level = float(entry['rank_level']),
                 rank = entry['rank'],
                 name = entry['name'],
-                status = entry['status'],
+                status = status,
                 wikipedia = entry['wikipedia'],
             )
             taxon.save()

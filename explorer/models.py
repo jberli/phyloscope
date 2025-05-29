@@ -7,11 +7,25 @@ class Taxon(models.Model):
     rank = models.CharField(db_column='rank', max_length=50, blank=False, null=False)
     iconic = models.CharField(db_column='iconic', max_length=50, blank=True, null=True)
     name = models.CharField(db_column='name', max_length=200, blank=False, null=False)
-    status = models.CharField(db_column='iucn', max_length=2, blank=True, null=True)
+    status = models.CharField(db_column='status', max_length=2, blank=True, null=True)
     wikipedia = models.CharField(db_column='wikipedia', max_length=500, blank=True, null=True)
     count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
     range = models.MultiPolygonField(db_column='range', srid=3857, blank=True, null=True, unique=False)
+
+    # Percentage children status
+    ex = models.IntegerField(db_column='ex', default=0)
+    ew = models.IntegerField(db_column='ew', default=0)
+    cr = models.IntegerField(db_column='cr', default=0)
+    en = models.IntegerField(db_column='en', default=0)
+    vu = models.IntegerField(db_column='vu', default=0)
+    nt = models.IntegerField(db_column='nt', default=0)
+    cd = models.IntegerField(db_column='cd', default=0)
+    lc = models.IntegerField(db_column='lc', default=0)
+    dd = models.IntegerField(db_column='dd', default=0)
+    ne = models.IntegerField(db_column='ne', default=0)
+    un = models.IntegerField(db_column='un', default=0)
+
     class Meta:
         managed = True
         ordering = ('tid',)

@@ -738,7 +738,7 @@ class Taxon {
                 html = '<i>' + uppercaseFirstLetter(this.taxon.scientific) + '</i>';
             }
 
-            if (this.taxon.status.length > 0) {
+            if (this.taxon.status !== 'UN') {
                 let status = makeDiv(null, 'taxonomy-entry-status');
                 addSVG(status, new URL('/static/explorer/img/status/' + this.taxon.status.toLowerCase() + '.svg', import.meta.url));
                 this.container.append(status);
