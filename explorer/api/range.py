@@ -14,7 +14,7 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from explorer.models import Taxon
 from explorer.api.tools.files import download
-from explorer.api.tools.geometry import correct_geometry
+from explorer.api.tools.geometry import correct_geometry, remove_flat_angles, make_overlap_antimeridian
 
 def get_range(index):
     """
@@ -75,9 +75,9 @@ def update_range(initialize=False):
     osdir = os.fsencode(pathtmp)
     
     inb = len(os.listdir(osdir))
-    before = datetime.datetime.now()
    
     for f in sorted(os.listdir(osdir)):
+        before = datetime.datetime.now()
         filename = os.fsdecode(f)
         file = os.path.join(pathtmp, filename)
         gdf = read_file(file)
@@ -105,8 +105,12 @@ def update_range(initialize=False):
     taxons = Taxon.objects.all().order_by('level')
     bar = IncrementalBar(f'...Adding range to ancestry ', max=len(taxons), suffix='%(percent)d%%')
     for taxon in taxons:
+        if not initialize and taxon.range is not None:
+            bar.next()
+            continue
+
         children = taxon.children.all()
-        if len(children) > 0 and taxon.range is None:
+        if len(children) > 0:
             geometry = None
             for child in children:
                 if child.range is not None:
@@ -122,9 +126,13 @@ def update_range(initialize=False):
                 else:
                     part += geometry.geoms
                 geometry = MultiPolygon(part)
+
+                # Make the multipolygon placement optimal regarding pacific antimeridian
+                corrected = make_overlap_antimeridian(geometry)
+                
                 taxon.range = GEOSGeometry(geometry.wkt, srid=3857)
                 taxon.save()
-        bar.next()
+            bar.next()
     
     bar.finish()
     after = datetime.datetime.now()
