@@ -130,7 +130,7 @@ def update_range(initialize=False):
                 # Make the multipolygon placement optimal regarding pacific antimeridian
                 corrected = make_overlap_antimeridian(geometry)
                 
-                taxon.range = GEOSGeometry(geometry.wkt, srid=3857)
+                taxon.range = GEOSGeometry(corrected.wkt, srid=3857)
                 taxon.save()
             bar.next()
     
