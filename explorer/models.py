@@ -12,6 +12,7 @@ class Taxon(models.Model):
     count_species = models.IntegerField(db_column='count_species', blank=True, null=True)
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
     range = models.MultiPolygonField(db_column='range', srid=3857, blank=True, null=True, unique=False)
+    rstate = models.CharField(db_column='rstate', max_length=10, blank=False, null=False, default='init')
 
     # Percentage children status
     ex = models.IntegerField(db_column='ex', default=0)

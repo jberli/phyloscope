@@ -14,7 +14,7 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from explorer.models import Taxon
 from explorer.api.tools.files import download
-from explorer.api.tools.geometry import correct_geometry, remove_flat_angles, make_overlap_antimeridian
+from explorer.api.tools.geometry import connect_antimeridian, make_overlap_antimeridian, smooth_multipolygon, enlarge_small_parts
 
 def get_range(index):
     """
@@ -32,10 +32,12 @@ def get_range(index):
         'typesorting': t
     }
 
-def update_range(initialize=False):
+def update_range():
     """
     Fetch taxon range and update the database.
     """
+
+    # DOWNLOAD GEOPACKAGES
     urlmeta = 'https://inaturalist-open-data.s3.us-east-1.amazonaws.com/geomodel/geopackages/latest/metadata.json'
     urlgpkg = 'https://inaturalist-open-data.s3.us-east-1.amazonaws.com/geomodel/geopackages/latest/iNaturalist_geomodel'
 
@@ -72,10 +74,9 @@ def update_range(initialize=False):
     after = datetime.datetime.now()
     print(f' in {str(after - before)}')
 
+    # INSERT RANGES FROM GEOPACKAGES
     osdir = os.fsencode(pathtmp)
-    
     inb = len(os.listdir(osdir))
-   
     for f in sorted(os.listdir(osdir)):
         before = datetime.datetime.now()
         filename = os.fsdecode(f)
@@ -89,26 +90,22 @@ def update_range(initialize=False):
             geom = entry.geometry
             taxon = Taxon.objects.filter(tid=tid)
             if len(taxon) > 0:
-                if not initialize:
-                    if taxon[0].range is not None:
-                        continue
-
-                corrected = correct_geometry(geom)
-                taxon[0].range = GEOSGeometry(corrected.wkt, srid=3857)
+                # Fill in the gap along the antimeridian before inserting
+                filled = connect_antimeridian(geom)
+                taxon[0].range = GEOSGeometry(filled.wkt, srid=3857)
+                taxon[0].rstate = 'original'
                 taxon[0].save()
             bar.next()
         bar.next()
         after = datetime.datetime.now()
         print(f' in {str(after - before)}')
 
+    # ADD RANGES UP THE TAXONOMY
     before = datetime.datetime.now()
-    taxons = Taxon.objects.all().order_by('level')
+    taxons = Taxon.objects.filter(rstate='init').order_by('level')
+
     bar = IncrementalBar(f'...Adding range to ancestry ', max=len(taxons), suffix='%(percent)d%%')
     for taxon in taxons:
-        if not initialize and taxon.range is not None:
-            bar.next()
-            continue
-
         children = taxon.children.all()
         if len(children) > 0:
             geometry = None
@@ -120,19 +117,38 @@ def update_range(initialize=False):
                     else:
                         geometry = unary_union([ make_valid(geometry), multi ])
             if geometry is not None:
-                part = []
                 if geometry.geom_type == 'Polygon':
-                    part.append(geometry)
-                else:
-                    part += geometry.geoms
-                geometry = MultiPolygon(part)
+                    geometry = MultiPolygon([geometry])
 
-                # Make the multipolygon placement optimal regarding pacific antimeridian
-                corrected = make_overlap_antimeridian(geometry)
-                
-                taxon.range = GEOSGeometry(corrected.wkt, srid=3857)
+                taxon.range = GEOSGeometry(geometry.wkt, srid=3857)
+                taxon.rstate = 'unioned'
                 taxon.save()
-            bar.next()
+        bar.next()
+    
+    bar.finish()
+    after = datetime.datetime.now()
+
+    # CORRECT GEOMETRIES
+    before = datetime.datetime.now()
+    taxons = Taxon.objects.filter(rstate__in=['original', 'unioned'])
+
+    bar = IncrementalBar(f'...Correcting geometries    ', max=len(taxons), suffix='%(percent)d%%')
+    for taxon in taxons:
+        state = taxon.rstate
+        if state == 'original':
+            rstate = 'ofinal'
+        else:
+            rstate = 'ufinal'
+
+        geom = enlarge_small_parts(taxon.range)
+        geom = make_overlap_antimeridian(geom)
+        geom = smooth_multipolygon(geom)
+
+        taxon.range = geom
+        taxon.rstate = rstate
+        taxon.save()
+
+        bar.next()
     
     bar.finish()
     after = datetime.datetime.now()

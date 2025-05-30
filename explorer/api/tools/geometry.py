@@ -4,22 +4,6 @@ from shapely import Point, LineString, Polygon, MultiPolygon, STRtree, intersect
 from shapely.ops import unary_union
 from shapely.affinity import translate
 
-def remove_flat_angles(coordinates, tolerance=1):
-    coords = list(coordinates)
-    coords.pop()
-
-    result = []
-    for i in range(0, len(coords)):
-        c0 = coords[i - 1] if i > 0 else coords[-1]
-        c1 = coords[i]
-        c2 = coords[i + 1] if i < len(coords) - 1 else coords[0]
-        angle = abs(np.degrees(np.arctan2(c1[1] - c2[1], c1[0] - c2[0]) - np.arctan2(c1[1] - c0[1], c1[0] - c0[0])))
-
-        if not abs(angle - 180) < tolerance:
-            result.append(c1)            
-
-    return result
-
 def resample_line(line, step, keep_vertices=False):
     """
     Densify a line by adding vertices.
@@ -84,92 +68,6 @@ def resample_line(line, step, keep_vertices=False):
         
     # Here, we return a new line with densified points.
     return LineString(xy)
-
-def make_overlap_antimeridian(multipolygon):
-    """
-    Make the geometry overlaps the antimeridian if the resulting multipolygon
-    is thinner (max east-west length) than the original.
-    """
-    # Calculate min max coordinates from 3857 projection 
-    minimum = -np.pi * 6378137
-    maximum = np.pi * 6378137
-
-    # Sort polygons by their min x
-    minsorted = sorted(list(multipolygon.geoms), key=lambda b: b.bounds[0])
-    # Sort polygons by their max x
-    maxsorted = sorted(list(multipolygon.geoms), key=lambda b: b.bounds[2])
-
-    tree = STRtree(minsorted)
-    touchfirst = True if minsorted[0].bounds[0] == minimum else False
-    touchlast = True if maxsorted[-1].bounds[2] == maximum else False
-
-    bounds = []
-
-    if touchfirst:
-        bounds.append([minimum])
-
-    for i, poly in enumerate(minsorted):
-        b = poly.bounds
-
-        add = True
-        if touchfirst:
-            if i == 0:
-                add = False
-        if add:
-            minmeridian = LineString([[b[0], maximum], [b[0], minimum]])
-            t = tree.query(minmeridian, predicate='intersects')
-            if len(t) == 1:
-                bounds.append([b[0]])
-        
-        add = True
-        if touchlast:
-            if i == len(minsorted) - 1:
-                add = False
-        if add:
-            maxmeridian = LineString([[b[2], maximum], [b[2], minimum]])
-            t = tree.query(maxmeridian, predicate='intersects')
-            if len(t) == 1:
-                bounds[-1].append(b[2])
-
-    if touchlast:
-        bounds[-1].append(maximum)
-
-    distxmin = abs(minimum - bounds[0][0])
-    distxmax = abs(maximum - bounds[-1][-1])
-    mindistance = distxmin + distxmax
-
-    pair = []
-    previous = bounds[0]
-    for i in range(1, len(bounds)):
-        current = bounds[i]
-        d = current[0] - previous[-1]
-        if d > mindistance:
-            pair = [ current[0], previous[-1] ]
-            mindistance = d
-        previous = current
-
-    if len(pair) > 0:
-        result = []
-        if abs(minimum - pair[0]) > abs(maximum - pair[1]):
-            shift = -maximum * 2
-            for poly in minsorted:
-                if poly.centroid.coords[0][0] > pair[1]:
-                    result.append(translate(poly, shift))
-                else:
-                    result.append(poly)
-        else:
-            shift = maximum * 2
-            for poly in minsorted:
-                if poly.centroid.coords[0][0] < pair[0]:
-                    result.append(translate(poly, shift))
-                else:
-                    result.append(poly)
-
-        result = MultiPolygon(result)
-    else:
-        result = MultiPolygon(minsorted)
-
-    return result
 
 def gaussian_smoothing(geometry, sigma=30, sample=None, densify=True):
     """
@@ -346,46 +244,11 @@ def gaussian_smoothing(geometry, sigma=30, sample=None, densify=True):
     
     return result
 
-def correct_geometry(polygon):
-    def construct_filler(minimum, maximum):
-        minwidth = 10000
-        maxwidth = 500000
-        minheight = 20000
-        maxheight = 100000
-        squares = []
-        total = minimum
-        while total < maximum:
-            xmin, ymin = minimum, total
-            height = remap(abs(ymin), 0, maximum, minheight, maxheight)
-            width = remap(abs(ymin), 0, maximum, minwidth, maxwidth)
-            xmax, ymax = minimum + width, total + height
-            squares.append(Polygon([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]))
-            total += height
-        
-        total = minimum
-        while total < maximum:
-            xmax, ymin = maximum, total
-            height = remap(abs(ymin), 0, maximum, minheight, maxheight)
-            width = remap(abs(ymin), 0, maximum, minwidth, maxwidth)
-            xmin, ymax = maximum - width, total + height
-            squares.append(Polygon([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]))
-            total += height
-        return squares
-
-    def smooth(polygon, sigma=30000, sample=30000):
-        exterior = gaussian_smoothing(polygon, sigma, sample).exterior.coords
-        exterior = remove_flat_angles(exterior)
-
-        interiors = []
-        for i in polygon.interiors:
-            if i.length > sample:
-                s = gaussian_smoothing(Polygon(i), sigma, sample)
-                if (s.area > 1000000000):
-                    interiors.append(remove_flat_angles(s.exterior.coords))
-        if len(interiors) > 0:
-            return Polygon(exterior, interiors)
-        else:
-            return Polygon(exterior)
+def connect_antimeridian(multipolygon):
+    """
+    When the provided multipolygon as parts close to the antimeridian,
+    fill the gap to snap the part to the antimeridian (min x or max x).
+    """
 
     def remap(value, start1, stop1, start2, stop2):
         return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
@@ -395,43 +258,226 @@ def correct_geometry(polygon):
     maximum = np.pi * 6378137
 
     # Construct filler rectangles along the antimeridian
-    squares = construct_filler(minimum, maximum)
+    minwidth = 10000
+    maxwidth = 500000
+    minheight = 20000
+    maxheight = 100000
+    squares = []
+    total = minimum
+    while total < maximum:
+        xmin, ymin = minimum, total
+        height = remap(abs(ymin), 0, maximum, minheight, maxheight)
+        width = remap(abs(ymin), 0, maximum, minwidth, maxwidth)
+        xmax, ymax = minimum + width, total + height
+        squares.append(Polygon([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]))
+        total += height
+    
+    total = minimum
+    while total < maximum:
+        xmax, ymin = maximum, total
+        height = remap(abs(ymin), 0, maximum, minheight, maxheight)
+        width = remap(abs(ymin), 0, maximum, minwidth, maxwidth)
+        xmin, ymax = maximum - width, total + height
+        squares.append(Polygon([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]))
+        total += height
 
     # Keep only intersecting filler rectangles
     tree = STRtree(squares)
-    indexes = tree.query(polygon, predicate='intersects')
-    result = []
+    indexes = tree.query(multipolygon, predicate='intersects')
+    intersecting = []
     for i, s in enumerate(squares):
         if i in indexes:
-            result.append(s)
+            intersecting.append(s)
 
     # Union intersecting rectangles with the original polygon
-    union = unary_union(result + [x for x in polygon.geoms])
+    union = unary_union(intersecting + [x for x in multipolygon.geoms])
 
-    # Clip the result using the projection bounds
+    # Clip the intersecting polygons using the projection bounds
     filled = intersection(union, Polygon([[minimum, minimum], [minimum, maximum], [maximum, maximum], [maximum, minimum], [minimum, minimum]]))
     if filled.geom_type == 'Polygon':
         filled = MultiPolygon([filled])
 
-    result = make_overlap_antimeridian(filled)
+    return filled
+
+def enlarge_small_parts(multipolygon):
+    """
+    Enlarge small parts of a multipolygon given a threshold.
+    """
+    # Calculate min max coordinates from 3857 projection 
+    minimum = -np.pi * 6378137
+    maximum = np.pi * 6378137
 
     enlarged = []
-    for p in result.geoms:
+    for p in multipolygon.geoms:
         # Enlarge smaller sub polygons to enhance them
         if p.area < 10000000000:
             enlarged.append(p.buffer(40000))
         else:
             enlarged.append(p)
-
     unioned = unary_union(enlarged)
 
-    if unioned.geom_type == 'MultiPolygon':
-        smoothed = []
-        for s in unioned.geoms:
-            smoothed.append(smooth(s))
-        smoothed = MultiPolygon(smoothed)
+    if unioned.geom_type == 'Polygon':
+        unioned = MultiPolygon([unioned])
+
+    # Clip the intersecting polygons using the projection bounds
+    clipped = intersection(unioned, Polygon([[minimum, minimum], [minimum, maximum], [maximum, maximum], [maximum, minimum], [minimum, minimum]]))
+    
+    if clipped.geom_type == 'Polygon':
+        clipped = MultiPolygon([clipped])
+
+    return clipped
+
+def make_overlap_antimeridian(multipolygon):
+    """
+    Make the geometry overlaps the antimeridian if the resulting multipolygon
+    is thinner (max east-west length) than the original.
+
+    The bounded argument defines whether the provided multipolygon is constrained
+    within the actual bounds of the 3857 projection.
+    """
+
+    # Calculate min max coordinates from 3857 projection 
+    minimum = -np.pi * 6378137
+    maximum = np.pi * 6378137
+
+    # Return True or False if the provided meridian intersects with other polygons
+    def is_bound(x, tree):
+        # Create the actual meridian of x value
+        meridian = LineString([[x, maximum], [x, minimum]])
+        # Get the list of polygons intersecting this meridian
+        t = tree.query(meridian, predicate='intersects')
+        # If only one exists, it is a bounding x, returns true
+        if len(t) == 1:
+            return True
+        else:
+            return False
+
+    # Sort polygons by their min x
+    minsorted = sorted(list(multipolygon.geoms), key=lambda b: b.bounds[0])
+    # Sort polygons by their max x
+    maxsorted = sorted(list(multipolygon.geoms), key=lambda b: b.bounds[2])
+
+    # This variable will store min x and max x of groups of polygons if
+    # the associated meridian (with those x values) doesn't intersect with an other polygon
+    bounds = []
+
+    # Flag to know if the first min x polygon touches the antimeridian
+    touchfirst = True if minsorted[0].bounds[0] == minimum else False
+    # Flag to know if the last max x polygon touches the antimeridian
+    touchlast = True if maxsorted[-1].bounds[2] == maximum else False
+
+    # Add the antimeridian to the bounds if a polygon touches it
+    if touchfirst:
+        bounds.append([minimum])
+
+    # Create an index for the minsorted polygons
+    tree = STRtree(minsorted)
+
+    # Loop through x values from east to west
+    for i, poly in enumerate(minsorted):
+        b = poly.bounds
+        xmin = b[0]
+        xmax = b[2]
+
+        # HERE, TREAT THE MIN X OF THE CURRENT GROUP
+        # Do not add the x value if already done before the loop
+        add = False if touchfirst and i == 0 else True
+
+        if add and is_bound(xmin, tree):
+            bounds.append([xmin])
+        
+        # HERE, TREAT THE MAX X OF THE CURRENT GROUP
+        # Do not add the x value if it will be done after the loop
+        add = False if touchlast and i == (len(minsorted) - 1) else True
+
+        if add and is_bound(xmax, tree):
+            # Adding the xmax bound along with the xmin
+            bounds[-1].append(xmax)
+
+    # Add the antimeridian to the bounds if a polygon touches it at the end
+    if touchlast:
+        bounds[-1].append(maximum)
+
+    distxmin = abs(minimum - bounds[0][0])
+    distxmax = abs(maximum - bounds[-1][-1])
+    mindistance = distxmin + distxmax
+
+    pair = []
+    previous = bounds[0]
+    for i in range(1, len(bounds)):
+        current = bounds[i]
+        d = current[0] - previous[-1]
+        if d > mindistance:
+            pair = [ current[0], previous[-1] ]
+            mindistance = d
+        previous = current
+
+    if len(pair) > 0:
+        result = []
+        if abs(minimum - pair[0]) > abs(maximum - pair[1]):
+            shift = -maximum * 2
+            for poly in minsorted:
+                if poly.centroid.coords[0][0] > pair[1]:
+                    result.append(translate(poly, shift))
+                else:
+                    result.append(poly)
+        else:
+            shift = maximum * 2
+            for poly in minsorted:
+                if poly.centroid.coords[0][0] < pair[0]:
+                    result.append(translate(poly, shift))
+                else:
+                    result.append(poly)
+
+        result = MultiPolygon(result)
     else:
-        smoothed = smooth(unioned)
+        result = MultiPolygon(minsorted)
+
+    unioned = unary_union(result)
+    if unioned.geom_type == 'Polygon':
+        unioned = MultiPolygon([unioned])
+
+    return unioned
+
+def smooth_multipolygon(multipolygon):
+    """
+    Smooth a multipolygon and optimize resulting shapes.
+    """
+
+    def remove_flat_angles(coordinates, tolerance=1):
+        coords = list(coordinates)
+        coords.pop()
+
+        result = []
+        for i in range(0, len(coords)):
+            c0 = coords[i - 1] if i > 0 else coords[-1]
+            c1 = coords[i]
+            c2 = coords[i + 1] if i < len(coords) - 1 else coords[0]
+            angle = abs(np.degrees(np.arctan2(c1[1] - c2[1], c1[0] - c2[0]) - np.arctan2(c1[1] - c0[1], c1[0] - c0[0])))
+
+            if not abs(angle - 180) < tolerance:
+                result.append(c1)            
+
+        return result
+        
+    smoothed = []
+    sigma=30000
+    sample=30000
+    for s in multipolygon.geoms:
+        exterior = gaussian_smoothing(s, sigma, sample).exterior.coords
+        exterior = remove_flat_angles(exterior)
+        interiors = []
+        for i in s.interiors:
+            if i.length > sample:
+                s = gaussian_smoothing(Polygon(i), sigma, sample)
+                if (s.area > 1000000000):
+                    interiors.append(remove_flat_angles(s.exterior.coords))
+        if len(interiors) > 0:
+            smoothed.append(Polygon(exterior, interiors))
+        else:
+            smoothed.append(Polygon(exterior))
+        
+    smoothed = MultiPolygon(smoothed)
     
     if smoothed.geom_type == 'Polygon':
         smoothed = MultiPolygon([smoothed])
