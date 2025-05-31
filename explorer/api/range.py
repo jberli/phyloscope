@@ -130,25 +130,29 @@ def update_range():
 
     # CORRECT GEOMETRIES
     before = datetime.datetime.now()
-    taxons = Taxon.objects.filter(rstate__in=['original', 'unioned'])
+    ct = Taxon.objects.filter(rstate__in=['original', 'unioned']).count()
 
-    bar = IncrementalBar(f'...Correcting geometries    ', max=len(taxons), suffix='%(percent)d%%')
-    for taxon in taxons:
-        state = taxon.rstate
-        if state == 'original':
-            rstate = 'ofinal'
-        else:
-            rstate = 'ufinal'
+    bar = IncrementalBar(f'...Correcting geometries    ', max=ct)
 
-        geom = enlarge_small_parts(taxon.range)
-        geom = make_overlap_antimeridian(geom)
-        geom = smooth_multipolygon(geom)
+    # with transaction.atomic():
+    for taxon in Taxon.objects.all().iterator():
+        if taxon.rstate in ['original', 'unioned']:
+            state = taxon.rstate
+            if state == 'original':
+                rstate = 'ofinal'
+            else:
+                rstate = 'ufinal'
 
-        taxon.range = geom
-        taxon.rstate = rstate
-        taxon.save()
+            multi = from_wkt(taxon.range.wkt)
+            geometry = enlarge_small_parts(multi)
+            geometry = make_overlap_antimeridian(geometry)
+            geometry = smooth_multipolygon(geometry)
 
-        bar.next()
+            taxon.range = GEOSGeometry(geometry.wkt, srid=3857)
+            taxon.rstate = rstate
+            taxon.save()
+
+            bar.next()
     
     bar.finish()
     after = datetime.datetime.now()
