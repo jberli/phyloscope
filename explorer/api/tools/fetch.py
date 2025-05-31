@@ -1,6 +1,6 @@
 import pyinaturalist as inat
 
-from explorer.api.tools.information import IUCN
+from explorer.api.tools.information import STATUS
 
 def fetch_api(taxa):
     def treat_photo(t, p, default):
@@ -52,8 +52,8 @@ def fetch_api(taxa):
         if status == 'Extinct':
             status == 'EX'
 
-        iucn = list(IUCN.keys())
-        taxon['status'] = status if status in iucn else None
+        status = list(STATUS.keys())
+        taxon['status'] = s if s in status else None
         taxon['wikipedia'] = entry['wikipedia_url']
 
         batch.append(taxon)

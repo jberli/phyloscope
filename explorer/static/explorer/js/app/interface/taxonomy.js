@@ -5,7 +5,7 @@
 
 import { loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, hasClass, makeDiv, makeImage, removeChildren, removeClass, wait } from "../generic/dom.js";
-import { calculateTextWidth, formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
+import { calculateTextWidth, uppercaseFirstLetter } from "../generic/parsing.js";
 import { Helper } from "./helper.js";
 import Widget from "./widget.js";
 
@@ -713,8 +713,10 @@ class Taxon {
             imageMask.appendChild(loader);
             image.append(imageMask, i);
 
-            let stats = this.taxon.count.toLocaleString();
-            if (this.taxon.percentage) { stats += ' (' + formatPercentage(this.taxon.percentage) + ')'; }
+            let locale = this.level.taxonomy.app.params.languages.available[this.level.taxonomy.app.params.languages.current].locale;
+            let stats = this.taxon.count.toLocaleString(locale);
+            
+            if (this.taxon.percentage) { stats += ` (${this.taxon.percentage.toLocaleString(locale, {maximumSignificantDigits: 2})}%)`; }
             let statistics = makeDiv(null, 'taxonomy-entry-statistics', stats);
             let swidth = calculateTextWidth(stats, getComputedStyle(statistics), .8);
     
@@ -738,9 +740,9 @@ class Taxon {
                 html = '<i>' + uppercaseFirstLetter(this.taxon.scientific) + '</i>';
             }
 
-            if (this.taxon.status !== 'UN') {
+            if (this.taxon.status.current !== 'UN') {
                 let status = makeDiv(null, 'taxonomy-entry-status');
-                addSVG(status, new URL('/static/explorer/img/status/' + this.taxon.status.toLowerCase() + '.svg', import.meta.url));
+                addSVG(status, new URL('/static/explorer/img/status/' + this.taxon.status.current.toLowerCase() + '.svg', import.meta.url));
                 this.container.append(status);
             }
     

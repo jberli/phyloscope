@@ -5,7 +5,7 @@
 
 import { ajaxGet, loadImage } from "../generic/ajax.js";
 import { addClass, addSVG, makeDiv, makeImage, makeInput, removeChildren, removeClass, wait } from "../generic/dom.js";
-import { boldSubstring, compare, removeTrailing, uppercaseFirstLetter } from "../generic/parsing.js";
+import { boldSubstring, compare, removeTrailing, remToPx, uppercaseFirstLetter } from "../generic/parsing.js";
 import Widget from "./widget.js";
 
 class Information extends Widget {
@@ -26,6 +26,10 @@ class Information extends Widget {
         // Create the search bar and the description
         this.search = new Search(this);
         this.description = new Description(this);
+       
+        new ResizeObserver(() => {
+            this.description.overflow();
+        }).observe(this.container);
     }
 
     update(callback) {
@@ -285,6 +289,7 @@ class Description {
         // Retrieve infos on the taxon from the database
         let updater = this.information.app.updater;
         let infos = updater.getTaxon();
+        let language = this.information.params.languages.current;
         // Retrieve wikipedia information
         let wikipedia = updater.getDescription();
 
@@ -348,7 +353,7 @@ class Description {
             }
             // Add the DOM Element only if vernaculars were found
             if (vstring !== '') {
-                let vernacular = makeDiv(null, 'description-vernacular', this.information.app.params.texts.vernaculars[this.information.params.languages.current])
+                let vernacular = makeDiv(null, 'description-vernacular', this.information.app.params.texts.vernaculars[language])
                 let vernaculars = makeDiv(null, 'description-vernaculars', vstring);
                 this.content.append(vernacular, vernaculars);
             }
@@ -360,11 +365,47 @@ class Description {
             let summary = makeDiv(null, 'description-summary', this.summary(wikipedia.summary));
             this.content.append(summary);
         }
+
+        console.log(this.information.params)
+        console.log(infos)
+
+        // Adding the status count
+        let statuses = infos.status;
+        let counters = [ 'ex', 'ew', 'cr', 'en', 'vu', 'nt', 'lc', 'dd', 'ne', 'un' ]
+
+        this.statuses = makeDiv(null, 'description-statuses-container');
+
+        let total = 0
+        counters.forEach((s) => { total += statuses[s]; });
+
+        counters.forEach((s) => {
+            let statuscontainer = makeDiv(null, 'description-statuses');
+
+            let locale = this.information.params.languages.available[language].locale;
+            let tooltipcontent = `${this.information.params.status[s][language]}<br>${statuses[s]} (${(100*statuses[s]/total).toLocaleString(locale, {maximumSignificantDigits: 2})}%)`
+
+            let tooltip = makeDiv(null, 'description-statuses-tooltip status-' + s, tooltipcontent);
+            let totalcontainer = makeDiv(null, 'description-statuses-total');
+            let amount = makeDiv(null, 'description-statuses-amount status-' + s);
+            amount.style.height = 100*statuses[s]/total + '%';
+            let name = makeDiv(null, 'description-statuses-name status-' + s, s);
+
+            totalcontainer.append(amount);
+            statuscontainer.append(tooltip, totalcontainer, name);
+            this.statuses.append(statuscontainer);
+
+            statuscontainer.addEventListener('mouseenter', () => { amount.style.height = '100%'; });
+            statuscontainer.addEventListener('mouseleave', () => { amount.style.height = 100*statuses[s]/total + '%'; });
+        });
+
+        this.content.append(this.statuses);
         
         // Animate the display of information
         wait(10, () => {
             removeClass(this.content, 'hidden');
             this.information.loaded();
+            this.overflow();
+            this.container.scrollTo(0, 0);
             callback();
         })
     }
@@ -420,6 +461,18 @@ class Description {
                 // Replace the brackets and their content which are often comment on improvements
                 .replace(/\[.*?\]/, "")
         )
+    }
+
+    overflow() {
+        if (this.content) {
+            let height = this.container.offsetHeight;
+            let contentheight = this.content.offsetHeight + remToPx(2);
+            if (height < contentheight) {
+                addClass(this.container, 'overflow');
+            } else {
+                removeClass(this.container, 'overflow');
+            }
+        }
     }
 }
 

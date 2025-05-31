@@ -38,7 +38,7 @@ RANKS = {
 }
 
 # Define the full names of IUCN redlist statuses
-IUCN = {
+STATUS = {
     'EX': { 'en': 'Extinct', 'fr': 'Éteinte' },
     'EW': { 'en': 'Extinct in the wild', 'fr': "Éteinte à l'état sauvage" },
     'CR': { 'en': 'Critically endangered', 'fr': "En danger critique d'extinction" },

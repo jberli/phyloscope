@@ -187,7 +187,7 @@ typesorting:
     level: 2
     en: Infrahybrid
     fr: Infra-hybride
-iucn:
+status:
   ex:
     en: Extinct
     fr: Éteinte
@@ -206,9 +206,6 @@ iucn:
   nt:
     en: Near threatened
     fr: Quasi menacée
-  cd:
-    en: Conservation dependent
-    fr: Dépendente de la conservation
   lc:
     en: Least concern
     fr: Préoccupation mineure
@@ -218,6 +215,9 @@ iucn:
   ne:
     en: Not evaluated
     fr: Non-évaluée
+  un:
+    en: Unknown
+    fr: Inconnu
 texts:
   vernaculars:
     en: 'Other names:'

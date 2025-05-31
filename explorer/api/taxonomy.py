@@ -38,12 +38,24 @@ def get_taxon_information(obj, lang):
             'parent': parent,
             'type': RANKS[obj.rank][lang],
             'typesorting': obj.rank,
-            'status': obj.status,
             'level': obj.level,
             'count': obj.count_species,
             'percentage': obj.percentage_parent,
             'photographs': photos,
             'iconic': obj.iconic,
+            'status': {
+                'current': obj.status,
+                'ex': obj.ex,
+                'ew': obj.ew,
+                'cr': obj.cr,
+                'en': obj.en,
+                'vu': obj.vu,
+                'nt': obj.nt,
+                'lc': obj.lc,
+                'dd': obj.dd,
+                'ne': obj.ne,
+                'un': obj.un
+            }
         }
 
 def get_taxon_description(language, taxon):

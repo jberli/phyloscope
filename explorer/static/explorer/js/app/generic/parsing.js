@@ -117,30 +117,7 @@ function calculateWidthFromClass(c) {
     return width;
 }
 
-/**
- * Properly format a percentage to avoid having too many numbers.
- * @param  {Float} c - Input percentage.
- * @return {String} - Formated percentage.
- */
-function formatPercentage(float) {
-    let perc = '';
-    if (round(float, 1) < 10) {
-        if (round(float, 1) < 0.1) {
-            if (round(float, 2) < 0.01) {
-                perc += round(float, 3).toFixed(3) + '%';
-            } else {
-                perc += round(float, 2).toFixed(2) + '%';
-            }
-        } else {
-            perc += round(float, 1).toFixed(1) + '%';
-        }
-    } else {
-        perc += Math.round(float) + '%';
-    }
-    return perc;
-}
-
 export {
     compare, removeTrailing, uppercaseFirstLetter, boldSubstring,
-    calculateTextWidth, calculateWidthFromClass, formatPercentage, remToPx, pxToRem
+    calculateTextWidth, calculateWidthFromClass, remToPx, pxToRem
 }

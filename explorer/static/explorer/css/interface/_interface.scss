@@ -221,3 +221,53 @@ svg.subspecies { color: $subspecies; }
 svg.infrahybrid { color: $infrahybrid; }
 svg.variety { color: $variety; }
 svg.form { color: $form; }
+
+.status-ex {
+    background-color: $ex-background;
+    color: $ex-text;
+}
+
+.status-ew {
+    background-color: $ew-background;
+    color: $ew-text;
+}
+
+.status-cr {
+    background-color: $cr-background;
+    color: $cr-text;
+}
+
+.status-en {
+    background-color: $en-background;
+    color: $en-text;
+}
+
+.status-vu {
+    background-color: $vu-background;
+    color: $vu-text;
+}
+
+.status-nt {
+    background-color: $nt-background;
+    color: $nt-text;
+}
+
+.status-lc {
+    background-color: $lc-background;
+    color: $lc-text;
+}
+
+.status-dd {
+    background-color: $dd-background;
+    color: $dd-text;
+}
+
+.status-ne {
+    background-color: $ne-background;
+    color: $ne-text;
+}
+
+.status-un {
+    background-color: $un-background;
+    color: $un-text;
+}

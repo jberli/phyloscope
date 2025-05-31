@@ -4,7 +4,7 @@
  */
 
 import { addClass, addSVG, makeDiv, removeChildren, removeClass, wait } from "../generic/dom.js";
-import { formatPercentage, uppercaseFirstLetter } from "../generic/parsing.js";
+import { uppercaseFirstLetter } from "../generic/parsing.js";
 import { Helper } from "./helper.js";
 import Widget from "./widget.js";
 
@@ -156,7 +156,7 @@ class Statistics extends Widget {
                     obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                     if (!self.freezed) {
                         let locale = self.app.params.languages.available[self.app.params.languages.current].locale;
-                        let stats = d.data.value.toLocaleString(locale) + ' - ' + formatPercentage(d.data.percentage);
+                        let stats = `${d.data.value.toLocaleString(locale)} (${d.data.percentage.toLocaleString(locale, {maximumSignificantDigits: 2})}%)`
                         self.wrapText(d.data.name, stats);
                         self.currentactive = self.app.taxonomy.children.getActive();
                         self.app.taxonomy.children.slideTo(d.index + 1);
@@ -269,7 +269,7 @@ class Statistics extends Widget {
                     obj.attr("fill", d3.color(obj.attr("fill")).darker(.5));
                     if (!self.freezed) {
                         let locale = self.app.params.languages.available[self.app.params.languages.current].locale;
-                        let stats = d.data.value.toLocaleString(locale) + ' - ' + formatPercentage(d.data.percentage);
+                        let stats = `${d.data.value.toLocaleString(locale)} (${d.data.percentage.toLocaleString(locale, {maximumSignificantDigits: 2})}%)`
                         self.wrapText(d.data.name, stats);
                         self.currentactive = self.app.taxonomy.children.getActive();
                         self.app.taxonomy.children.slideTo(d.index + 1);
