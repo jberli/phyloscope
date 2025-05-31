@@ -45,7 +45,6 @@ IUCN = {
     'EN': { 'en': 'Endangered', 'fr': 'En danger' },
     'VU': { 'en': 'Vulnerable', 'fr': 'Vulnérable' },
     'NT': { 'en': 'Near threatened', 'fr': 'Quasi menacée' },
-    'CD': { 'en': 'Conservation dependent', 'fr': 'Dépendente de la conservation' },
     'LC': { 'en': 'Least concern', 'fr': 'Préoccupation mineure' },
     'DD': { 'en': 'Data deficient', 'fr': 'Données insuffisantes' },
     'NE': { 'en': 'Not evaluated', 'fr': 'Non-évaluée' },

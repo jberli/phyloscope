@@ -24,8 +24,6 @@ def calculate_statistics():
                 t.vu = 1
             elif t.status == 'NT':
                 t.nt = 1
-            elif t.status == 'CD':
-                t.cd = 1
             elif t.status == 'LC':
                 t.lc = 1
             elif t.status == 'DD':
@@ -39,7 +37,7 @@ def calculate_statistics():
             t.save()
         else:
             add = True
-            total = ex = ew = cr = en = vu = nt = cd = lc = dd = ne = un = 0
+            total = ex = ew = cr = en = vu = nt = lc = dd = ne = un = 0
             for child in children:
                 if child.count_species is None:
                     add = False
@@ -51,7 +49,6 @@ def calculate_statistics():
                 en += child.en
                 vu += child.vu
                 nt += child.nt
-                cd += child.cd
                 lc += child.lc
                 dd += child.dd
                 ne += child.ne
@@ -63,7 +60,6 @@ def calculate_statistics():
                 t.en = en
                 t.vu = vu
                 t.nt = nt
-                t.cd = cd
                 t.lc = lc
                 t.dd = dd
                 t.ne = ne

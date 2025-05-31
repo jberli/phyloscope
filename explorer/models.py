@@ -21,7 +21,6 @@ class Taxon(models.Model):
     en = models.IntegerField(db_column='en', default=0)
     vu = models.IntegerField(db_column='vu', default=0)
     nt = models.IntegerField(db_column='nt', default=0)
-    cd = models.IntegerField(db_column='cd', default=0)
     lc = models.IntegerField(db_column='lc', default=0)
     dd = models.IntegerField(db_column='dd', default=0)
     ne = models.IntegerField(db_column='ne', default=0)
