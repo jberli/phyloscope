@@ -302,7 +302,8 @@ class Range {
         // Create and add the layer
         this.layer = new ol.layer.Vector({
             source: new ol.source.Vector({
-                features: []
+                features: [],
+                wrapX: false,
             }),
             updateWhileAnimating: true,
             updateWhileInteracting: true,
