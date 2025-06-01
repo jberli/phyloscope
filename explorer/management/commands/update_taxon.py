@@ -17,7 +17,7 @@ class Command(BaseCommand):
         if options['nocheck']:
             doit = True
         else:
-            doit = prompt('''You are about to update the taxon of the week. Continue? ''')
+            doit = prompt('''You are about to update the showcased taxon. Continue? ''')
         if (doit):
             update_taxon()
         else:

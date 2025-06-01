@@ -11,6 +11,7 @@ def has_wikipedia(url):
     Returns True if the taxon has a Wikipedia page with a summary.
     Instead returns False
     """
+    print(url)
     configuration = yaml.safe_load(open('explorer/static/explorer/conf/configuration.yaml', 'r'))
     languages = configuration['languages']['available']
     name = url.split('/')[-1].replace(" ", "_")
@@ -25,14 +26,14 @@ def has_wikipedia(url):
                 has_all = False
     return has_all
 
-def update_taxon(ranks=['species']):
+def update_taxon(ranks=['species', 'genus', 'family']):
     """
     Update the current showcased taxon
     """
     print('Updating showcased taxon...')
 
     # Get all species
-    taxons = Taxon.objects.filter(rank__in=ranks)
+    taxons = Taxon.objects.filter(rank__in=ranks, rstate__in=['ofinal', 'ufinal']).exclude(wikipedia='').exclude(wikipedia=None)
     # Create a list of indexes
     indexes = list(taxons.values('tid'))
 
@@ -43,10 +44,9 @@ def update_taxon(ranks=['species']):
         taxon = taxons[index]
 
         # Checking if taxon has range and wikipedia page
-        r = True if taxon.range is not None else False
         w = has_wikipedia(taxon.wikipedia)
 
-        if r and w:
+        if w:
             print(f'Taxon {taxon.name} ({taxon.tid}) has range and wikipedia page, setting as showcased.')
 
             # Load the configuration file
@@ -61,7 +61,5 @@ def update_taxon(ranks=['species']):
                 yamlfile.write(yaml.dump(data, default_flow_style=False))
             break
         else:
-            if not r:
-                print(f'Taxon {taxon.name} ({taxon.tid}) has no range.')
             if not w:
                 print(f'Taxon {taxon.name} ({taxon.tid}) has no wikipedia page.')
