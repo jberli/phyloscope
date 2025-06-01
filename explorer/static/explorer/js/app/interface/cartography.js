@@ -183,7 +183,7 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137) * 3, (-pi * 6378137) * 0.9, (pi * 6378137) * 3, (pi * 6378137) * 0.9 ],
+            extent: [ (-pi * 6378137) * 2.5, (-pi * 6378137) * 0.9, (pi * 6378137) * 2.5, (pi * 6378137) * 0.9 ],
             projection: this.projection
         })
 
