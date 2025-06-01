@@ -13,6 +13,7 @@ class Taxon(models.Model):
     percentage_parent = models.FloatField(db_column='percentage_parent', blank=True, null=True)
     range = models.MultiPolygonField(db_column='range', srid=3857, blank=True, null=True, unique=False)
     rstate = models.CharField(db_column='rstate', max_length=10, blank=False, null=False, default='init')
+    rcrossing = models.BooleanField(db_column='rcrossing', default=False, null=False)
 
     # Percentage children status
     ex = models.IntegerField(db_column='ex', default=0)
