@@ -96,8 +96,8 @@ texts:
       en: 'Updated on '
       fr: 'Actualisé le '
   powered:
-    en: 'Powered by <a href=''https://www.inaturalist.org/'' target=''_blank''>iNaturalist</a>'
-    fr: 'Alimenté par <a href=''https://www.inaturalist.org/'' target=''_blank''>iNaturalist</a>'
+    en: 'Powered by'
+    fr: 'Alimenté par'
   help:
     cartography:
     - en: Using the map

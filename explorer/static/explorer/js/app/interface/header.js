@@ -20,8 +20,10 @@ class Header extends Widget {
         this.foldable = makeDiv(null, 'header-foldable');
         this.container.append(this.foldable);
 
+
         let language = this.params.languages.current;
         
+        this.left = makeDiv(null, 'header-left');
         this.githubcontainer = makeDiv(null, 'header-github-container');
         let githublogo = makeDiv(null, 'header-github-logo');
         addSVG(githublogo, new URL('/static/explorer/img/github.svg', import.meta.url));
@@ -60,10 +62,12 @@ class Header extends Widget {
             this.updatecontainer.style.width = '2rem';
         });
 
-        this.powered = makeDiv(null, 'header-powered', this.params.texts.powered[language]);
+        this.left.append(this.githubcontainer, this.updatecontainer);
+
+        this.center = makeDiv(null, 'header-center', this.params.texts.powered[language] + " <a href='https://www.inaturalist.org/' target='_blank'>iNaturalist</a>");
 
         this.languages = []
-        this.languagescontainer = makeDiv(null, 'header-languages-container');
+        this.right = makeDiv(null, 'header-right');
         for (let [lang, value] of Object.entries(this.params.languages.available)) {
             let lcont = makeDiv(null, 'header-language');
             let l = makeDiv(null, 'header-language-flag');
@@ -73,19 +77,19 @@ class Header extends Widget {
             if (lang === language) { addClass(l, 'active') }
             this.languages.push(l);
             lcont.append(l, tooltip);
-            this.languagescontainer.append(lcont);
+            this.right.append(lcont);
 
             l.addEventListener('click', () => {
                 if (!hasClass(l, 'active') && !this.freezed) {
                     this.languages.forEach((e) => { removeClass(e, 'active'); });
                     addClass(l, 'active');
-                    addClass(this.powered, 'hidden');
+                    addClass(this.center, 'hidden');
                     this.app.updater.switchLanguage(l.getAttribute('value'));
                 }
             });
         }
 
-        this.foldable.append(this.githubcontainer, this.updatecontainer, this.powered, this.languagescontainer);
+        this.foldable.append(this.left, this.center, this.right);
     }
 
     switchLanguage(language) {
@@ -98,8 +102,8 @@ class Header extends Widget {
         this.update.innerHTML = this.updatetext;
 
         wait(100, () => {
-            this.powered.innerHTML = this.params.texts.powered[language];
-            removeClass(this.powered, 'hidden');
+            this.center.innerHTML = this.params.texts.powered[language];
+            removeClass(this.center, 'hidden');
         });
     }
 }

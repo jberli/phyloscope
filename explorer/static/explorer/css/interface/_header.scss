@@ -1,11 +1,15 @@
 #header {
-    height: 11rem;
+    height: 8rem;
     background-color: $main-color-light;
     display: flex;
     flex-direction: column;
     justify-content: start;
     align-items: center;
-    overflow: visible;
+    overflow: hidden;
+
+    &:hover {
+       height: 11rem;
+    }
 }
 
 .header-logo {
@@ -22,13 +26,23 @@
 }
 
 .header-foldable {
+    position: relative;
     height: 3rem;
-    width: calc(100% - 2rem);
-    padding: 0 1rem;
+    width: 100%;
+}
+
+.header-left {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    top: 0;
+    height: inherit;
 
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+
+    margin-left: 1rem;
 }
 
 .header-update-container {
@@ -124,15 +138,22 @@
     transition: transform .1s ease-in-out;
 }
 
-.header-powered {
-    margin: 0 auto;
-    font-style: italic;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.header-center {
+    position: absolute;
+    z-index: 18;
+    top: 0;
+    left: 50%;
+    height: 3rem;
+    line-height: 3rem;
 
-    & > a { font-weight: bold; }
+    transform: translateX(-50%);
+
+    font-style: italic;
+
+    & > a {
+        font-weight: bold;
+        font-style: normal;
+    }
 
     opacity: 1;
     transition: opacity .1s ease-in-out;
@@ -140,8 +161,13 @@
     &.hidden { opacity: 0; }
 }
 
-.header-languages-container {
-    height: 3rem;
+.header-right {
+    position: absolute;
+    z-index: 19;
+    right: 0;
+    margin-right: 1rem;
+
+    height: inherit;
     display: flex;
     justify-content: center;
     align-items: center;
