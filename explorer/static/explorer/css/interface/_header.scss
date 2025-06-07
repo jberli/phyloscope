@@ -127,6 +127,10 @@
 .header-powered {
     margin: 0 auto;
     font-style: italic;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
     & > a { font-weight: bold; }
 
