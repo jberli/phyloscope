@@ -86,7 +86,7 @@ status:
     en: Vulnerable
     fr: Vulnérable
 taxonomy:
-  current: 141732
+  current: 3163
 texts:
   database:
     initialization:
