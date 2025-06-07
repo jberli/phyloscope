@@ -12,11 +12,10 @@ social network of worldwide naturalists that aims at sharing information about b
 Don't hesitate to visit their website, register and start sharing and learning!
 
 <p align="center">
-<figure align="center">
     <img src="https://raw.githubusercontent.com/jberli/phyloscope/refs/heads/main/assets/phyloscope.jpg" alt="Phyloscope GUI"/>
-    <figcaption align="center" style="text-align:center;"><i>Figure 1: Phyloscope user interface</i></figcaption>
-</figure>
 </p>
+<figcaption align="center" style="text-align:center;"><i>Figure 1: Phyloscope user interface</i></figcaption>
+<br>
 
 The application is divided into **5 widgets** that communicates between each other. Below is a short description of the different tools and information you can find within those widgets. More information can be found in the web application itself by clicking on the exclamation mark in the top right corner of a widget.
 
