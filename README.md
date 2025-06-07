@@ -69,7 +69,7 @@ represents the full taxon list derived from the community's observation. Find ou
 
 ### Photography widget
 
-The photography widget allows you to put a face on the name. Those are photography from the **iNaturalist community** published under a **CC-BY** licenses or in the **Public Domain**. A link to the original photography and its uploader is available at the bottom of the widget when hovering.
+The photography widget allows you to put a face on the name. Those are photography from the **iNaturalist community** published under a **CC-BY** license or in the **Public Domain**. A link to the original photography and its uploader is available at the bottom of the widget when hovering.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/jberli/phyloscope/refs/heads/main/assets/photography.jpg" alt="Photography"/>
@@ -77,7 +77,7 @@ The photography widget allows you to put a face on the name. Those are photograp
 
 ### Statistics widget
 
-The statistics widget allows you better estimate the **diversity** of a given taxon as it shows the **proportion of children** taxa within the current taxon. It shows a fully interactable doughnut chart that is linked to the taxonomy widget and allows you to navigate in the children taxa or move up the taxonomy.
+The statistics widget allows you to better estimate the **diversity** of a given taxon as it shows the **proportion of children** taxa within the current taxon. It shows a fully interactable doughnut chart that is linked to the taxonomy widget and allows you to navigate in the children taxa or move up the taxonomy.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/jberli/phyloscope/refs/heads/main/assets/statistics.jpg" alt="Statistics"/>
