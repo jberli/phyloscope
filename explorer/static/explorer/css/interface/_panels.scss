@@ -42,7 +42,7 @@ $side-panel-background: $interface-background;
 }
 
 #information {
-    flex: 30%;
+    flex: 40%;
     color: $main-color-extralight;
     display: flex;
     flex-direction: column;
@@ -54,7 +54,7 @@ $side-panel-background: $interface-background;
 }
 
 #cartography {
-    flex: 70%;
+    flex: 60%;
     background-color: $main-color-light;
     overflow: visible;
 }
