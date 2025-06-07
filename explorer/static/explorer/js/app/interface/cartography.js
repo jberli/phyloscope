@@ -71,8 +71,8 @@ class Cartography extends Widget {
         this.resizer.addEventListener('dblclick', () => {
             self.app.first.style.flex = '35%';
             self.app.second.style.flex = '35%';
-            self.app.information.container.style.flex = '30%';
-            self.container.style.flex = '70%';
+            self.app.information.container.style.flex = '40%';
+            self.container.style.flex = '60%';
         });
 
         // Map DOM element
@@ -295,16 +295,14 @@ class Range {
         this.default = true;
         // Flag to see if the geometry of the range exists
         this.geometry = false;
+        // Flag to see if the geometry should be wrap at the antimeridian
+        this.wrapping = false;
 
         // Flag to avoid double activation of the range
         this.transition = false;
 
         // Create and add the layer
         this.layer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [],
-                wrapX: false,
-            }),
             updateWhileAnimating: true,
             updateWhileInteracting: true,
             zIndex: 100
@@ -378,20 +376,34 @@ class Range {
 
             // Create a new feature using the provided WKT
             let feature = new ol.format.WKT().readFeature(range);
+
+            let extent = feature.getGeometry().getExtent();
+            const minimum = -Math.PI * 6378137;
+            const maximum = Math.PI * 6378137;
+
+            if (extent[0] < minimum || extent[2] > maximum) {
+                if (this.wrapping) { this.wrapping = false; }
+            } else {
+                if (!this.wrapping) { this.wrapping = true; }
+            }
             
             // Set the fill color to represent the typesorting
             let style = new ol.style.Style({
                 fill: new ol.style.Fill({
                     color: this.params.colors[this.typesorting]
                 })
-            })
+            });
 
             // Apply the fill style
             this.layer.setStyle(style);
 
-            // Remove all features from the source and add the current
-            this.layer.getSource().clear();
-            this.layer.getSource().addFeature(feature);
+            let source = new ol.source.Vector({
+                features: [ feature ],
+                wrapX: this.wrapping,
+            });
+
+            this.layer.setSource(source);
+            
             // Set opacity to 0 for later reveal
             this.layer.setOpacity(0);
 
