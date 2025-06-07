@@ -20,13 +20,19 @@ class Application {
         this.mask = makeDiv('application-mask', 'mask');
         this.container.append(this.mask);
         this.large = '';
-        document.body.appendChild(this.container);
 
+        document.body.appendChild(this.container);
+        let language = navigator.language.substring(0, 2);
+        
         // Retrieve the configuration parameters
-        ajaxGet('configuration/', (params) => {
+        ajaxGet('configuration/' + language, (params) => {
             this.params = params;
             this.params.widgets = 5;
             this.params.colors = getColorsByClassNames(...Object.keys(this.params.typesorting));
+
+            document.title = this.params.metadata.title[language];
+            document.querySelector('meta[name="description"]').setAttribute("content", this.params.metadata.description[language]);
+            document.documentElement.setAttribute("lang", language);
 
             // Create the first, second and third column panel
             this.first = makeDiv('first-panel', 'panel');

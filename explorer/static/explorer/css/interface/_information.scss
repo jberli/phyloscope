@@ -310,10 +310,24 @@ $search-height: 3rem;
 }
 
 .search-loader {
-    width: .5rem;
-    height: .5rem;
+    position: absolute;
+    right: 3rem;
+    top: 0.5rem;
+    z-index: 30;
+    pointer-events: none;
+
+    width: .6rem;
+    height: .6rem;
     border-radius: 50%;
-    border: .3rem solid #fff;
-    border-color: #fff transparent #fff transparent;
+    border: .7rem solid $main-color-dark;
+
+    border-color: $main-color-dark transparent $main-color-dark transparent;
     animation: rotationcw 1.2s linear infinite;
+
+    opacity: 0;
+    transition: opacity .2s ease-in-out;
+
+    &.loading {
+        opacity: 1;
+    }
 }

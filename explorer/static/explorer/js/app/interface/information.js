@@ -77,13 +77,18 @@ class Search {
 
         // Flag to see if the search bar is currently active
         this.active = false;
+        // Storage for the search value
+        this.value = '';
         // Storage for results of the search
-        this.results = []
+        this.results = [];
 
         // Add a button to activate the search
         this.searchbutton = makeDiv(null, 'search-button button');
         addSVG(this.searchbutton, new URL('/static/explorer/img/search.svg', import.meta.url));
         this.information.container.append(this.searchbutton);
+
+        this.loader = makeDiv(null, 'search-loader');
+        this.information.container.append(this.loader);
 
         // Create DOM Elements of the search bar
         this.container = makeDiv(null, 'search-container collapse');
@@ -100,9 +105,31 @@ class Search {
         });
 
         this.input.addEventListener('input', (e) => {
-            if (self.active) {
-                let value = e.target.innerHTML.replace('<br>', '').trim();
-                self.lookup(value);
+            if (this.active) {
+                let input = e.target.innerHTML.replace('<br>', '').replace('&nbsp;', '').trim();
+                this.value = input;
+
+                // Check if input has 3 or more characters
+                if (input.length > 2) {
+                    let cooldown = this.information.params.interface.lookup.cooldown;
+                    this.loading();
+                    // Wait for the cooldown before sending the ajax
+                    wait(cooldown, () => {
+                        // If the widget input value has not changed, send the ajax
+                        if (this.value === input) {
+                            // Check if there is at least 3 characters
+                            if (this.value.length > 2) {
+                                this.lookup();
+                            }
+                        }
+                    });
+                }
+                // If there is less than 3 characters
+                else {
+                    // Empty the description container
+                    this.information.description.clear();
+                    this.loaded();
+                }
             }
         })
 
@@ -160,7 +187,7 @@ class Search {
         })
     }
 
-    lookup(value) {
+    lookup() {
         // Create a group of results depending of the sorting type
         function addGroup(array, type, typesort) {
             // Create DOM Elements
@@ -174,104 +201,107 @@ class Search {
             return group;
         }
 
-        let self = this;
-        // Check if there is at least 3 characters
-        if (value.length > 2) {
-            // Send an ajax to lookup the wanted characters
-            ajaxGet('search/' + self.information.app.params.languages.current + '/' + value, function(r) {
-                let length = r.values.length;
-                // If results have been returned
-                if (r.values.length > 0) {
-                    // Storage for the previous taxon type for sorting purposes 
-                    let previousType;
-                    let previousTypeSort;
-                    // Storage for different taxon types
-                    let sorting = [];
-                    // Set the results as empty
-                    self.results = [];
-                    // Loop through each result
-                    for (let i = 0; i < length; ++i) {
-                        let entry = r.values[i];
-                        // Retrieve the vernacular name
-                        let name = entry.vernacular
-                        let html;
-                        // Set name as the scientific name when needed and boldify sent string
-                        if (name === null) { html = '<i>' + boldSubstring(entry.scientific, value) + '</i><br>'; }
-                        // Set vernacular name and boldify sent string
-                        else { html = boldSubstring(name, value) + '<br><i>' + boldSubstring(entry.scientific, value) + '</i>'; }
-                        // Retrieve the sorting type
-                        let typesort = entry.typesorting;
-                        let type = entry.type;
-                        // If the type is different from the previous 
-                        if (typesort != previousTypeSort && sorting.length > 0) {
-                            // Add the group to the results
-                            self.results.push(addGroup(sorting, previousType, previousTypeSort));
-                            sorting = [];
-                        }
-                        let label = makeDiv(null, 'search-label', html);
-                        let imageDiv = makeDiv(null, 'search-image-container');
+        let value = this.value;
 
-                        // If there is an image, loading it
-                        if (entry.picture !== null) {
-                            let imageMask = makeDiv(null, 'mask ' + typesort);
-                            let loader = makeDiv(null, 'search-loader');
-                            let image = makeImage(entry.picture, null, null, null, 'photo');
-                            loadImage(image).then(() => { addClass(imageMask, 'loaded'); });
-                            imageMask.appendChild(loader);
-                            imageDiv.append(imageMask, image);
-                        } else {
-                            if (entry.iconic !== null) {
-                                let image = makeDiv(null, 'photo-svg');
-                                addSVG(image, new URL('/static/explorer/img/iconic/' + entry.iconic + '.svg', import.meta.url));
-                                imageDiv.append(image);
-                            }
-                        }
-
-                        // Create the element for the current result with image and label
-                        let result = makeDiv(null, 'search-result ' + typesort);
-                        result.append(imageDiv, label);
-                        // Add the taxon index as an html attribute
-                        result.setAttribute('taxon', entry.taxon);
-
-                        // Activate the taxon on click
-                        function activateTaxon(e) {
-                            if (!self.information.freezed) {
-                                result.removeEventListener('click', activateTaxon);
-                                let taxon = parseInt(e.target.getAttribute('taxon'));
-                                if (taxon !== self.information.app.updater.getTaxon().id) {
-                                    self.information.description.clear();
-                                    self.deactivate();
-                                    // Update the application widgets
-                                    self.information.app.updater.updateFromSearch(taxon);
-                                } else {
-                                    self.information.describing();
-                                }
-                            }
-                        }
-                        result.addEventListener('click', activateTaxon);
-
-                        // Add the current result to the list
-                        sorting.push(result);
-                        // Set current types as previous
-                        previousTypeSort = typesort;
-                        previousType = type;
+        // Send an ajax to lookup the wanted characters
+        ajaxGet('search/' + this.information.app.params.languages.current + '/' + value, (r) => {
+            this.loaded();         
+            let length = r.values.length;
+            // If results have been returned
+            if (r.values.length > 0) {
+                // Storage for the previous taxon type for sorting purposes 
+                let previousType;
+                let previousTypeSort;
+                // Storage for different taxon types
+                let sorting = [];
+                // Set the results as empty
+                this.results = [];
+                // Loop through each result
+                for (let i = 0; i < length; ++i) {
+                    let entry = r.values[i];
+                    // Retrieve the vernacular name
+                    let name = entry.vernacular
+                    let html;
+                    // Set name as the scientific name when needed and boldify sent string
+                    if (name === null) { html = '<i>' + boldSubstring(entry.scientific, value) + '</i><br>'; }
+                    // Set vernacular name and boldify sent string
+                    else { html = boldSubstring(name, value) + '<br><i>' + boldSubstring(entry.scientific, value) + '</i>'; }
+                    // Retrieve the sorting type
+                    let typesort = entry.typesorting;
+                    let type = entry.type;
+                    // If the type is different from the previous 
+                    if (typesort != previousTypeSort && sorting.length > 0) {
+                        // Add the group to the results
+                        this.results.push(addGroup(sorting, previousType, previousTypeSort));
+                        sorting = [];
                     }
-                    // Add the last group to the list of results
-                    self.results.push(addGroup(sorting, previousType, previousTypeSort));
-                    // Add results to the description widget
-                    self.information.description.results(self.results, previousTypeSort);
+                    let label = makeDiv(null, 'search-label', html);
+                    let imageDiv = makeDiv(null, 'search-image-container');
+
+                    // If there is an image, loading it
+                    if (entry.picture !== null) {
+                        let imageMask = makeDiv(null, 'mask ' + typesort);
+                        let loader = makeDiv(null, 'search-loader');
+                        let image = makeImage(entry.picture, null, null, null, 'photo');
+                        loadImage(image).then(() => { addClass(imageMask, 'loaded'); });
+                        imageMask.appendChild(loader);
+                        imageDiv.append(imageMask, image);
+                    } else {
+                        if (entry.iconic !== null) {
+                            let image = makeDiv(null, 'photo-svg');
+                            addSVG(image, new URL('/static/explorer/img/iconic/' + entry.iconic + '.svg', import.meta.url));
+                            imageDiv.append(image);
+                        }
+                    }
+
+                    // Create the element for the current result with image and label
+                    let result = makeDiv(null, 'search-result ' + typesort);
+                    result.append(imageDiv, label);
+                    // Add the taxon index as an html attribute
+                    result.setAttribute('taxon', entry.taxon);
+
+                    // Activate the taxon on click
+                    self = this;
+                    function activateTaxon(e) {
+                        if (!self.information.freezed) {
+                            result.removeEventListener('click', activateTaxon);
+                            let taxon = parseInt(e.target.getAttribute('taxon'));
+                            if (taxon !== self.information.app.updater.getTaxon().id) {
+                                self.information.description.clear();
+                                self.deactivate();
+                                // Update the application widgets
+                                self.information.app.updater.updateFromSearch(taxon);
+                            } else {
+                                self.information.describing();
+                            }
+                        }
+                    }
+                    result.addEventListener('click', activateTaxon);
+
+                    // Add the current result to the list
+                    sorting.push(result);
+                    // Set current types as previous
+                    previousTypeSort = typesort;
+                    previousType = type;
                 }
-                // If no results have been found, clear the description container
-                else {
-                    self.information.description.clear();
-                }
-            });
-        }
-        // If there is less than 3 characters
-        else {
-            // Empty the description container
-            self.information.description.clear();
-        }
+                // Add the last group to the list of results
+                this.results.push(addGroup(sorting, previousType, previousTypeSort));
+                // Add results to the description widget
+                this.information.description.results(this.results, previousTypeSort);
+            }
+            // If no results have been found, clear the description container
+            else {
+                this.information.description.clear();
+            }
+        });
+    }
+
+    loading() {
+        addClass(this.loader, 'loading');
+    }
+
+    loaded() {
+        removeClass(this.loader, 'loading');
     }
 }
 
@@ -365,9 +395,6 @@ class Description {
             let summary = makeDiv(null, 'description-summary', this.summary(wikipedia.summary));
             this.content.append(summary);
         }
-
-        console.log(this.information.params)
-        console.log(infos)
 
         // Adding the status count
         let statuses = infos.status;

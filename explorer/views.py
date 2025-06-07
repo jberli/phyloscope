@@ -13,11 +13,11 @@ def initialization(request):
             'version': 1.0,
         })
 
-def configuration(request):
+def configuration(request, lang):
     """
     Returns the configuration file with the showcased taxon.
     """
-    config = get_configuration()
+    config = get_configuration(lang)
     return JsonResponse(config)
 
 def search(request, lang, value, limit=15):

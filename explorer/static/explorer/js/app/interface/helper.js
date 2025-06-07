@@ -157,20 +157,24 @@ class Helper {
                     let colorscale = makeDiv(null, 'helper-color-scale');
                     container.append(current, colorscale);
 
-                    for (let [level, value] of Object.entries(params.typesorting)) {
-                        let color = makeDiv(null, 'helper-color ' + level);
+                    let values = []
+                    for (let [l, v] of Object.entries(params.typesorting)) { values.push({ name: l, level: v.level }) }
+                    values.sort((a, b) => a.level - b.level).reverse();
+
+                    values.forEach((e) => {
+                        let color = makeDiv(null, 'helper-color ' + e.name);
                         colorscale.append(color);
                         color.addEventListener('mouseenter', () => {
-                            addClass(current, level);
+                            addClass(current, e.name);
                             addClass(current, 'hovering');
-                            current.innerHTML = `${value[language]} (${c.level[language]} ${value.level})`;
+                            current.innerHTML = `${params.typesorting[e.name][language]} (${c.level[language]} ${e.level})`;
                         });
                         color.addEventListener('mouseleave', () => {
-                            removeClass(current, level);
+                            removeClass(current, e.name);
                             removeClass(current, 'hovering');
                             current.innerHTML = c.placeholder[language];
                         });
-                    }
+                    });
 
                     let label = makeDiv(null, 'helper-label', c.label[language]);
                     this.content.append(container, label);

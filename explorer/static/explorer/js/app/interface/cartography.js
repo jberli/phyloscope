@@ -183,7 +183,7 @@ class Cartography extends Widget {
             center: carto.start.center,
             zoom: carto.start.zoom,
             maxZoom: carto.maxzoom,
-            extent: [ (-pi * 6378137) * 2.5, (-pi * 6378137) * 0.9, (pi * 6378137) * 2.5, (pi * 6378137) * 0.9 ],
+            extent: [ (-pi * 6378137) * 2.5, -pi * 6378137, (pi * 6378137) * 2.5, pi * 6378137 ],
             projection: this.projection
         })
 
@@ -198,7 +198,7 @@ class Cartography extends Widget {
         this.baselayer = new ol.layer.Tile({
             preload: Infinity,
             source: new ol.source.XYZ({
-                url: 'http://localhost:8001/' + this.baselayers[this.baselayerindex].url + '/{z}/{x}/{y}.png',
+                url: `https://geo.phyloscope.org/${this.baselayers[this.baselayerindex].url}/{z}/{x}/{y}.png`,
             }),
             zIndex: 10
         });
@@ -227,7 +227,7 @@ class Cartography extends Widget {
         let newlayer = new ol.layer.Tile({
             preload: Infinity,
             source: new ol.source.XYZ({
-                url: 'http://localhost:8001/' + baselayer.url + '/{z}/{x}/{y}.png',
+                url: `https://geo.phyloscope.org/${baselayer.url}/{z}/{x}/{y}.png`,
             }),
             zIndex: 9
         });

@@ -100,6 +100,10 @@ class Updater {
         this.app.cartography.loading();
         this.app.taxonomy.collapse();
 
+        document.title = this.params.metadata.title[lang];
+        document.querySelector('meta[name="description"]').setAttribute("content", this.params.metadata.description[lang]);
+        document.documentElement.setAttribute("lang", lang);
+
         addClass(this.app.taxonomy.helper.content, 'hidden');
         addClass(this.app.statistics.helper.content, 'hidden');
         wait(transition, () => {

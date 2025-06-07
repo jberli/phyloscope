@@ -13,7 +13,7 @@ interface:
       url: ne2
     - name:
         en: Hypsometric Tints
-        fr: "Teintes hypsom\xE9triques"
+        fr: Teintes hypsométriques
       style: dark
       url: hypso
     - name:
@@ -33,8 +33,16 @@ interface:
       - 0
       - 0
       zoom: 2
-  title: Phyloscope
   transition: 200
+  lookup:
+    cooldown: 500
+metadata:
+  title:
+    en: Phyloscope - Explore Life
+    fr: Phyloscope - Explorez le vivant
+  description:
+    en: 'Explore the relationships between species with interactive maps, statistics, and visual tools, using data from iNaturalist.'
+    fr: 'Explorez les relations entre les espèces à l’aide de cartes interactives, de statistiques et d’outils visuels, en utilisant des données provenant d’iNaturalist.'
 languages:
   available:
     en:
@@ -42,8 +50,8 @@ languages:
       name: English
     fr:
       locale: fr-FR
-      name: "Fran\xE7ais"
-  current: fr
+      name: Français
+  current: en
 photography:
   url: https://inaturalist-open-data.s3.amazonaws.com/photos/
 status:
@@ -52,41 +60,41 @@ status:
     fr: En danger critique d'extinction
   dd:
     en: Data deficient
-    fr: "Donn\xE9es insuffisantes"
+    fr: Données insuffisantes
   en:
     en: Endangered
     fr: En danger
   ew:
     en: Extinct in the wild
-    fr: "\xC9teinte \xE0 l'\xE9tat sauvage"
+    fr: Éteinte à l'état sauvage
   ex:
     en: Extinct
-    fr: "\xC9teinte"
+    fr: Éteinte
   lc:
     en: Least concern
-    fr: "Pr\xE9occupation mineure"
+    fr: Préoccupation mineure
   ne:
     en: Not evaluated
-    fr: "Non-\xE9valu\xE9e"
+    fr: Non-évaluée
   nt:
     en: Near threatened
-    fr: "Quasi menac\xE9e"
+    fr: Quasi menacée
   un:
     en: Unknown
     fr: Inconnu
   vu:
     en: Vulnerable
-    fr: "Vuln\xE9rable"
+    fr: Vulnérable
 taxonomy:
-  current: 417768
+  current: 141732
 texts:
   database:
     initialization:
       en: 'Initialized on '
-      fr: "Initialis\xE9 le "
+      fr: 'Initialisé le '
     update:
       en: 'Updated on '
-      fr: "Actualis\xE9 le "
+      fr: 'Actualisé le '
   help:
     cartography:
     - en: Using the map
@@ -109,26 +117,24 @@ texts:
         type: standard
       - label:
           en: Display or hide the taxon's range extent
-          fr: "Afficher ou cacher la zone de r\xE9partition du taxon"
+          fr: Afficher ou cacher la zone de répartition du taxon
         type: slider
       - label:
           en: Center the map on the taxon's range extent
-          fr: "Centrer la carte sur la zone de r\xE9partition du taxon"
+          fr: Centrer la carte sur la zone de répartition du taxon
         svg: center
         type: vector
       type: buttons
     - content:
         en: 'In the top right of this cartographic widget, a circle inside the border
           allows you to resize the map. Double-clicking it will restore its initial
-          size.
-
-          '
-        fr: "En haut \xE0 droite de cette cartographie, un cercle dans la bordure\
-          \ permet de redimensionner la carte. Double cliquer dessus permet de revenir\
-          \ \xE0 sa taille initiale.\n"
+          size.'
+        fr: 'En haut à droite de cette cartographie, un cercle dans la bordure permet
+          de redimensionner la carte. Double cliquer dessus permet de revenir à sa
+          taille initiale.'
       type: paragraph
     - en: Data source
-      fr: "Source des donn\xE9es"
+      fr: Source des données
       type: title
     - content:
         en: 'Geographical data on species ranges are taken from the <a href=''https://www.inaturalist.org/pages/range_maps''
@@ -136,16 +142,16 @@ texts:
           is generated from the <a href=''https://www.inaturalist.org/blog/84677-introducing-the-inaturalist-geomodel''
           target=''_blank''>Geomodel iNaturalist</a> that uses a deep learning model
           to create areas of potential presence based on observations and terrain
-          relief.
+          relief.'
+        fr: 'Les données géographiques de répartition des espèces sont issues de la
+          base <a href=''https://www.inaturalist.org/pages/range_maps'' target=''_blank''>iNaturalist
+          Open Range Map Dataset.</a> Cette base de données est générée à partir du
+          <a href=''https://www.inaturalist.org/blog/84677-introducing-the-inaturalist-geomodel''
+          target=''_blank''>Geomodel iNaturalist</a> utilisant l''apprentissage profond
+          pour créer des zones de présence potentielle en fonction des observations
+          et du relief.
 
           '
-        fr: "Les donn\xE9es g\xE9ographiques de r\xE9partition des esp\xE8ces sont\
-          \ issues de la base <a href='https://www.inaturalist.org/pages/range_maps'\
-          \ target='_blank'>iNaturalist Open Range Map Dataset.</a> Cette base de\
-          \ donn\xE9es est g\xE9n\xE9r\xE9e \xE0 partir du <a href='https://www.inaturalist.org/blog/84677-introducing-the-inaturalist-geomodel'\
-          \ target='_blank'>Geomodel iNaturalist</a> utilisant l'apprentissage profond\
-          \ pour cr\xE9er des zones de pr\xE9sence potentielle en fonction des observations\
-          \ et du relief.\n"
       type: paragraph
     - content:
       - en: 'The base iNaturalist dataset being generated mostly at the species rank
@@ -153,10 +159,11 @@ texts:
           the aggregation of range areas of the lower ranks.
 
           '
-        fr: "Les donn\xE9es de base \xE9tant g\xE9n\xE9r\xE9es majoritairement au\
-          \ niveau des esp\xE8ces par iNaturalist, les zones r\xE9partition des rangs\
-          \ sup\xE9rieurs de la taxonomie r\xE9sultent de l'agr\xE9gation des zones\
-          \ de r\xE9partition des rangs inf\xE9rieurs.\n"
+        fr: 'Les données de base étant générées majoritairement au niveau des espèces
+          par iNaturalist, les zones répartition des rangs supérieurs de la taxonomie
+          résultent de l''agrégation des zones de répartition des rangs inférieurs.
+
+          '
       - en: 'Range areas have been reconnected at the antimeridian (180<sup>th</sup>
           meridian, in the Pacific Ocean) because the base iNaturalist dataset is
           discontinuous when crossing this line. This operation is performed by a
@@ -167,46 +174,55 @@ texts:
           by the iNaturalist model.
 
           '
-        fr: "Les zones de r\xE9partition sont \xE9galement reconnect\xE9es au niveau\
-          \ de l'antim\xE9ridien (180<sup>\xE8me</sup> m\xE9ridien, dans l'oc\xE9\
-          an Pacifique) car les donn\xE9es de base sont discontinues lorsqu'elles\
-          \ traversent cette ligne. Cette op\xE9ration est effectu\xE9e par un algorithme\
-          \ personnel disponible sur le <a href='https://github.com/jberli/phyloscope'\
-          \ target='_blank'>d\xE9p\xF4t du projet</a>, elle permet de center la carte\
-          \ de mani\xE8re optimale. Les zones sont ensuite liss\xE9es par un algorithme\
-          \ de lissage gaussien afin d'obtenir des bordures plus organiques par rapport\
-          \ aux cellules hexagonales g\xE9n\xE9r\xE9es par le mod\xE8le iNaturalist.\n"
+        fr: 'Les zones de répartition sont également reconnectées au niveau de l''antiméridien
+          (180<sup>ème</sup> méridien, dans l''océan Pacifique) car les données de
+          base sont discontinues lorsqu''elles traversent cette ligne. Cette opération
+          est effectuée par un algorithme personnel disponible sur le <a href=''https://github.com/jberli/phyloscope''
+          target=''_blank''>dépôt du projet</a>, elle permet de centrer la carte de
+          manière optimale. Les zones sont ensuite lissées par un algorithme de lissage
+          gaussien afin d''obtenir des bordures plus organiques par rapport aux cellules
+          hexagonales générées par le modèle iNaturalist.
+
+          '
       sorted: false
       type: list
     - content:
         en: 'Geographical species range data
 
           '
-        fr: "Les fonds de carte proviennent de <a href='https://www.naturalearthdata.com/downloads/10m-raster-data/'\
-          \ target='_blank'>Natural Earth</a>, et plus sp\xE9cifiquement la version\
-          \ <a href='https://shadedrelief.com/ne-draft/' target='_blank'>6.0</a> qui\
-          \ propose une meilleure r\xE9solution. Les diff\xE9rents fonds de carte\
-          \ disponibles sont\_:\n"
+        fr: 'Les fonds de carte proviennent de <a href=''https://www.naturalearthdata.com/downloads/10m-raster-data/''
+          target=''_blank''>Natural Earth</a>, et plus spécifiquement la version <a
+          href=''https://shadedrelief.com/ne-draft/'' target=''_blank''>6.0</a> qui
+          propose une meilleure résolution. Les différents fonds de carte disponibles
+          sont :
+
+          '
       type: paragraph
     - content:
       - en: '<b>Natural Earth 1</b> represents the land use and is derived from satellite
           images.
 
           '
-        fr: "<b>Natural Earth 1</b> repr\xE9sente l'occupation des sols d\xE9riv\xE9\
-          e de l'imagerie satellite.\n"
+        fr: '<b>Natural Earth 1</b> représente l''occupation des sols dérivée de l''imagerie
+          satellite.
+
+          '
       - en: '<b>Natural Earth 2</b> is derived from Natural Earth 1 and represents
           an idealized Earth, with little human influence.
 
           '
-        fr: "<b>Natural Earth 2</b> est d\xE9riv\xE9 de Natural Earth 1 et repr\xE9\
-          sente la Terre de mani\xE8re id\xE9alis\xE9e, avec peu d'influence humaine.\n"
+        fr: '<b>Natural Earth 2</b> est dérivé de Natural Earth 1 et représente la
+          Terre de manière idéalisée, avec peu d''influence humaine.
+
+          '
       - en: '<b>Hypsometric tints</b> is a mix of shaded relief and colours based
           on elevation and climate.
 
           '
-        fr: "<b>Teintes hypsom\xE9triques</b> propose un m\xE9lange entre un ombrage\
-          \ du relief et des couleurs bas\xE9es sur l'\xE9l\xE9vation et le climat.\n"
+        fr: '<b>Teintes hypsométriques</b> propose un mélange entre un ombrage du
+          relief et des couleurs basées sur l''élévation et le climat.
+
+          '
       - en: '<b>Greyscale</b> is a shaded relief in grey levels.
 
           '
@@ -231,22 +247,26 @@ texts:
           while hovering the active children from the taxonomic view is updated.
 
           '
-        fr: "Le graphique en anneaux propose une vue alternative de la taxonomie mettant\
-          \ en avant la proportion de chaque taxon enfant du taxon actif. Cela permet\
-          \ d'avoir une id\xE9e de sa diversit\xE9 (Figure 1). Sans interaction, le\
-          \ centre du graphique affiche le nom du taxon actif et le nombre de taxa\
-          \ terminaux (<i>cf.</i> Aide de la vue taxonomique - Figure 3) qui le compose.\
-          \ Lors du passage du la souris sur les taxa enfant, le centre affiche le\
-          \ nom entier du taxon enfant survol\xE9, le nombre de taxa terminaux qui\
-          \ le compose, et le pourcentage qu'il occupe dans le taxon actif. De plus,\
-          \ lors du passage de la souris, l'enfant actif de la vue taxonomique est\
-          \ \xE9galement mis-\xE0-jour.\n"
+        fr: 'Le graphique en anneaux propose une vue alternative de la taxonomie mettant
+          en avant la proportion de chaque taxon enfant du taxon actif. Cela permet
+          d''avoir une idée de sa diversité (Figure 1). Sans interaction, le centre
+          du graphique affiche le nom du taxon actif et le nombre de taxa terminaux
+          (<i>cf.</i> Aide de la vue taxonomique - Figure 3) qui le compose. Lors
+          du passage du la souris sur les taxa enfant, le centre affiche le nom entier
+          du taxon enfant survolé, le nombre de taxa terminaux qui le compose, et
+          le pourcentage qu''il occupe dans le taxon actif. De plus, lors du passage
+          de la souris, l''enfant actif de la vue taxonomique est également mis-à-jour.
+
+          '
       type: paragraph
     - label:
-        en: "Figure 1\_: The doughnut chart showing the proportion of every taxon\
-          \ child\n"
-        fr: "Figure 1\_: Le graphique en anneau montre les proportion de chaque taxon\
-          \ enfant\n"
+        en: 'Figure 1 : The doughnut chart showing the proportion of every taxon child
+
+          '
+        fr: 'Figure 1 : Le graphique en anneau montre les proportion de chaque taxon
+          enfant
+
+          '
       svg: donut
       type: vector
     - content:
@@ -259,14 +279,13 @@ texts:
           current taxon as well as the processing power of your computer.
 
           '
-        fr: "Il est possible de naviguer dans la taxonomie en utilisant ce graphique.\
-          \ En cliquant au centre, la taxonomie remonte et le parent devient le taxon\
-          \ actif. En cliquant sur un taxon enfant, la taxonomie descend et le taxon\
-          \ enfant selectionn\xE9 devient le taxon actif, r\xE9velant ses propres\
-          \ enfants \xE0 la place des enfants actuels. La fluidit\xE9 de l'animation\
-          \ du graphique \xE0 anneaux peut parfois \xEAtre mauvaise, elle d\xE9pend\
-          \ du nombre d'enfants du taxon actif et de la puissance de calcul de votre\
-          \ ordinateur."
+        fr: Il est possible de naviguer dans la taxonomie en utilisant ce graphique.
+          En cliquant au centre, la taxonomie remonte et le parent devient le taxon
+          actif. En cliquant sur un taxon enfant, la taxonomie descend et le taxon
+          enfant selectionné devient le taxon actif, révelant ses propres enfants
+          à la place des enfants actuels. La fluidité de l'animation du graphique
+          à anneaux peut parfois être mauvaise, elle dépend du nombre d'enfants du
+          taxon actif et de la puissance de calcul de votre ordinateur.
       type: paragraph
     taxonomy:
     - en: Navigating the taxonomy
@@ -278,10 +297,12 @@ texts:
           analogy with the family tree (ancestores, parents, children, <i>etc.</i>).
 
           '
-        fr: "La vue taxonomique est une repr\xE9sentation de l'arbre du vivant (arbre\
-          \ phylog\xE9n\xE9tique). Afin de faciliter sa compr\xE9hension, les explications\
-          \ qui suivent utilisent un analogie avec un arbre g\xE9n\xE9alogique (anc\xEA\
-          tres, parents, enfants, <i>etc.</i>).\n"
+        fr: 'La vue taxonomique est une représentation de l''arbre du vivant (arbre
+          phylogénétique). Afin de faciliter sa compréhension, les explications qui
+          suivent utilisent un analogie avec un arbre généalogique (ancêtres, parents,
+          enfants, <i>etc.</i>).
+
+          '
       type: paragraph
     - ancestry:
       - en: Life
@@ -292,20 +313,24 @@ texts:
         fr: Parent
       children:
       - en: Previous child
-        fr: "Enfant pr\xE9c\xE9dent"
+        fr: Enfant précédent
       - en: Child
         fr: Enfant
       - en: Next child
         fr: Enfant suivant
       label:
-        en: "Figure 1\_: Schematization of the taxonomic view\n"
-        fr: "Figure 1\_: Sch\xE9matisation de la vue taxonomique\n"
+        en: 'Figure 1 : Schematization of the taxonomic view
+
+          '
+        fr: 'Figure 1 : Schématisation de la vue taxonomique
+
+          '
       parent:
         en: Parent
         fr: Parent
       siblings:
       - en: Previous taxon
-        fr: "Taxon pr\xE9c\xE9dent"
+        fr: Taxon précédent
       - en: Active taxon
         fr: Taxon actif
       - en: Next taxon
@@ -317,15 +342,19 @@ texts:
           ancestor to activate it.
 
           '
-        fr: "Tout en haut, la liste des <b>anc\xEAtres</b> sont visibles de la racine\
-          \ (la vie) jusqu'au parent du taxon actif. Il est possible de cliquer sur\
-          \ chaque anc\xEAtre pour l'activer.\n"
+        fr: 'Tout en haut, la liste des <b>ancêtres</b> sont visibles de la racine
+          (la vie) jusqu''au parent du taxon actif. Il est possible de cliquer sur
+          chaque ancêtre pour l''activer.
+
+          '
       - en: 'The upper level contains the <b>parent</b> of the current taxon. Clicking
           on it will go up the taxonomy and the parent will become the current taxon.
 
           '
-        fr: "Le niveau sup\xE9rieur comporte le <b>parent</b> du taxon actif. Cliquer\
-          \ dessus remonte la taxonomie et le parent devient le taxon actif.\n"
+        fr: 'Le niveau supérieur comporte le <b>parent</b> du taxon actif. Cliquer
+          dessus remonte la taxonomie et le parent devient le taxon actif.
+
+          '
       - en: 'The middle level contains the <b>current taxon</b> surrounded by its
           siblings (<i>i.e.</i> the other children of the parent of the current taxon).
           Clicking on a sibling or scrolling on the level allows you to change the
@@ -334,12 +363,14 @@ texts:
           from left to right.
 
           '
-        fr: "Le niveau interm\xE9diaire comporte le <b>taxon actif</b> ainsi que ses\
-          \ fr\xE8res (<i>i.e.</i> les autres enfants du parent du taxon actif). Cliquer\
-          \ sur un fr\xE8re ou utiliser la molette de la souris sur le niveau permet\
-          \ de changer le taxon actif pour le fr\xE8re suivant ou pr\xE9c\xE9dent.\
-          \ Ce niveau est class\xE9 par le nombre de taxon terminaux (<i>cf.</i> Figure\
-          \ 3) contenu dans chaque taxon de gauche \xE0 droite.\n"
+        fr: 'Le niveau intermédiaire comporte le <b>taxon actif</b> ainsi que ses
+          frères (<i>i.e.</i> les autres enfants du parent du taxon actif). Cliquer
+          sur un frère ou utiliser la molette de la souris sur le niveau permet de
+          changer le taxon actif pour le frère suivant ou précédent. Ce niveau est
+          classé par le nombre de taxon terminaux (<i>cf.</i> Figure 3) contenu dans
+          chaque taxon de gauche à droite.
+
+          '
       - en: 'The lower level contains the <b>children</b> of the current taxon. Clicking
           on the child in the center will go down the taxonomy and the child will
           become the current taxon. Clicking on the surrounding children or scrolling
@@ -348,18 +379,24 @@ texts:
           3) composing every child from left to right.
 
           '
-        fr: "Le niveau inf\xE9rieur comporte les <b>enfants</b> du taxon actif. Cliquer\
-          \ sur l'enfant situ\xE9 au centre descend la taxonomie et l'enfant devient\
-          \ le taxon actif. Cliquer sur un des deux autres enfant ou utiliser la molette\
-          \ permet de naviguer dans les enfants du taxon actif. Ce niveau est \xE9\
-          galement class\xE9 par le nombre de taxon terminaux (<i>cf.</i> Figure 3)\
-          \ contenu dans chaque enfant de gauche \xE0 droite.\n"
+        fr: 'Le niveau inférieur comporte les <b>enfants</b> du taxon actif. Cliquer
+          sur l''enfant situé au centre descend la taxonomie et l''enfant devient
+          le taxon actif. Cliquer sur un des deux autres enfant ou utiliser la molette
+          permet de naviguer dans les enfants du taxon actif. Ce niveau est également
+          classé par le nombre de taxon terminaux (<i>cf.</i> Figure 3) contenu dans
+          chaque enfant de gauche à droite.
+
+          '
       sorted: false
       type: list
     - label:
-        en: "Figure 2\_: Colours used to represent every level of the taxonomy\n"
-        fr: "Figure 2\_: Les couleurs utilis\xE9es pour repr\xE9senter les niveaux\
-          \ de la taxonomie\n"
+        en: 'Figure 2 : Colours used to represent every level of the taxonomy
+
+          '
+        fr: 'Figure 2 : Les couleurs utilisées pour représenter les niveaux de la
+          taxonomie
+
+          '
       level:
         en: level
         fr: niveau
@@ -375,15 +412,16 @@ texts:
           from the colours used by the donough chart.
 
           '
-        fr: "Chaque niveau de la taxonomie est repr\xE9sent\xE9 par une couleur arbitraire,\
-          \ du rouge (la vie) \xE0 l'orange (infra-hybride). Cela permet d'avoir une\
-          \ id\xE9e de sa position dans l'arbre phylog\xE9n\xE9tique. Cette couleur\
-          \ est \xE9galement utilis\xE9e par l'aire de r\xE9partition du taxon dans\
-          \ la vue cartographique mais elle est ind\xE9pendante des couleurs utilis\xE9\
-          es par le graphique \xE0 anneaux.\n"
+        fr: 'Chaque niveau de la taxonomie est représenté par une couleur arbitraire,
+          du rouge (la vie) à l''orange (infra-hybride). Cela permet d''avoir une
+          idée de sa position dans l''arbre phylogénétique. Cette couleur est également
+          utilisée par l''aire de répartition du taxon dans la vue cartographique
+          mais elle est indépendante des couleurs utilisées par le graphique à anneaux.
+
+          '
       type: paragraph
     - en: What is phylogenetics?
-      fr: "Qu'est-ce que la phylog\xE9n\xE9tique\_?"
+      fr: Qu'est-ce que la phylogénétique ?
       type: title
     - content:
         en: 'The term <a href=''https://en.wikipedia.org/wiki/Taxonomy'' target=''_blank''>taxonomy</a>
@@ -401,21 +439,21 @@ texts:
           target=''_blank''>Life</a> itself.
 
           '
-        fr: "Le terme taxonomie renvoie \xE0 une mani\xE8re de classifier et de cat\xE9\
-          goriser des donn\xE9es, g\xE9n\xE9ralement sous forme d'une hi\xE9rarchie.\
-          \ Un \xE9l\xE9ment de cet arbre taxonomique est appel\xE9 taxon (ou taxa\
-          \ au pluriel). Pour repr\xE9senter la diversit\xE9 de la vie, les scientifiques\
-          \ utilisent la <a href='https://fr.wikipedia.org/wiki/Taxonomie' target='_blank'>taxonomie</a>\
-          \ pour repr\xE9senter la relation entre les esp\xE8ces, on appelle \xE7\
-          a un <a href='https://fr.wikipedia.org/wiki/Arbre_phylog%C3%A9n%C3%A9tique'\
-          \ target='_blank'>arbre phylog\xE9n\xE9tique</a>. Cette relation refl\xE8\
-          te <a href='https://fr.wikipedia.org/wiki/Histoire_%C3%A9volutive_du_vivant'\
-          \ target='_blank'>l'histoire \xE9volutive</a> partag\xE9es par ces esp\xE8\
-          ces. Un taxon de cette taxonomie d\xE9signe alors n'importe quel niveau\
-          \ de cet arbre, par exemple une <a href='https://fr.wikipedia.org/wiki/Esp%C3%A8ce'\
-          \ target='_blank'>esp\xE8ce</a> (<i>e.g. Columba palumbus</i>), une <a href='https://fr.wikipedia.org/wiki/Classe_(biologie)'\
-          \ target='_blank'>classe</a> (<i>e.g.</i> les oiseaux) ou encore la <a href='https://fr.wikipedia.org/wiki/Vie'\
-          \ target='_blank'>vie</a> elle-m\xEAme.\n"
+        fr: 'Le terme taxonomie renvoie à une manière de classifier et de catégoriser
+          des données, généralement sous forme d''une hiérarchie. Un élément de cet
+          arbre taxonomique est appelé taxon (ou taxa au pluriel). Pour représenter
+          la diversité de la vie, les scientifiques utilisent la <a href=''https://fr.wikipedia.org/wiki/Taxonomie''
+          target=''_blank''>taxonomie</a> pour représenter la relation entre les espèces,
+          on appelle ça un <a href=''https://fr.wikipedia.org/wiki/Arbre_phylog%C3%A9n%C3%A9tique''
+          target=''_blank''>arbre phylogénétique</a>. Cette relation reflète <a href=''https://fr.wikipedia.org/wiki/Histoire_%C3%A9volutive_du_vivant''
+          target=''_blank''>l''histoire évolutive</a> partagées par ces espèces. Un
+          taxon de cette taxonomie désigne alors n''importe quel niveau de cet arbre,
+          par exemple une <a href=''https://fr.wikipedia.org/wiki/Esp%C3%A8ce'' target=''_blank''>espèce</a>
+          (<i>e.g. Columba palumbus</i>), une <a href=''https://fr.wikipedia.org/wiki/Classe_(biologie)''
+          target=''_blank''>classe</a> (<i>e.g.</i> les oiseaux) ou encore la <a href=''https://fr.wikipedia.org/wiki/Vie''
+          target=''_blank''>vie</a> elle-même.
+
+          '
       type: paragraph
     - content:
         en: 'The phylogenetic tree used here comes from the collaborative database
@@ -433,25 +471,30 @@ texts:
           need to include humans as well.
 
           '
-        fr: "L'arbre phylog\xE9n\xE9tique utilis\xE9 ici provient de la base de donn\xE9\
-          es collaborative <a href='https://www.inaturalist.org/' target='_blank'>iNaturalist</a>.\
-          \ Cette base de donn\xE9es utilise la <a href='https://fr.wikipedia.org/wiki/Cladistique'\
-          \ target='_blank'>cladistique</a> comme principe sous-jacent. La cladistique\
-          \ est une approche de la classification biologique dans laquelle les organismes\
-          \ sont cat\xE9goris\xE9s en groupes bas\xE9s sur l'hypoth\xE8se du <a href='https://fr.wikipedia.org/wiki/Dernier_anc%C3%AAtre_commun'\
-          \ target='_blank'>denier anc\xEAtre commun</a> (<i>cf.</i> Figure 3). Ces\
-          \ groupes, appel\xE9s <a href='https://fr.wikipedia.org/wiki/Clade' target='_blank'>clades</a>,\
-          \ doivent \xEAtre <a href='https://fr.wikipedia.org/wiki/Monophylie' target='_blank'>monophyl\xE9\
-          tique</a>, c'est-\xE0-dire qu'ils doivent contenir tous les taxa ayant \xE9\
-          volu\xE9s \xE0 partir du dernier anc\xEAtre commun \xE0 l'ensemble du groupe.\
-          \ \xC0 partir de cette logique, certains groupes comme les vers ou les poissons\
-          \ n'existent pas car ils contiennent une telle diversit\xE9 d'esp\xE8ces\
-          \ qu'il faudrait y inclure les humains.\n"
+        fr: 'L''arbre phylogénétique utilisé ici provient de la base de données collaborative
+          <a href=''https://www.inaturalist.org/'' target=''_blank''>iNaturalist</a>.
+          Cette base de données utilise la <a href=''https://fr.wikipedia.org/wiki/Cladistique''
+          target=''_blank''>cladistique</a> comme principe sous-jacent. La cladistique
+          est une approche de la classification biologique dans laquelle les organismes
+          sont catégorisés en groupes basés sur l''hypothèse du <a href=''https://fr.wikipedia.org/wiki/Dernier_anc%C3%AAtre_commun''
+          target=''_blank''>denier ancêtre commun</a> (<i>cf.</i> Figure 3). Ces groupes,
+          appelés <a href=''https://fr.wikipedia.org/wiki/Clade'' target=''_blank''>clades</a>,
+          doivent être <a href=''https://fr.wikipedia.org/wiki/Monophylie'' target=''_blank''>monophylétique</a>,
+          c''est-à-dire qu''ils doivent contenir tous les taxa ayant évolués à partir
+          du dernier ancêtre commun à l''ensemble du groupe. À partir de cette logique,
+          certains groupes comme les vers ou les poissons n''existent pas car ils
+          contiennent une telle diversité d''espèces qu''il faudrait y inclure les
+          humains.
+
+          '
       type: paragraph
     - label:
-        en: "Figure 3\_: Standard representation of a clade in phylogenetics\n"
-        fr: "Figure 3\_: Repr\xE9sentation classique d'un clade en phylog\xE9n\xE9\
-          tique\n"
+        en: 'Figure 3 : Standard representation of a clade in phylogenetics
+
+          '
+        fr: 'Figure 3 : Représentation classique d''un clade en phylogénétique
+
+          '
       svg: phylogenetic
       type: vector
     - content:
@@ -465,15 +508,16 @@ texts:
           environmental modifications, <i>etc.</i>
 
           '
-        fr: "Notre arbre phylog\xE9n\xE9tique est donc une simplification de l'arbre\
-          \ phylog\xE9n\xE9tique du vivant. Il s'agit d'une r\xE9duction du nombre\
-          \ de taxon interm\xE9diaire en s\xE9lectionnant les taxa les plus repr\xE9\
-          sentatifs. Cette s\xE9lection peut \xEAtre un h\xE9ritage de l'histoire\
-          \ de la biologie de l'\xE9volution, mais il s'agit souvent de refl\xE9ter\
-          \ la <a href='https://fr.wikipedia.org/wiki/Sp%C3%A9ciation' target='_blank'>sp\xE9\
-          ciation</a> induite par diff\xE9rents facteurs\_: les mouvements tectoniques\
-          \ (isolation des esp\xE8ces, activit\xE9 volcanique, <i>etc.</i>), les modifications\
-          \ anthropiques d'un milieu, <i>etc.</i>\n"
+        fr: 'Notre arbre phylogénétique est donc une simplification de l''arbre phylogénétique
+          du vivant. Il s''agit d''une réduction du nombre de taxon intermédiaire
+          en sélectionnant les taxa les plus représentatifs. Cette sélection peut
+          être un héritage de l''histoire de la biologie de l''évolution, mais il
+          s''agit souvent de refléter la <a href=''https://fr.wikipedia.org/wiki/Sp%C3%A9ciation''
+          target=''_blank''>spéciation</a> induite par différents facteurs : les mouvements
+          tectoniques (isolation des espèces, activité volcanique, <i>etc.</i>), les
+          modifications anthropiques d''un milieu, <i>etc.</i>
+
+          '
       type: paragraph
     - content:
         en: 'If we take for example, three orders: <i>columbiformes</i> (pigeons and
@@ -489,36 +533,42 @@ texts:
           degree of proximity and it is only quantified by genetic studies.
 
           '
-        fr: "Prenons par exemple trois ordres\_: les <a href='https://fr.wikipedia.org/wiki/Columbiformes'\
-          \ target='_blank'><i>columbiformes</i></a> (pigeons et tourterelles), les\
-          \ <a href='https://fr.wikipedia.org/wiki/Pterocliformes' target='_blank'><i>pterocliformes</i></a>\
-          \ (gangas et syrrhaptes) et les <a href='https://fr.wikipedia.org/wiki/Cuculiformes'\
-          \ target='_blank'><i>cuculiformes</i></a> (coucous et apparent\xE9s). Dans\
-          \ notre base de donn\xE9es simplifi\xE9es, ces trois ordres appartiennent\
-          \ directement \xE0 la classe <i>Aves</i> (les oiseaux). Mais en r\xE9alit\xE9\
-          , les <i>columbiformes</i> et les <i>pterocliformes</i> sont plus proches\
-          \ entre eux qu'ils ne le sont des <i>cuculiformes</i> et cette information\
-          \ n'est pas pr\xE9sente dans notre base. Ces trois ordres appartiennent\
-          \ au clade des <i>columbaves</i>, comme le montre la repr\xE9sentation du\
-          \ clade dans la Figure 4. Il est tout de m\xEAme important de conserver\
-          \ \xE0 l'esprit qu'un arbre phylog\xE9n\xE9tique exhaustif n'existe pas\
-          \ actuellement et sans doute n'existera jamais, car toutes les exp\xE8ces\
-          \ ont un diff\xE9rent degr\xE9 de proximit\xE9 et celle-ci n'est quantifi\xE9\
-          e que par des \xE9tudes g\xE9n\xE9tiques.\n"
+        fr: 'Prenons par exemple trois ordres : les <a href=''https://fr.wikipedia.org/wiki/Columbiformes''
+          target=''_blank''><i>columbiformes</i></a> (pigeons et tourterelles), les
+          <a href=''https://fr.wikipedia.org/wiki/Pterocliformes'' target=''_blank''><i>pterocliformes</i></a>
+          (gangas et syrrhaptes) et les <a href=''https://fr.wikipedia.org/wiki/Cuculiformes''
+          target=''_blank''><i>cuculiformes</i></a> (coucous et apparentés). Dans
+          notre base de données simplifiées, ces trois ordres appartiennent directement
+          à la classe <i>Aves</i> (les oiseaux). Mais en réalité, les <i>columbiformes</i>
+          et les <i>pterocliformes</i> sont plus proches entre eux qu''ils ne le sont
+          des <i>cuculiformes</i> et cette information n''est pas présente dans notre
+          base. Ces trois ordres appartiennent au clade des <i>columbaves</i>, comme
+          le montre la représentation du clade dans la Figure 4. Il est tout de même
+          important de conserver à l''esprit qu''un arbre phylogénétique exhaustif
+          n''existe pas actuellement et sans doute n''existera jamais, car toutes
+          les expèces ont un différent degré de proximité et celle-ci n''est quantifiée
+          que par des études génétiques.
+
+          '
       type: paragraph
     - label:
-        en: "Figure 4\_: Representation of the clade <i>Columbaves</i>\n"
-        fr: "Figure 4\_: Repr\xE9sentation du clade <i>Columbaves</i>\n"
+        en: 'Figure 4 : Representation of the clade <i>Columbaves</i>
+
+          '
+        fr: 'Figure 4 : Représentation du clade <i>Columbaves</i>
+
+          '
       svg: aves
       type: vector
     - content:
         en: 'Research on genetics is forever evolving et some taxa are subject to
-          changes when new discoveries emerge. Phyloscope is updated each month.
+          changes when new discoveries emerge.
 
           '
-        fr: "La recherche sur la g\xE9n\xE9tique ne cesse d'avancer et certains taxa\
-          \ sont susceptibles de changer lorsque de nouvelles d\xE9couvertes \xE9\
-          mergent. Phyloscope est mis-\xE0-jour tous les mois.\n"
+        fr: 'La recherche sur la génétique ne cesse d''avancer et certains taxa sont
+          susceptibles de changer lorsque de nouvelles découvertes émergent.
+
+          '
       type: paragraph
   vernaculars:
     en: 'Other names:'
@@ -534,7 +584,7 @@ typesorting:
     level: 12
   epifamily:
     en: Epifamily
-    fr: "\xC9pifamille"
+    fr: Épifamille
     level: 42
   family:
     en: Family
@@ -570,7 +620,7 @@ typesorting:
     level: 57
   kingdom:
     en: Kingdom
-    fr: "R\xE8gne"
+    fr: Règne
     level: 90
   order:
     en: Order
@@ -590,11 +640,11 @@ typesorting:
     level: 15
   species:
     en: Species
-    fr: "Esp\xE8ce"
+    fr: Espèce
     level: 10
   stateofmatter:
     en: State of matter
-    fr: "\xC9tat de la mati\xE8re"
+    fr: État de la matière
     level: 100
   subclass:
     en: Subclass
@@ -622,7 +672,7 @@ typesorting:
     level: 14
   subspecies:
     en: Subspecies
-    fr: "Sous-esp\xE8ce"
+    fr: Sous-espèce
     level: 7
   subterclass:
     en: Subterclass
@@ -654,7 +704,7 @@ typesorting:
     level: 30
   variety:
     en: Variety
-    fr: "Vari\xE9t\xE9"
+    fr: Variété
     level: 5
   zoosection:
     en: Zoosection

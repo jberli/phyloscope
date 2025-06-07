@@ -55,7 +55,7 @@ def lookup(language, value, limit):
                 break
         return names, taxons
 
-    mignon = ['grisou', 'tipijon', 'bisette']
+    mignon = ['grisou', 'tipijon', 'bisette', 'georgette']
 
     if value in mignon:
         limit -= 1

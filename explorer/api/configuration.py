@@ -1,7 +1,7 @@
 import yaml
 import csv
 
-def get_configuration():
+def get_configuration(language):
     """
     Retrieve the configuration along with taxonomic information on the showcased taxon.
     """
@@ -15,5 +15,8 @@ def get_configuration():
         c['update'] = updates.pop()[2]
     else:
         c['update'] = None
+
+    if language in c['languages']['available']:
+        c['languages']['current'] = language
 
     return c

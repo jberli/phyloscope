@@ -58,7 +58,7 @@ def update_taxon(ranks=['species', 'genus', 'family']):
 
             # Write the file
             with open(filename, 'w') as yamlfile:
-                yamlfile.write(yaml.dump(data, default_flow_style=False))
+                yamlfile.write(yaml.dump(data, default_flow_style=False, allow_unicode=True))
             break
         else:
             if not w:
