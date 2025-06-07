@@ -187,7 +187,9 @@ texts:
       sorted: false
       type: list
     - content:
-        en: 'Geographical species range data
+        en: 'The basemaps come from <a href=''https://www.naturalearthdata.com/downloads/10m-raster-data/''
+          target=''_blank''>Natural Earth</a>, and more precisely the version <a href=''https://shadedrelief.com/ne-draft/'' target=''_blank''>6.0</a>
+          which provide a better resolution. The different available basemaps are:
 
           '
         fr: 'Les fonds de carte proviennent de <a href=''https://www.naturalearthdata.com/downloads/10m-raster-data/''
@@ -530,8 +532,9 @@ texts:
           as shown by the reprentation of the clade in Figure 4. It is important to
           acknowledge the fact that an exhaustive phylogenetic tree doesn''t exist
           currently and will probably never exist, indeed, all species have a different
-          degree of proximity and it is only quantified by genetic studies.
-
+          degree of proximity and it is only quantified by genetic studies. Research on genetics is
+          forever evolving et some taxa are subject to
+          changes when new discoveries emerge.
           '
         fr: 'Prenons par exemple trois ordres : les <a href=''https://fr.wikipedia.org/wiki/Columbiformes''
           target=''_blank''><i>columbiformes</i></a> (pigeons et tourterelles), les
@@ -547,7 +550,8 @@ texts:
           important de conserver à l''esprit qu''un arbre phylogénétique exhaustif
           n''existe pas actuellement et sans doute n''existera jamais, car toutes
           les expèces ont un différent degré de proximité et celle-ci n''est quantifiée
-          que par des études génétiques.
+          que par des études génétiques. La recherche sur la génétique ne cesse d''avancer
+          et certains taxa sont susceptibles de changer lorsque de nouvelles découvertes émergent.
 
           '
       type: paragraph
@@ -560,14 +564,15 @@ texts:
           '
       svg: aves
       type: vector
+    - en: Data source
+      fr: Source des données
+      type: title
     - content:
-        en: 'Research on genetics is forever evolving et some taxa are subject to
-          changes when new discoveries emerge.
-
+        en: 'The data is the <a href=''https://www.inaturalist.org/pages/developers'' target=''_blank''>iNaturalist Taxonomy DarwinCore Archive</a>
+          which as been expanded using the <a href=''https://api.inaturalist.org/v1/docs/'' target=''_blank''>iNaturalist API</a>.
           '
-        fr: 'La recherche sur la génétique ne cesse d''avancer et certains taxa sont
-          susceptibles de changer lorsque de nouvelles découvertes émergent.
-
+        fr: 'Les données proviennent de l''archive <a href=''https://www.inaturalist.org/pages/developers'' target=''_blank''>iNaturalist Taxonomy DarwinCore Archive</a>
+          enrichie par l''utilisation de l''<a href=''https://api.inaturalist.org/v1/docs/'' target=''_blank''>API iNaturalist</a>.
           '
       type: paragraph
   vernaculars:
