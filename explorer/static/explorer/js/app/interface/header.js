@@ -4,7 +4,7 @@
  */
 
 import { addClass, addSVG, hasClass, makeDiv, removeClass, wait } from "../generic/dom.js";
-import { calculateTextWidth, pxToRem, remToPx } from "../generic/parsing.js";
+import { calculateTextWidth, pxToRem } from "../generic/parsing.js";
 import Widget from "./widget.js";
 
 class Header extends Widget {
@@ -60,6 +60,8 @@ class Header extends Widget {
             this.updatecontainer.style.width = '2rem';
         });
 
+        this.powered = makeDiv(null, 'header-powered', this.params.texts.powered[language]);
+
         this.languages = []
         this.languagescontainer = makeDiv(null, 'header-languages-container');
         for (let [lang, value] of Object.entries(this.params.languages.available)) {
@@ -77,12 +79,13 @@ class Header extends Widget {
                 if (!hasClass(l, 'active') && !this.freezed) {
                     this.languages.forEach((e) => { removeClass(e, 'active'); });
                     addClass(l, 'active');
+                    addClass(this.powered, 'hidden');
                     this.app.updater.switchLanguage(l.getAttribute('value'));
                 }
             });
         }
 
-        this.foldable.append(this.githubcontainer, this.updatecontainer, this.languagescontainer);
+        this.foldable.append(this.githubcontainer, this.updatecontainer, this.powered, this.languagescontainer);
     }
 
     switchLanguage(language) {
@@ -93,6 +96,11 @@ class Header extends Widget {
         this.updatewidth = uwidth + 3;
 
         this.update.innerHTML = this.updatetext;
+
+        wait(100, () => {
+            this.powered.innerHTML = this.params.texts.powered[language];
+            removeClass(this.powered, 'hidden');
+        });
     }
 }
 

@@ -32,7 +32,6 @@
 }
 
 .header-update-container {
-    margin-right: auto;
     margin-left: 1rem;
     height: 2rem;
     width: 2rem;
@@ -123,6 +122,18 @@
     transform: scale(0, 0) translate(-50%);
     transform-origin: 0 50%;
     transition: transform .1s ease-in-out;
+}
+
+.header-powered {
+    margin: 0 auto;
+    font-style: italic;
+
+    & > a { font-weight: bold; }
+
+    opacity: 1;
+    transition: opacity .1s ease-in-out;
+
+    &.hidden { opacity: 0; }
 }
 
 .header-languages-container {
