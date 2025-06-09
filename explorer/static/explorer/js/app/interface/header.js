@@ -102,7 +102,7 @@ class Header extends Widget {
         this.update.innerHTML = this.updatetext;
 
         wait(100, () => {
-            this.center.innerHTML = this.params.texts.powered[language];
+            this.center.innerHTML = this.params.texts.powered[language] + " <a href='https://www.inaturalist.org/' target='_blank'>iNaturalist</a>";
             removeClass(this.center, 'hidden');
         });
     }

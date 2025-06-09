@@ -37,6 +37,7 @@ $side-panel-background: $interface-background;
 #taxonomy {
     overflow: visible;
     max-height: calc(100% - 9rem);
+    min-height: calc(100% - 12rem);
     flex: 1;
     background-color: $main-color-dark;
 }
