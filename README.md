@@ -1,7 +1,5 @@
 # Phyloscope
 
-Available at [https://phyloscope.org](https://phyloscope.org).
-
 **Phyloscope** is a web application that aims at providing a smooth interface to navigate through the diversity of life using different **data visualization** methods.
 You can easily explore the **taxonomic tree**, read about each [taxon](https://en.wikipedia.org/wiki/Taxon),
 explore the **geographic range** of different species, etc.
